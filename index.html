@@ -494,6 +494,11 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.message.muted {
+  opacity: 0.3;
+  filter: blur(3px);
+}
+
 .message-avatar {
   width: 45px;
   height: 45px;
@@ -577,6 +582,39 @@ body {
   font-weight: 400;
   line-height: 1.5;
   max-width: 600px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.user-action-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 8px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-action-btn.block {
+  background: rgba(255,0,0,0.2);
+  color: #ff6666;
+  border: 1px solid rgba(255,0,0,0.4);
+}
+
+.user-action-btn.mute {
+  background: rgba(255,165,0,0.2);
+  color: #ffaa66;
+  border: 1px solid rgba(255,165,0,0.4);
+}
+
+.user-action-btn:hover {
+  transform: translateY(-2px);
 }
 
 .input-container {
@@ -761,6 +799,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1.3em;
+  cursor: pointer;
 }
 
 .player-details {
@@ -775,6 +814,7 @@ body {
 .player-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .action-btn {
@@ -975,7 +1015,7 @@ input[type="checkbox"] {
 <!-- MAIN CHAT APP -->
 <div class="chat-app" id="chatApp">
   <div class="sidebar">
-    <div class="profile-section" onclick="window.location.href='profile.html'">
+    <div class="profile-section" onclick="goToOwnProfile()">
       <div class="profile-avatar" id="profileAvatar">👤</div>
       <div class="profile-username" id="profileUsername">Username</div>
       <div id="adminBadgeContainer"></div>
@@ -994,6 +1034,13 @@ input[type="checkbox"] {
         <div class="room-info">
           <div class="room-name">General</div>
           <div class="room-count" id="generalCount">0 online</div>
+        </div>
+      </div>
+      <div class="chat-room" data-room="counting">
+        <div class="room-icon">🔢</div>
+        <div class="room-info">
+          <div class="room-name">Counting</div>
+          <div class="room-count">Bot Active</div>
         </div>
       </div>
       <div class="chat-room" data-room="gaming">
@@ -1148,6 +1195,53 @@ input[type="checkbox"] {
 
 <script>
 const ADMIN_PASSWORD = 'chicken103chicken103chickenfishfarting103';
+
+// Profanity filter - extensive list with common substitutions
+const BAD_WORDS = [
+  'fuck', 'f*ck', 'fck', 'f**k', 'f_ck', 'fu*k', 'fvck', 'phuck',
+  'shit', 'sh*t', 'sht', 'sh1t', 's**t', 'shyt', 'shiit',
+  'ass', 'a**', 'a$$', 'a55', '@ss', 'azz',
+  'asshole', 'a$$hole', 'a**hole', '@sshole', 'assh0le',
+  'bitch', 'b*tch', 'b1tch', 'bi**h', 'b!tch', 'biatch',
+  'dick', 'd*ck', 'd1ck', 'd**k', 'dik', 'dck',
+  'pussy', 'p*ssy', 'pu**y', 'pus*y', 'pvssy',
+  'cunt', 'c*nt', 'cvnt', 'c**t',
+  'damn', 'd*mn', 'damm', 'darn',
+  'hell', 'h*ll', 'heck',
+  'bastard', 'b*stard', 'bstard',
+  'slut', 'sl*t', 's1ut', 'slutt',
+  'whore', 'wh*re', 'hore', 'who*e',
+  'fag', 'f*g', 'fagg', 'f@g',
+  'retard', 'r*tard', 'ret@rd', 'retrd',
+  'nigger', 'n*gger', 'nig*er', 'n1gger', 'nigga',
+  'rape', 'r*pe', 'rap3',
+  'sex', 's*x', 's3x',
+  'porn', 'p*rn', 'pr0n',
+  'cum', 'c*m', 'cvm',
+  'cock', 'c*ck', 'cck', 'c0ck'
+];
+
+function containsProfanity(text) {
+  const lower = text.toLowerCase();
+  
+  // Replace common character substitutions
+  const normalized = lower
+    .replace(/[*$@!]/g, '')  // Remove common masking characters
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/8/g, 'b')
+    .replace(/\s+/g, '');  // Remove spaces
+  
+  return BAD_WORDS.some(word => {
+    const pattern = new RegExp(`\\b${word}\\b|${word}`, 'i');
+    return pattern.test(normalized) || pattern.test(lower);
+  });
+}
+
 let currentUsername = '';
 let currentRoom = 'general';
 let currentGroupChat = null;
@@ -1160,15 +1254,18 @@ let lastMessageTime = 0;
 let cooldownInterval = null;
 let selectedPlayerForBadge = '';
 let selectedPlayerForBan = '';
+let blockedUsers = new Set();
+let mutedUsers = new Set();
 
 const roomInfo = {
   general: { name: '💬 General', desc: 'Welcome to the general chat room!' },
+  counting: { name: '🔢 Counting', desc: 'Count to infinity! One number per person, 1 hour cooldown.' },
   gaming: { name: '🎮 Gaming', desc: 'Talk about your favorite games!' },
   music: { name: '🎵 Music', desc: 'Share your favorite tunes!' },
   random: { name: '✨ Random', desc: 'Anything goes here!' }
 };
 
-['general', 'gaming', 'music', 'random'].forEach(room => {
+['general', 'counting', 'gaming', 'music', 'random'].forEach(room => {
   messages[room] = [];
 });
 
@@ -1244,6 +1341,13 @@ async function login() {
     return;
   }
   
+  // Check for profanity in username
+  if (containsProfanity(username)) {
+    alert('Username contains inappropriate content. Please choose a different username.');
+    return;
+  }
+  
+  // FIXED: Only set admin if CURRENT username is kingderrick AND password is correct
   if (username.toLowerCase() === 'kingderrick') {
     const password = passwordInput.value;
     if (password !== ADMIN_PASSWORD) {
@@ -1252,16 +1356,35 @@ async function login() {
     }
     isAdmin = true;
     await window.storage.set(`admin_${username}`, 'true', true);
+  } else {
+    isAdmin = false; // Explicitly set to false for non-admin users
   }
   
   currentUsername = username;
   
   try {
     await window.storage.set('aurababy_username', username);
+    await loadBlockedAndMuted();
     await checkIfBanned();
   } catch (error) {
     console.error('Storage error:', error);
     startChat();
+  }
+}
+
+async function loadBlockedAndMuted() {
+  try {
+    const blockedData = await window.storage.get(`blocked_${currentUsername}`);
+    if (blockedData && blockedData.value) {
+      blockedUsers = new Set(JSON.parse(blockedData.value));
+    }
+    
+    const mutedData = await window.storage.get(`muted_${currentUsername}`);
+    if (mutedData && mutedData.value) {
+      mutedUsers = new Set(JSON.parse(mutedData.value));
+    }
+  } catch (error) {
+    console.log('No blocked/muted users');
   }
 }
 
@@ -1281,6 +1404,7 @@ function startChat() {
   updateOnlineCount();
   loadFriends();
   loadGroupChats();
+  initCountingBot();
   messageInput.focus();
   
   setInterval(updateTimeSpent, 60000);
@@ -1299,18 +1423,33 @@ async function loadUserAvatar() {
   }
 }
 
+function goToOwnProfile() {
+  window.location.href = 'profile.html';
+}
+
 function formatTime() {
   const now = new Date();
   return now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 }
 
-async function addMessage(username, content, timestamp, isSystem = false) {
+async function addMessage(username, content, timestamp, isSystem = false, showActions = true) {
+  // Check if user is blocked
+  if (blockedUsers.has(username) && !isSystem) {
+    return; // Don't show messages from blocked users
+  }
+  
   const messageDiv = document.createElement('div');
   messageDiv.className = 'message';
+  
+  // Add muted class if user is muted
+  if (mutedUsers.has(username)) {
+    messageDiv.classList.add('muted');
+  }
   
   let avatarHTML = '';
   let usernameClass = '';
   let badges = '';
+  let actionsHTML = '';
   
   if (isSystem) {
     avatarHTML = '<div class="message-avatar">🤖</div>';
@@ -1335,6 +1474,18 @@ async function addMessage(username, content, timestamp, isSystem = false) {
       } else {
         avatarHTML = `<div class="message-avatar" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>`;
       }
+      
+      // Add user action buttons (block/mute) if not own message and showActions is true
+      if (username !== currentUsername && showActions) {
+        const isBlocked = blockedUsers.has(username);
+        const isMuted = mutedUsers.has(username);
+        actionsHTML = `
+          <div class="user-actions">
+            <button class="user-action-btn block" onclick="toggleBlock('${username}')">${isBlocked ? 'Unblock' : 'Block'}</button>
+            <button class="user-action-btn mute" onclick="toggleMute('${username}')">${isMuted ? 'Unmute' : 'Mute'}</button>
+          </div>
+        `;
+      }
     } catch (error) {
       avatarHTML = `<div class="message-avatar" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>`;
     }
@@ -1349,6 +1500,7 @@ async function addMessage(username, content, timestamp, isSystem = false) {
         <span class="message-timestamp">${timestamp}</span>
       </div>
       <div class="message-content">${content}</div>
+      ${actionsHTML}
     </div>
   `;
   messagesContainer.appendChild(messageDiv);
@@ -1359,6 +1511,40 @@ function viewProfile(username) {
   window.location.href = `profile.html?user=${encodeURIComponent(username)}`;
 }
 
+async function toggleBlock(username) {
+  if (blockedUsers.has(username)) {
+    blockedUsers.delete(username);
+  } else {
+    blockedUsers.add(username);
+  }
+  
+  await window.storage.set(`blocked_${currentUsername}`, JSON.stringify([...blockedUsers]));
+  
+  // Reload current room to apply blocking
+  if (currentGroupChat) {
+    await loadGroupMessages(currentGroupChat);
+  } else if (currentRoom) {
+    await loadRoom(currentRoom);
+  }
+}
+
+async function toggleMute(username) {
+  if (mutedUsers.has(username)) {
+    mutedUsers.delete(username);
+  } else {
+    mutedUsers.add(username);
+  }
+  
+  await window.storage.set(`muted_${currentUsername}`, JSON.stringify([...mutedUsers]));
+  
+  // Reload current room to apply muting
+  if (currentGroupChat) {
+    await loadGroupMessages(currentGroupChat);
+  } else if (currentRoom) {
+    await loadRoom(currentRoom);
+  }
+}
+
 async function loadRoom(room) {
   messagesContainer.innerHTML = '';
   for (const msg of messages[room]) {
@@ -1366,9 +1552,77 @@ async function loadRoom(room) {
   }
 }
 
+// COUNTING BOT
+async function initCountingBot() {
+  try {
+    const countData = await window.storage.get('counting_current', true);
+    if (!countData || !countData.value) {
+      await window.storage.set('counting_current', '0', true);
+      await window.storage.set('counting_last_user', '', true);
+      await window.storage.set('counting_last_time', '0', true);
+    }
+  } catch (error) {
+    console.log('Counting bot initialized');
+  }
+}
+
+async function handleCountingMessage(message) {
+  const num = parseInt(message.trim());
+  if (isNaN(num)) {
+    await addMessage('CountBot', '❌ Please enter a valid number!', formatTime(), true, false);
+    return false;
+  }
+  
+  try {
+    const currentCount = parseInt((await window.storage.get('counting_current', true))?.value || '0');
+    const lastUser = (await window.storage.get('counting_last_user', true))?.value || '';
+    const lastTime = parseInt((await window.storage.get('counting_last_time', true))?.value || '0');
+    
+    // Check if user is trying to count twice in a row
+    if (lastUser === currentUsername) {
+      const timeSince = Date.now() - lastTime;
+      const hoursLeft = Math.ceil((3600000 - timeSince) / 60000);
+      if (timeSince < 3600000) { // 1 hour in milliseconds
+        await addMessage('CountBot', `❌ You must wait ${hoursLeft} more minutes before counting again!`, formatTime(), true, false);
+        return false;
+      }
+    }
+    
+    // Check if number is correct (should be currentCount + 1)
+    const expectedNumber = currentCount + 1;
+    if (num !== expectedNumber) {
+      await addMessage('CountBot', `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0!`, formatTime(), true, false);
+      await window.storage.set('counting_current', '0', true);
+      await window.storage.set('counting_last_user', '', true);
+      await window.storage.set('counting_last_time', '0', true);
+      return false;
+    }
+    
+    // Correct number!
+    await window.storage.set('counting_current', num.toString(), true);
+    await window.storage.set('counting_last_user', currentUsername, true);
+    await window.storage.set('counting_last_time', Date.now().toString(), true);
+    
+    if (num % 10 === 0) {
+      await addMessage('CountBot', `🎉 Milestone reached: ${num}! Keep counting!`, formatTime(), true, false);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Counting error:', error);
+    return false;
+  }
+}
+
 async function sendMessage() {
   const message = messageInput.value.trim();
   if (!message) return;
+  
+  // Check for profanity
+  if (containsProfanity(message)) {
+    alert('Your message contains inappropriate content and cannot be sent.');
+    return;
+  }
   
   const now = Date.now();
   const timeSinceLastMessage = (now - lastMessageTime) / 1000;
@@ -1377,6 +1631,15 @@ async function sendMessage() {
     const remaining = Math.ceil(5 - timeSinceLastMessage);
     alert(`Please wait ${remaining} seconds before sending another message.`);
     return;
+  }
+  
+  // Special handling for counting room
+  if (currentRoom === 'counting') {
+    const success = await handleCountingMessage(message);
+    if (!success) {
+      messageInput.value = '';
+      return;
+    }
   }
   
   const timestamp = formatTime();
@@ -1509,7 +1772,7 @@ async function createPlayerCard(username, container) {
   }
   
   card.innerHTML = `
-    <div class="player-avatar-small">${username.charAt(0).toUpperCase()}</div>
+    <div class="player-avatar-small" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>
     <div class="player-details">
       <div class="player-name ${isUserAdmin ? 'admin' : ''}">${username}</div>
       ${isBanned ? '<small style="color: #ff0000;">BANNED</small>' : ''}
@@ -1816,7 +2079,7 @@ document.querySelectorAll('.chat-room').forEach(room => {
     room.classList.add('active');
     
     currentRoom = room.dataset.room;
-    currentGroupChat = null; // Reset group chat when switching to room
+    currentGroupChat = null;
     const info = roomInfo[currentRoom];
     currentRoomName.textContent = info.name;
     currentRoomDesc.textContent = info.desc;
