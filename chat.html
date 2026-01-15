@@ -1011,8 +1011,10 @@ input[type="checkbox"] {
         id="passwordInput" 
         placeholder="Enter admin password..."
       />
+      <button class="login-button" onclick="checkAdminPassword()" style="margin-top: 15px;">✅ Verify Admin Password</button>
     </div>
     <button class="login-button" id="loginButton">START CHATTING 🚀</button>
+    <button class="login-button" onclick="showAdminLogin()" style="margin-top: 15px; background: linear-gradient(135deg, #ffd700, #ff8c00); font-size: 0.9em;">🔑 Admin Login</button>
   </div>
 </div>
 
@@ -1033,7 +1035,7 @@ input[type="checkbox"] {
     
     <!-- Settings Button -->
     <div style="padding: 10px 20px;">
-      <button class="admin-panel-btn" style="width: 100%; background: linear-gradient(135deg, var(--blue-bright), var(--purple-bright));" onclick="window.location.href='settings.html'">⚙️ SETTINGS</button>
+      <button class="admin-panel-btn" style="width: 100%; background: linear-gradient(135deg, var(--blue-bright), var(--purple-bright));" onclick="window.location.href='./settings.html'">⚙️ SETTINGS</button>
     </div>
 
     <div class="sidebar-section">
@@ -1313,12 +1315,45 @@ const generalCount = document.getElementById('generalCount');
 const cooldownTimer = document.getElementById('cooldownTimer');
 
 usernameInput.addEventListener('input', () => {
-  if (usernameInput.value.toLowerCase() === 'kingderrick') {
-    passwordContainer.classList.add('show');
-  } else {
-    passwordContainer.classList.remove('show');
+  // Don't do anything special on input anymore
+});
+
+passwordInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    checkAdminPassword();
   }
 });
+
+function showAdminLogin() {
+  usernameInput.value = '';
+  usernameInput.placeholder = 'First enter admin password below...';
+  usernameInput.disabled = true;
+  passwordContainer.classList.add('show');
+  passwordInput.focus();
+}
+
+function checkAdminPassword() {
+  const password = passwordInput.value;
+  if (password === ADMIN_PASSWORD) {
+    adminPasswordEntered = true;
+    passwordContainer.classList.remove('show');
+    usernameInput.disabled = false;
+    usernameInput.value = '';
+    usernameInput.placeholder = '✅ Admin Powers Granted! Enter username...';
+    usernameInput.style.borderColor = '#ffd700';
+    usernameInput.style.boxShadow = '0 0 30px rgba(255,215,0,0.6)';
+    
+    // Update button text
+    loginButton.textContent = '🌟 START AS ADMIN 🌟';
+    loginButton.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
+    
+    alert('✅ ADMIN POWERS GRANTED! You can now enter any username with admin privileges.');
+    usernameInput.focus();
+  } else {
+    alert('❌ Incorrect admin password!');
+    passwordInput.value = '';
+  }
+}
 
 async function checkUsername() {
   try {
@@ -1377,16 +1412,12 @@ async function login() {
     return;
   }
   
-  // FIXED: Only set admin if CURRENT username is kingderrick AND password is correct
-  if (username.toLowerCase() === 'kingderrick') {
-    const password = passwordInput.value;
-    if (password !== ADMIN_PASSWORD) {
-      alert('Incorrect password for admin account!');
-      return;
-    }
+  // Check if admin password was entered
+  if (adminPasswordEntered) {
     isAdmin = true;
     const adminRef = ref(database, `admins/${username}`);
     await set(adminRef, true);
+    console.log('Admin powers granted for user:', username);
   } else {
     isAdmin = false;
   }
@@ -1786,18 +1817,31 @@ async function sendMessage() {
     createdAt: Date.now()
   };
   
-  // Save to Firebase
+  // Save to Firebase with better error handling
   try {
     if (currentGroupChat) {
       const groupMsgRef = ref(database, `groups/${currentGroupChat}/messages`);
       await push(groupMsgRef, messageData);
+      console.log('Group message sent successfully');
     } else if (currentRoom) {
       const roomMsgRef = ref(database, `rooms/${currentRoom}/messages`);
       await push(roomMsgRef, messageData);
+      console.log('Room message sent successfully to:', currentRoom);
     }
   } catch (error) {
-    console.error('Error saving message:', error);
-    alert('Failed to send message. Please try again.');
+    console.error('Firebase error details:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    
+    // Check if it's a permissions error
+    if (error.code === 'PERMISSION_DENIED') {
+      alert('⚠️ Database permissions error. Please check Firebase rules are set to allow writes.');
+    } else if (error.message.includes('network')) {
+      alert('⚠️ Network error. Please check your internet connection.');
+    } else {
+      alert(`⚠️ Failed to send message: ${error.message}`);
+    }
+    return; // Don't clear input on error
   }
   
   messageInput.value = '';
@@ -2251,9 +2295,6 @@ loginButton.addEventListener('click', login);
 usernameInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') login();
 });
-passwordInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') login();
-});
 
 sendButton.addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', (e) => {
@@ -2261,6 +2302,8 @@ messageInput.addEventListener('keypress', (e) => {
 });
 
 // Make functions globally accessible
+window.showAdminLogin = showAdminLogin;
+window.checkAdminPassword = checkAdminPassword;
 window.openAdminPanel = openAdminPanel;
 window.closeAdminPanel = closeAdminPanel;
 window.promotePlayer = promotePlayer;
