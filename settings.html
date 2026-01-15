@@ -666,7 +666,7 @@ body {
 
 <div class="container">
   <div class="header">
-    <a href="chat.html" class="back-button">← Back to Chat</a>
+    <a href="./chat.html" class="back-button">← Back to Chat</a>
     <h1 class="page-title">⚙️ Settings</h1>
   </div>
 
@@ -1138,7 +1138,7 @@ async function init() {
       await loadBlockedUsers();
       await loadMutedUsers();
     } else {
-      window.location.href = 'chat.html';
+      window.location.href = './chat.html';
     }
   } catch (error) {
     console.error('Error loading settings:', error);
@@ -1291,7 +1291,7 @@ async function changeUsername() {
     try {
       await window.storage.set('aurababy_username', newUsername);
       alert('Username updated! Redirecting to login...');
-      window.location.href = 'chat.html';
+      window.location.href = './chat.html';
     } catch (error) {
       alert('Failed to update username');
     }
@@ -1444,7 +1444,7 @@ async function importSettings(input) {
 async function logout() {
   if (confirm('Are you sure you want to logout?')) {
     await window.storage.delete('aurababy_username');
-    window.location.href = 'chat.html';
+    window.location.href = './chat.html';
   }
 }
 
@@ -1463,7 +1463,7 @@ async function deleteAccount() {
         await window.storage.delete(`time_${currentUsername}`);
         
         alert('Your account has been deleted.');
-        window.location.href = 'chat.html';
+        window.location.href = './chat.html';
       } catch (error) {
         alert('Failed to delete account');
       }
