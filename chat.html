@@ -993,6 +993,10 @@ input[type="checkbox"] {
   <div class="login-box">
     <h1 class="login-title">🌌 AURABABY</h1>
     <p class="login-subtitle">Choose your username to get started</p>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: rgba(0,255,0,0.1); border: 2px solid rgba(0,255,0,0.3); border-radius: 20px; margin-bottom: 30px;">
+      <span style="width: 10px; height: 10px; background: #00ff00; border-radius: 50%; animation: pulse 2s ease-in-out infinite; box-shadow: 0 0 15px #00ff00;"></span>
+      <span style="font-size: 0.85em; font-weight: 600;">🔥 Firebase Real-Time Sync Active</span>
+    </div>
     <input 
       type="text" 
       class="login-input" 
@@ -1287,13 +1291,10 @@ const roomInfo = {
   random: { name: '✨ Random', desc: 'Anything goes here!' }
 };
 
-// Initialize empty message arrays (will be loaded from shared storage)
+// Initialize empty message arrays (will be loaded from Firebase)
 ['general', 'counting', 'gaming', 'music', 'random'].forEach(room => {
   messages[room] = [];
 });
-
-let messageCheckInterval = null;
-let lastMessageCount = {};
 
 const loginScreen = document.getElementById('loginScreen');
 const chatApp = document.getElementById('chatApp');
@@ -1334,8 +1335,9 @@ async function checkUsername() {
 
 async function checkAdminStatus() {
   try {
-    const adminData = await window.storage.get(`admin_${currentUsername}`, true);
-    isAdmin = adminData && adminData.value === 'true';
+    const adminRef = ref(database, `admins/${currentUsername}`);
+    const snapshot = await get(adminRef);
+    isAdmin = snapshot.exists() && snapshot.val() === true;
   } catch (error) {
     isAdmin = false;
   }
@@ -1343,15 +1345,17 @@ async function checkAdminStatus() {
 
 async function checkIfBanned() {
   try {
-    const banData = await window.storage.get(`ban_${currentUsername}`, true);
-    if (banData && banData.value) {
-      const ban = JSON.parse(banData.value);
+    const banRef = ref(database, `bans/${currentUsername}`);
+    const snapshot = await get(banRef);
+    
+    if (snapshot.exists()) {
+      const ban = snapshot.val();
       if (ban.until === 'permanent' || Date.now() < ban.until) {
         alert(`You are banned${ban.until === 'permanent' ? ' permanently' : ' until ' + new Date(ban.until).toLocaleString()}.\nReason: ${ban.reason}`);
         window.storage.delete('aurababy_username');
         return;
       } else {
-        await window.storage.delete(`ban_${currentUsername}`, true);
+        await remove(banRef);
       }
     }
     startChat();
@@ -1381,9 +1385,10 @@ async function login() {
       return;
     }
     isAdmin = true;
-    await window.storage.set(`admin_${username}`, 'true', true);
+    const adminRef = ref(database, `admins/${username}`);
+    await set(adminRef, true);
   } else {
-    isAdmin = false; // Explicitly set to false for non-admin users
+    isAdmin = false;
   }
   
   currentUsername = username;
@@ -1426,109 +1431,68 @@ function startChat() {
   }
   
   loadUserAvatar();
-  updateOnlineUser(true);
+  setOnlineStatus(true);
   loadFriends();
   loadGroupChats();
   initCountingBot();
-  loadRoomMessages(currentRoom);
+  setupMessageListener(currentRoom);
+  setupOnlineUsersListener();
   messageInput.focus();
   
   setInterval(updateTimeSpent, 60000);
+}
+
+// Set user online status in Firebase
+function setOnlineStatus(isOnline) {
+  const userStatusRef = ref(database, `online/${currentUsername}`);
   
-  // Poll for new messages every 2 seconds
-  messageCheckInterval = setInterval(() => {
-    checkForNewMessages();
-    updateOnlineUsers();
-  }, 2000);
-}
-
-// Update online users in shared storage
-async function updateOnlineUser(isOnline) {
-  try {
-    const onlineData = await window.storage.get('online_users', true);
-    const users = onlineData && onlineData.value ? JSON.parse(onlineData.value) : {};
+  if (isOnline) {
+    set(userStatusRef, {
+      online: true,
+      lastSeen: Date.now()
+    });
     
-    if (isOnline) {
-      users[currentUsername] = Date.now();
-    } else {
-      delete users[currentUsername];
-    }
-    
-    await window.storage.set('online_users', JSON.stringify(users), true);
-  } catch (error) {
-    console.error('Error updating online status:', error);
+    // Auto set offline when disconnected
+    onDisconnect(userStatusRef).remove();
+  } else {
+    remove(userStatusRef);
   }
 }
 
-// Get all online users
-async function updateOnlineUsers() {
-  try {
-    const onlineData = await window.storage.get('online_users', true);
-    if (onlineData && onlineData.value) {
-      const users = JSON.parse(onlineData.value);
-      const now = Date.now();
-      const activeUsers = new Set();
-      
-      // Remove users inactive for more than 10 seconds
-      for (const [username, timestamp] of Object.entries(users)) {
-        if (now - timestamp < 10000) {
-          activeUsers.add(username);
-        }
-      }
-      
-      onlineUsers = activeUsers;
-      updateOnlineCount();
+// Listen for online users in real-time
+function setupOnlineUsersListener() {
+  const onlineRef = ref(database, 'online');
+  onValue(onlineRef, (snapshot) => {
+    onlineUsers.clear();
+    if (snapshot.exists()) {
+      const users = snapshot.val();
+      Object.keys(users).forEach(username => {
+        onlineUsers.add(username);
+      });
     }
-  } catch (error) {
-    console.error('Error getting online users:', error);
-  }
+    updateOnlineCount();
+  });
 }
 
-// Load messages from shared storage for a room
-async function loadRoomMessages(room) {
-  try {
-    const roomData = await window.storage.get(`room_${room}_messages`, true);
-    if (roomData && roomData.value) {
-      messages[room] = JSON.parse(roomData.value);
-      lastMessageCount[room] = messages[room].length;
-    } else {
-      messages[room] = [];
-      lastMessageCount[room] = 0;
-    }
-  } catch (error) {
-    messages[room] = [];
-    lastMessageCount[room] = 0;
+// Setup real-time message listener for a room
+function setupMessageListener(room) {
+  // Remove previous listener if exists
+  if (messageListeners[room]) {
+    return; // Already listening
   }
-}
-
-// Check for new messages in current room
-async function checkForNewMessages() {
-  if (!currentRoom && !currentGroupChat) return;
   
-  try {
-    if (currentGroupChat) {
-      const messagesData = await window.storage.get(`group_messages_${currentGroupChat}`, true);
-      if (messagesData && messagesData.value) {
-        const msgs = JSON.parse(messagesData.value);
-        if (msgs.length > (groupMessages[currentGroupChat]?.length || 0)) {
-          groupMessages[currentGroupChat] = msgs;
-          await loadGroupMessages(currentGroupChat);
-        }
-      }
-    } else if (currentRoom) {
-      const roomData = await window.storage.get(`room_${currentRoom}_messages`, true);
-      if (roomData && roomData.value) {
-        const msgs = JSON.parse(roomData.value);
-        if (msgs.length > (lastMessageCount[currentRoom] || 0)) {
-          messages[currentRoom] = msgs;
-          lastMessageCount[currentRoom] = msgs.length;
-          await loadRoom(currentRoom);
-        }
+  const messagesRef = ref(database, `rooms/${room}/messages`);
+  messageListeners[room] = onValue(messagesRef, async (snapshot) => {
+    messagesContainer.innerHTML = '';
+    if (snapshot.exists()) {
+      const msgs = snapshot.val();
+      messages[room] = Object.values(msgs);
+      
+      for (const msg of messages[room]) {
+        await addMessage(msg.username, msg.content, msg.timestamp, msg.isSystem || false);
       }
     }
-  } catch (error) {
-    console.error('Error checking messages:', error);
-  }
+  });
 }
 
 async function loadUserAvatar() {
@@ -1556,7 +1520,7 @@ function formatTime() {
 async function addMessage(username, content, timestamp, isSystem = false, showActions = true) {
   // Check if user is blocked
   if (blockedUsers.has(username) && !isSystem) {
-    return; // Don't show messages from blocked users
+    return;
   }
   
   const messageDiv = document.createElement('div');
@@ -1576,17 +1540,21 @@ async function addMessage(username, content, timestamp, isSystem = false, showAc
     avatarHTML = '<div class="message-avatar">🤖</div>';
   } else {
     try {
-      const adminData = await window.storage.get(`admin_${username}`, true);
-      const isUserAdmin = adminData && adminData.value === 'true';
+      // Check admin status from Firebase
+      const adminRef = ref(database, `admins/${username}`);
+      const adminSnapshot = await get(adminRef);
+      const isUserAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
       
       if (isUserAdmin) {
         usernameClass = 'admin';
         badges += '<span class="message-badge admin">ADMIN</span>';
       }
       
-      const badgeData = await window.storage.get(`badge_${username}`, true);
-      if (badgeData && badgeData.value) {
-        badges += `<span class="message-badge custom">${badgeData.value}</span>`;
+      // Check custom badge from Firebase
+      const badgeRef = ref(database, `badges/${username}`);
+      const badgeSnapshot = await get(badgeRef);
+      if (badgeSnapshot.exists()) {
+        badges += `<span class="message-badge custom">${badgeSnapshot.val()}</span>`;
       }
       
       const avatarData = await window.storage.get(`avatar_${username}`);
@@ -1596,7 +1564,6 @@ async function addMessage(username, content, timestamp, isSystem = false, showAc
         avatarHTML = `<div class="message-avatar" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>`;
       }
       
-      // Add user action buttons (block/mute) if not own message and showActions is true
       if (username !== currentUsername && showActions) {
         const isBlocked = blockedUsers.has(username);
         const isMuted = mutedUsers.has(username);
@@ -1667,20 +1634,25 @@ async function toggleMute(username) {
 }
 
 async function loadRoom(room) {
-  messagesContainer.innerHTML = '';
-  for (const msg of messages[room]) {
-    await addMessage(msg.username, msg.content, msg.timestamp, msg.isSystem);
+  // This function is now handled by the real-time listener
+  // Just ensure the listener is set up
+  if (!messageListeners[room]) {
+    setupMessageListener(room);
   }
 }
 
-// COUNTING BOT
+// COUNTING BOT with Firebase
 async function initCountingBot() {
   try {
-    const countData = await window.storage.get('counting_current', true);
-    if (!countData || !countData.value) {
-      await window.storage.set('counting_current', '0', true);
-      await window.storage.set('counting_last_user', '', true);
-      await window.storage.set('counting_last_time', '0', true);
+    const countRef = ref(database, 'counting');
+    const snapshot = await get(countRef);
+    
+    if (!snapshot.exists()) {
+      await set(countRef, {
+        current: 0,
+        lastUser: '',
+        lastTime: 0
+      });
     }
   } catch (error) {
     console.log('Counting bot initialized');
@@ -1690,42 +1662,83 @@ async function initCountingBot() {
 async function handleCountingMessage(message) {
   const num = parseInt(message.trim());
   if (isNaN(num)) {
-    await addMessage('CountBot', '❌ Please enter a valid number!', formatTime(), true, false);
+    const botMsg = {
+      username: 'CountBot',
+      content: '❌ Please enter a valid number!',
+      timestamp: formatTime(),
+      isSystem: true,
+      createdAt: Date.now()
+    };
+    const roomMsgRef = ref(database, `rooms/counting/messages`);
+    await push(roomMsgRef, botMsg);
     return false;
   }
   
   try {
-    const currentCount = parseInt((await window.storage.get('counting_current', true))?.value || '0');
-    const lastUser = (await window.storage.get('counting_last_user', true))?.value || '';
-    const lastTime = parseInt((await window.storage.get('counting_last_time', true))?.value || '0');
+    const countRef = ref(database, 'counting');
+    const snapshot = await get(countRef);
+    const countData = snapshot.val() || { current: 0, lastUser: '', lastTime: 0 };
+    
+    const currentCount = countData.current;
+    const lastUser = countData.lastUser;
+    const lastTime = countData.lastTime;
     
     // Check if user is trying to count twice in a row
     if (lastUser === currentUsername) {
       const timeSince = Date.now() - lastTime;
       const hoursLeft = Math.ceil((3600000 - timeSince) / 60000);
-      if (timeSince < 3600000) { // 1 hour in milliseconds
-        await addMessage('CountBot', `❌ You must wait ${hoursLeft} more minutes before counting again!`, formatTime(), true, false);
+      if (timeSince < 3600000) {
+        const botMsg = {
+          username: 'CountBot',
+          content: `❌ You must wait ${hoursLeft} more minutes before counting again!`,
+          timestamp: formatTime(),
+          isSystem: true,
+          createdAt: Date.now()
+        };
+        const roomMsgRef = ref(database, `rooms/counting/messages`);
+        await push(roomMsgRef, botMsg);
         return false;
       }
     }
     
-    // Check if number is correct (should be currentCount + 1)
+    // Check if number is correct
     const expectedNumber = currentCount + 1;
     if (num !== expectedNumber) {
-      await addMessage('CountBot', `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0!`, formatTime(), true, false);
-      await window.storage.set('counting_current', '0', true);
-      await window.storage.set('counting_last_user', '', true);
-      await window.storage.set('counting_last_time', '0', true);
+      const botMsg = {
+        username: 'CountBot',
+        content: `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0!`,
+        timestamp: formatTime(),
+        isSystem: true,
+        createdAt: Date.now()
+      };
+      const roomMsgRef = ref(database, `rooms/counting/messages`);
+      await push(roomMsgRef, botMsg);
+      
+      await set(countRef, {
+        current: 0,
+        lastUser: '',
+        lastTime: 0
+      });
       return false;
     }
     
     // Correct number!
-    await window.storage.set('counting_current', num.toString(), true);
-    await window.storage.set('counting_last_user', currentUsername, true);
-    await window.storage.set('counting_last_time', Date.now().toString(), true);
+    await set(countRef, {
+      current: num,
+      lastUser: currentUsername,
+      lastTime: Date.now()
+    });
     
     if (num % 10 === 0) {
-      await addMessage('CountBot', `🎉 Milestone reached: ${num}! Keep counting!`, formatTime(), true, false);
+      const botMsg = {
+        username: 'CountBot',
+        content: `🎉 Milestone reached: ${num}! Keep counting!`,
+        timestamp: formatTime(),
+        isSystem: true,
+        createdAt: Date.now()
+      };
+      const roomMsgRef = ref(database, `rooms/counting/messages`);
+      await push(roomMsgRef, botMsg);
     }
     
     return true;
@@ -1769,30 +1782,23 @@ async function sendMessage() {
     username: currentUsername,
     content: message,
     timestamp: timestamp,
-    isSystem: false
+    isSystem: false,
+    createdAt: Date.now()
   };
   
-  // Save to shared storage
+  // Save to Firebase
   try {
     if (currentGroupChat) {
-      const messagesData = await window.storage.get(`group_messages_${currentGroupChat}`, true);
-      const msgs = messagesData && messagesData.value ? JSON.parse(messagesData.value) : [];
-      msgs.push(messageData);
-      await window.storage.set(`group_messages_${currentGroupChat}`, JSON.stringify(msgs), true);
-      groupMessages[currentGroupChat] = msgs;
+      const groupMsgRef = ref(database, `groups/${currentGroupChat}/messages`);
+      await push(groupMsgRef, messageData);
     } else if (currentRoom) {
-      const roomData = await window.storage.get(`room_${currentRoom}_messages`, true);
-      const msgs = roomData && roomData.value ? JSON.parse(roomData.value) : [];
-      msgs.push(messageData);
-      await window.storage.set(`room_${currentRoom}_messages`, JSON.stringify(msgs), true);
-      messages[currentRoom] = msgs;
-      lastMessageCount[currentRoom] = msgs.length;
+      const roomMsgRef = ref(database, `rooms/${currentRoom}/messages`);
+      await push(roomMsgRef, messageData);
     }
   } catch (error) {
     console.error('Error saving message:', error);
+    alert('Failed to send message. Please try again.');
   }
-  
-  await addMessage(currentUsername, message, timestamp, false);
   
   messageInput.value = '';
   lastMessageTime = now;
@@ -1855,9 +1861,19 @@ async function loadAllPlayers() {
   playerList.innerHTML = '';
   
   try {
-    const usersData = await window.storage.list('aurababy_username');
+    // Get all users from online status and storage
     const allUsernames = new Set([currentUsername]);
     
+    // Get from online users (Firebase)
+    const onlineRef = ref(database, 'online');
+    const onlineSnapshot = await get(onlineRef);
+    if (onlineSnapshot.exists()) {
+      const users = onlineSnapshot.val();
+      Object.keys(users).forEach(username => allUsernames.add(username));
+    }
+    
+    // Also get from local storage for offline users
+    const usersData = await window.storage.list('aurababy_username');
     if (usersData && usersData.keys) {
       for (const key of usersData.keys) {
         const userData = await window.storage.get(key);
@@ -2221,19 +2237,16 @@ document.querySelectorAll('.chat-room').forEach(room => {
     currentRoomName.textContent = info.name;
     currentRoomDesc.textContent = info.desc;
     
-    await loadRoomMessages(currentRoom);
-    await loadRoom(currentRoom);
+    setupMessageListener(currentRoom);
   });
 });
 
 // Update online status when page unloads
 window.addEventListener('beforeunload', () => {
-  updateOnlineUser(false);
-  if (messageCheckInterval) {
-    clearInterval(messageCheckInterval);
-  }
+  setOnlineStatus(false);
 });
 
+// Event listeners
 loginButton.addEventListener('click', login);
 usernameInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') login();
@@ -2246,6 +2259,29 @@ sendButton.addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
 });
+
+// Make functions globally accessible
+window.openAdminPanel = openAdminPanel;
+window.closeAdminPanel = closeAdminPanel;
+window.promotePlayer = promotePlayer;
+window.showBadgeModal = showBadgeModal;
+window.closeBadgeModal = closeBadgeModal;
+window.saveBadge = saveBadge;
+window.showBanModal = showBanModal;
+window.closeBanModal = closeBanModal;
+window.confirmBan = confirmBan;
+window.unbanPlayer = unbanPlayer;
+window.viewProfile = viewProfile;
+window.toggleBlock = toggleBlock;
+window.toggleMute = toggleMute;
+window.goToOwnProfile = goToOwnProfile;
+window.showAddFriendModal = showAddFriendModal;
+window.closeAddFriendModal = closeAddFriendModal;
+window.addFriend = addFriend;
+window.showCreateGroupModal = showCreateGroupModal;
+window.closeCreateGroupModal = closeCreateGroupModal;
+window.createGroup = createGroup;
+window.switchToGroupChat = switchToGroupChat;
 
 checkUsername();
 </script>
