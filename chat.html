@@ -1314,9 +1314,7 @@ const currentRoomDesc = document.getElementById('currentRoomDesc');
 const generalCount = document.getElementById('generalCount');
 const cooldownTimer = document.getElementById('cooldownTimer');
 
-usernameInput.addEventListener('input', () => {
-  // Don't do anything special on input anymore
-});
+// Don't add any input event listener that breaks normal login
 
 passwordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
@@ -1540,7 +1538,7 @@ async function loadUserAvatar() {
 }
 
 function goToOwnProfile() {
-  window.location.href = 'profile.html';
+  window.location.href = './profile.html';
 }
 
 function formatTime() {
@@ -1627,7 +1625,7 @@ async function addMessage(username, content, timestamp, isSystem = false, showAc
 }
 
 function viewProfile(username) {
-  window.location.href = `profile.html?user=${encodeURIComponent(username)}`;
+  window.location.href = `./profile.html?user=${encodeURIComponent(username)}`;
 }
 
 async function toggleBlock(username) {
@@ -1717,11 +1715,11 @@ async function handleCountingMessage(message) {
     // Check if user is trying to count twice in a row
     if (lastUser === currentUsername) {
       const timeSince = Date.now() - lastTime;
-      const hoursLeft = Math.ceil((3600000 - timeSince) / 60000);
+      const minutesLeft = Math.ceil((3600000 - timeSince) / 60000);
       if (timeSince < 3600000) {
         const botMsg = {
           username: 'CountBot',
-          content: `❌ You must wait ${hoursLeft} more minutes before counting again!`,
+          content: `❌ ${currentUsername}, you must wait ${minutesLeft} more minutes before counting again!`,
           timestamp: formatTime(),
           isSystem: true,
           createdAt: Date.now()
@@ -1735,15 +1733,15 @@ async function handleCountingMessage(message) {
     // Check if number is correct
     const expectedNumber = currentCount + 1;
     if (num !== expectedNumber) {
-      const botMsg = {
+      const resetMsg = {
         username: 'CountBot',
-        content: `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0!`,
+        content: `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0! 😢`,
         timestamp: formatTime(),
         isSystem: true,
         createdAt: Date.now()
       };
       const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, botMsg);
+      await push(roomMsgRef, resetMsg);
       
       await set(countRef, {
         current: 0,
@@ -1753,28 +1751,58 @@ async function handleCountingMessage(message) {
       return false;
     }
     
-    // Correct number!
+    // Correct number! Update count first
     await set(countRef, {
       current: num,
       lastUser: currentUsername,
       lastTime: Date.now()
     });
     
-    if (num % 10 === 0) {
-      const botMsg = {
+    // Show milestone messages
+    if (num % 100 === 0) {
+      const milestoneMsg = {
         username: 'CountBot',
-        content: `🎉 Milestone reached: ${num}! Keep counting!`,
+        content: `🎉🎊 AMAZING! ${num} reached! What a milestone! 🎊🎉`,
         timestamp: formatTime(),
         isSystem: true,
         createdAt: Date.now()
       };
       const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, botMsg);
+      await push(roomMsgRef, milestoneMsg);
+    } else if (num % 50 === 0) {
+      const milestoneMsg = {
+        username: 'CountBot',
+        content: `🌟 Halfway to ${num + 50}! Keep it up! 🌟`,
+        timestamp: formatTime(),
+        isSystem: true,
+        createdAt: Date.now()
+      };
+      const roomMsgRef = ref(database, `rooms/counting/messages`);
+      await push(roomMsgRef, milestoneMsg);
+    } else if (num % 10 === 0) {
+      const milestoneMsg = {
+        username: 'CountBot',
+        content: `✨ Nice! ${num} reached! ✨`,
+        timestamp: formatTime(),
+        isSystem: true,
+        createdAt: Date.now()
+      };
+      const roomMsgRef = ref(database, `rooms/counting/messages`);
+      await push(roomMsgRef, milestoneMsg);
     }
     
     return true;
   } catch (error) {
     console.error('Counting error:', error);
+    const errorMsg = {
+      username: 'CountBot',
+      content: `⚠️ Error processing count. Please try again.`,
+      timestamp: formatTime(),
+      isSystem: true,
+      createdAt: Date.now()
+    };
+    const roomMsgRef = ref(database, `rooms/counting/messages`);
+    await push(roomMsgRef, errorMsg);
     return false;
   }
 }
