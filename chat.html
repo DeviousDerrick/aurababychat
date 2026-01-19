@@ -85,6 +85,17 @@ body::before {
   color: var(--accent-color);
   margin-bottom: 10px;
   letter-spacing: 1px;
+  cursor: default;
+}
+
+.section-title .admin-trigger {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.section-title .admin-trigger:hover {
+  color: #ff416c;
+  text-shadow: 0 0 10px rgba(255, 65, 108, 0.8);
 }
 
 .room { 
@@ -97,6 +108,7 @@ body::before {
   border: 2px solid rgba(138, 43, 226, 0.2);
   font-size: 16px;
   letter-spacing: 1px;
+  position: relative;
 }
 
 .room:hover {
@@ -111,6 +123,22 @@ body::before {
   border-color: var(--accent-color);
   box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6), 0 0 40px rgba(240, 147, 251, 0.4);
   transform: translateX(8px);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff416c;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(255, 65, 108, 0.6);
 }
 
 .profile-section {
@@ -152,6 +180,12 @@ body::before {
   margin-bottom: 5px;
 }
 
+.profile-time {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 5px;
+}
+
 .chat { 
   flex: 1; 
   display: flex; 
@@ -179,6 +213,30 @@ body::before {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.online-btn {
+  cursor: pointer;
+  padding: 8px 16px;
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  transition: all 0.3s ease;
+}
+
+.online-btn:hover {
+  background: rgba(102, 126, 234, 0.5);
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.typing-indicator {
+  padding: 10px 30px;
+  font-size: 14px;
+  color: var(--accent-color);
+  font-style: italic;
+  opacity: 0.8;
+  min-height: 40px;
 }
 
 .messages { 
@@ -355,7 +413,7 @@ body::before {
 }
 
 /* Buttons */
-.admin-btn, .friends-btn, .settings-btn {
+.friends-btn, .settings-btn, .leaderboard-btn {
   position: fixed;
   top: 90px;
   padding: 12px 24px;
@@ -373,21 +431,24 @@ body::before {
   transition: all 0.3s ease;
 }
 
-.admin-btn { right: 30px; }
 .friends-btn { 
-  right: 200px; 
+  right: 30px; 
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
 }
 .settings-btn {
-  right: 380px;
+  right: 200px;
   background: linear-gradient(135deg, #10b981, #059669);
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6);
 }
+.leaderboard-btn {
+  right: 380px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.6);
+}
 
-.admin-btn:hover, .friends-btn:hover, .settings-btn:hover {
+.friends-btn:hover, .settings-btn:hover, .leaderboard-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(255, 65, 108, 0.8);
 }
 
 .modal-overlay {
@@ -621,15 +682,79 @@ body::before {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border-color: var(--accent-color);
 }
+
+.streak-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-left: 10px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: rgba(40, 30, 80, 0.5);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+  background: rgba(50, 40, 90, 0.6);
+  transform: translateX(4px);
+}
+
+.leaderboard-rank {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.5);
+}
+
+.leaderboard-rank.gold { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; }
+.leaderboard-rank.silver { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #000; }
+.leaderboard-rank.bronze { background: linear-gradient(135deg, #cd7f32, #e8a87c); color: #000; }
 </style>
 </head>
 <body>
 <div class="topbar">✨ AURABABY CHAT ✨</div>
 
 <!-- Buttons -->
-<button class="admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN</button>
 <button class="friends-btn" onclick="openFriendsPanel()">👥 FRIENDS</button>
 <button class="settings-btn" onclick="openSettings()">⚙️ SETTINGS</button>
+<button class="leaderboard-btn" onclick="openLeaderboard()">🏆 LEADERBOARD</button>
+
+<!-- Leaderboard Panel -->
+<div id="leaderboardOverlay" class="modal-overlay" onclick="closeLeaderboard()"></div>
+<div id="leaderboardPanel" class="modal">
+  <button class="close-modal" onclick="closeLeaderboard()">×</button>
+  <h2>🏆 TIME LEADERBOARD</h2>
+  <div class="modal-section">
+    <h3>Top Users by Time Spent</h3>
+    <div id="leaderboardList"></div>
+  </div>
+</div>
+
+<!-- Online Users Panel -->
+<div id="onlineUsersOverlay" class="modal-overlay" onclick="closeOnlineUsers()"></div>
+<div id="onlineUsersPanel" class="modal">
+  <button class="close-modal" onclick="closeOnlineUsers()">×</button>
+  <h2>👥 ONLINE USERS</h2>
+  <div class="modal-section">
+    <div id="onlineUsersList" class="user-list"></div>
+  </div>
+</div>
 
 <!-- Settings Panel -->
 <div id="settingsOverlay" class="modal-overlay" onclick="closeSettings()"></div>
@@ -768,11 +893,21 @@ body::before {
       <div class="profile-avatar" id="profileAvatar" style="width:100px; height:100px; font-size:48px; margin:0 auto 20px;">?</div>
       <h3 id="profileUsername">Username</h3>
       <p id="profileBio" style="font-size:14px; opacity:0.8;">Bio...</p>
+      <p id="profileTimeSpent" style="font-size:12px; opacity:0.7; margin-top:10px;">⏱️ Time on AuraBaby: Loading...</p>
     </div>
   </div>
 
   <div class="modal-section" id="profileFriendSection">
     <button id="profileAddFriend" onclick="addFriendFromProfile()">ADD FRIEND</button>
+  </div>
+
+  <div class="modal-section" id="profilePrivateChat" style="display:none;">
+    <button onclick="openPrivateChat()">💬 PRIVATE CHAT</button>
+  </div>
+
+  <div class="modal-section" id="profileStreakSection" style="display:none;">
+    <h3>🔥 Chat Streak</h3>
+    <p id="profileStreak" style="font-size:20px; text-align:center;">0 days</p>
   </div>
 
   <div class="modal-section">
@@ -789,7 +924,7 @@ body::before {
 <div class="container">
   <div class="sidebar">
     <div class="sidebar-section">
-      <div class="section-title">PUBLIC ROOMS</div>
+      <div class="section-title"><span class="admin-trigger" onclick="adminUnlock()">P</span>UBLIC ROOMS</div>
       <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
       <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
       <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
@@ -801,17 +936,27 @@ body::before {
       <div id="groupChatsList"></div>
     </div>
 
+    <div class="sidebar-section" id="privateChatsSection" style="display:none;">
+      <div class="section-title">PRIVATE CHATS</div>
+      <div id="privateChatsList"></div>
+    </div>
+
     <div class="profile-section">
       <div class="profile-card" onclick="openMyProfile()">
         <div class="profile-avatar" id="myAvatar">?</div>
         <div class="profile-name" id="myUsername">Username</div>
+        <div class="profile-time" id="myTime">⏱️ 0d 0h 0m</div>
         <div style="font-size:11px; opacity:0.7;">View Profile →</div>
       </div>
     </div>
   </div>
 
   <div class="chat">
-    <div class="chat-header" id="roomName">🌌 General 1 <span>Online: <span id="onlineCount">0</span></span></div>
+    <div class="chat-header" id="roomName">
+      🌌 General 1 
+      <span class="online-btn" onclick="openOnlineUsers()">Online: <span id="onlineCount">0</span></span>
+    </div>
+    <div class="typing-indicator" id="typingIndicator"></div>
     <div class="messages" id="messages"></div>
     <div class="input">
       <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
@@ -838,26 +983,335 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Username + Admin Login
+// Username
 let username = localStorage.getItem("name") || prompt("Enter your username:");
 localStorage.setItem("name", username);
-let isAdmin = false;
-const adminPass = prompt("Enter admin password (leave blank if not admin):");
-if (adminPass === "chickenfish67demonlordohio") { 
-  isAdmin = true; 
-  alert("Admin mode enabled"); 
-  document.getElementById("adminBtn").style.display = "block";
+let isAdmin = localStorage.getItem("isAdmin") === "true";
+
+// Admin unlock function
+function adminUnlock() {
+  if (isAdmin) return alert("You're already admin!");
+  const pass = prompt("Enter admin password:");
+  if (pass === "chickenfish67demonlordohio") {
+    isAdmin = true;
+    localStorage.setItem("isAdmin", "true");
+    alert("Admin unlocked!");
+    location.reload();
+  } else if (pass) {
+    alert("Wrong password!");
+  }
 }
 
 // Initialize profile
 document.getElementById("myUsername").textContent = username;
 document.getElementById("myAvatar").textContent = username[0].toUpperCase();
 
+// Time tracking
+const joinTime = parseInt(localStorage.getItem("joinTime")) || Date.now();
+localStorage.setItem("joinTime", joinTime);
+
+function formatTime(ms) {
+  const secs = Math.floor(ms / 1000);
+  const mins = Math.floor(secs / 60);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  return `${days}d ${hours % 24}h ${mins % 60}m`;
+}
+
+function updateMyTime() {
+  const elapsed = Date.now() - joinTime;
+  document.getElementById("myTime").textContent = `⏱️ ${formatTime(elapsed)}`;
+  
+  // Update in Firebase
+  db.collection("userTimes").doc(username).set({
+    totalTime: elapsed,
+    lastUpdate: Date.now()
+  }, {merge: true});
+}
+
+setInterval(updateMyTime, 1000);
+updateMyTime();
+
 db.collection("profiles").doc(username).set({
   avatar: username[0].toUpperCase(),
   bio: "AuraBaby user",
-  createdAt: Date.now()
+  createdAt: Date.now(),
+  joinTime: joinTime
 }, {merge: true});
+
+// LEADERBOARD
+function openLeaderboard() {
+  document.getElementById('leaderboardPanel').style.display = 'block';
+  document.getElementById('leaderboardOverlay').style.display = 'block';
+  loadLeaderboard();
+}
+
+function closeLeaderboard() {
+  document.getElementById('leaderboardPanel').style.display = 'none';
+  document.getElementById('leaderboardOverlay').style.display = 'none';
+}
+
+function loadLeaderboard() {
+  db.collection("userTimes").orderBy("totalTime", "desc").limit(10).get().then(snapshot => {
+    const list = document.getElementById('leaderboardList');
+    list.innerHTML = "";
+    
+    snapshot.forEach((doc, idx) => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.className = 'leaderboard-item';
+      
+      const rank = document.createElement('div');
+      rank.className = 'leaderboard-rank';
+      if (idx === 0) rank.classList.add('gold');
+      else if (idx === 1) rank.classList.add('silver');
+      else if (idx === 2) rank.classList.add('bronze');
+      rank.textContent = idx + 1;
+      
+      const info = document.createElement('div');
+      info.style.flex = '1';
+      info.innerHTML = `<div style="font-size:16px;">${doc.id}</div><div style="font-size:12px; opacity:0.7;">${formatTime(data.totalTime)}</div>`;
+      
+      div.appendChild(rank);
+      div.appendChild(info);
+      list.appendChild(div);
+    });
+    
+    if (list.innerHTML === "") list.innerHTML = "No data yet";
+  });
+}
+
+// ONLINE USERS
+function openOnlineUsers() {
+  document.getElementById('onlineUsersPanel').style.display = 'block';
+  document.getElementById('onlineUsersOverlay').style.display = 'block';
+  loadOnlineUsersList();
+}
+
+function closeOnlineUsers() {
+  document.getElementById('onlineUsersPanel').style.display = 'none';
+  document.getElementById('onlineUsersOverlay').style.display = 'none';
+}
+
+function loadOnlineUsersList() {
+  db.collection("presence").get().then(snapshot => {
+    const list = document.getElementById('onlineUsersList');
+    list.innerHTML = "";
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      if (now - doc.data().lastSeen < 7000) {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.innerHTML = `<span>${doc.id}</span>`;
+        
+        if (doc.id !== username) {
+          const btn = document.createElement('button');
+          btn.textContent = 'View Profile';
+          btn.onclick = () => {
+            closeOnlineUsers();
+            openUserProfile(doc.id);
+          };
+          div.appendChild(btn);
+        }
+        
+        list.appendChild(div);
+      }
+    });
+    
+    if (list.innerHTML === "") list.innerHTML = "No users online";
+  });
+}
+
+// NOTIFICATIONS
+const unreadCounts = {};
+
+function updateNotifications() {
+  document.querySelectorAll('.room').forEach(room => {
+    const roomName = room.dataset.room;
+    const type = room.dataset.type;
+    const isActive = room.classList.contains('active');
+    
+    if (!isActive && unreadCounts[roomName] > 0) {
+      let badge = room.querySelector('.notification-badge');
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.className = 'notification-badge';
+        room.appendChild(badge);
+      }
+      badge.textContent = unreadCounts[roomName] > 99 ? '99+' : unreadCounts[roomName];
+    } else {
+      const badge = room.querySelector('.notification-badge');
+      if (badge) badge.remove();
+    }
+  });
+}
+
+// TYPING INDICATOR
+let typingTimeout;
+let currentlyTyping = new Set();
+
+function sendTypingIndicator() {
+  if (!currentRoom || currentRoomType === 'counting') return;
+  
+  const path = currentRoomType === 'group' 
+    ? `groupChats/${currentRoom}/typing`
+    : currentRoomType === 'private'
+    ? `privateChats/${currentRoom}/typing`
+    : `rooms/${currentRoom}/typing`;
+  
+  db.collection(path).doc(username).set({
+    typing: true,
+    timestamp: Date.now()
+  });
+  
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.collection(path).doc(username).delete();
+  }, 3000);
+}
+
+function watchTyping(room, type) {
+  const path = type === 'group'
+    ? `groupChats/${room}/typing`
+    : type === 'private'
+    ? `privateChats/${room}/typing`
+    : `rooms/${room}/typing`;
+  
+  db.collection(path).onSnapshot(snapshot => {
+    currentlyTyping.clear();
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      if (doc.id !== username && now - doc.data().timestamp < 4000) {
+        currentlyTyping.add(doc.id);
+      }
+    });
+    
+    const indicator = document.getElementById('typingIndicator');
+    if (currentlyTyping.size > 0) {
+      const users = Array.from(currentlyTyping);
+      if (users.length === 1) {
+        indicator.textContent = `${users[0]} is typing...`;
+      } else if (users.length === 2) {
+        indicator.textContent = `${users[0]} and ${users[1]} are typing...`;
+      } else {
+        indicator.textContent = `${users[0]}, ${users[1]}, and ${users.length - 2} others are typing...`;
+      }
+    } else {
+      indicator.textContent = "";
+    }
+  });
+}
+
+document.getElementById('msgInput').addEventListener('input', sendTypingIndicator);
+
+// PRIVATE CHATS
+async function openPrivateChat() {
+  if (!currentProfileUser || currentProfileUser === username) return;
+  
+  const users = [username, currentProfileUser].sort();
+  const chatId = users.join('_');
+  
+  // Create or get private chat
+  await db.collection('privateChats').doc(chatId).set({
+    users: users,
+    createdAt: Date.now(),
+    lastMessage: Date.now()
+  }, {merge: true});
+  
+  closeProfile();
+  loadPrivateChats();
+  loadRoom(chatId, 'private');
+}
+
+function loadPrivateChats() {
+  db.collection('privateChats').where('users', 'array-contains', username).onSnapshot(snapshot => {
+    const section = document.getElementById('privateChatsSection');
+    const list = document.getElementById('privateChatsList');
+    
+    list.innerHTML = "";
+    
+    if (snapshot.empty) {
+      section.style.display = 'none';
+      return;
+    }
+    
+    section.style.display = 'block';
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const otherUser = data.users.find(u => u !== username);
+      
+      const div = document.createElement('div');
+      div.className = 'room';
+      div.dataset.room = doc.id;
+      div.dataset.type = 'private';
+      div.textContent = `💬 ${otherUser}`;
+      
+      // Check for streak
+      db.collection('streaks').doc(doc.id).get().then(streakDoc => {
+        if (streakDoc.exists) {
+          const streak = streakDoc.data().streak || 0;
+          if (streak > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'streak-badge';
+            badge.textContent = `🔥 ${streak}`;
+            badge.style.fontSize = '10px';
+            badge.style.marginLeft = '5px';
+            div.appendChild(badge);
+          }
+        }
+      });
+      
+      div.onclick = function() {
+        document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
+        this.classList.add('active');
+        loadRoom(doc.id, 'private');
+      };
+      
+      list.appendChild(div);
+    });
+  });
+}
+
+loadPrivateChats();
+
+// STREAK SYSTEM
+async function updateStreak(chatId) {
+  const streakDoc = await db.collection('streaks').doc(chatId).get();
+  const now = Date.now();
+  const oneDayMs = 86400000;
+  
+  if (streakDoc.exists) {
+    const data = streakDoc.data();
+    const lastChat = data.lastChat || 0;
+    const timeDiff = now - lastChat;
+    
+    if (timeDiff < oneDayMs) {
+      // Same day, don't update
+      return;
+    } else if (timeDiff < oneDayMs * 2) {
+      // Next day, increase streak
+      await db.collection('streaks').doc(chatId).update({
+        streak: (data.streak || 0) + 1,
+        lastChat: now
+      });
+    } else {
+      // Streak broken, reset
+      await db.collection('streaks').doc(chatId).set({
+        streak: 1,
+        lastChat: now
+      });
+    }
+  } else {
+    // First chat
+    await db.collection('streaks').doc(chatId).set({
+      streak: 1,
+      lastChat: now
+    });
+  }
+}
 
 // THEMES
 const themes = [
@@ -885,7 +1339,6 @@ function renderThemes() {
     container.appendChild(div);
   });
   
-  // Load saved theme
   const saved = localStorage.getItem('theme');
   if (saved) {
     const theme = themes[parseInt(saved)];
@@ -916,7 +1369,6 @@ function openSettings() {
   document.getElementById('settingsPanel').style.display = 'block';
   document.getElementById('settingsOverlay').style.display = 'block';
   
-  // Load saved settings
   document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') === 'true';
   document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
   document.getElementById('compactMode').checked = localStorage.getItem('compactMode') === 'true';
@@ -926,7 +1378,6 @@ function closeSettings() {
   document.getElementById('settingsPanel').style.display = 'none';
   document.getElementById('settingsOverlay').style.display = 'none';
   
-  // Save settings
   localStorage.setItem('showTimestamps', document.getElementById('showTimestamps').checked);
   localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
   localStorage.setItem('compactMode', document.getElementById('compactMode').checked);
@@ -971,6 +1422,7 @@ tagColors.forEach((color, idx) => {
 
 // ADMIN FUNCTIONS
 function openAdminPanel() {
+  if (!isAdmin) return alert("You're not an admin!");
   document.getElementById("adminPanel").style.display = "block";
   document.getElementById("adminOverlay").style.display = "block";
   loadBannedUsers();
@@ -1317,16 +1769,46 @@ function openUserProfile(user) {
   db.collection("profiles").doc(user).get().then(doc => {
     const data = doc.data() || {};
     document.getElementById("profileBio").textContent = data.bio || "AuraBaby user";
+    
+    const userJoinTime = data.joinTime || Date.now();
+    const elapsed = Date.now() - userJoinTime;
+    const secs = Math.floor(elapsed / 1000);
+    const mins = Math.floor(secs / 60);
+    const hours = Math.floor(mins / 60);
+    const days = Math.floor(hours / 24);
+    document.getElementById("profileTimeSpent").textContent = 
+      `⏱️ Time on AuraBaby: ${days} days, ${hours % 24} hours, ${mins % 60} minutes, ${secs % 60} seconds`;
   });
   
   if (user === username) {
     document.getElementById("profileFriendSection").style.display = "none";
+    document.getElementById("profilePrivateChat").style.display = "none";
+    document.getElementById("profileStreakSection").style.display = "none";
   } else {
     document.getElementById("profileFriendSection").style.display = "block";
+    document.getElementById("profilePrivateChat").style.display = "block";
+    
     db.collection("friends").doc(username).get().then(doc => {
       const friends = doc.data() || {};
       document.getElementById("profileAddFriend").textContent = 
         friends[user] ? "✓ Friends" : "ADD FRIEND";
+    });
+    
+    // Check for private chat streak
+    const users = [username, user].sort();
+    const chatId = users.join('_');
+    db.collection('streaks').doc(chatId).get().then(streakDoc => {
+      if (streakDoc.exists) {
+        const streak = streakDoc.data().streak || 0;
+        if (streak > 0) {
+          document.getElementById('profileStreakSection').style.display = 'block';
+          document.getElementById('profileStreak').textContent = `🔥 ${streak} day${streak !== 1 ? 's' : ''}`;
+        } else {
+          document.getElementById('profileStreakSection').style.display = 'none';
+        }
+      } else {
+        document.getElementById('profileStreakSection').style.display = 'none';
+      }
     });
   }
   
@@ -1413,7 +1895,11 @@ let lastSent = 0;
 let cooldownInterval = null;
 
 function filterText(text) {
-  const badWords = [/fuck/gi, /shit/gi, /bitch/gi];
+  const badWords = [
+    /f+u+c+k+/gi, /s+h+i+t+/gi, /b+i+t+c+h+/gi, /n+i+g+g+a+/gi, /n+i+g+g+e+r+/gi,
+    /p+e+n+i+s+/gi, /d+i+c+k+/gi, /c+u+n+t+/gi, /a+s+s+h+o+l+e+/gi, /p+u+s+s+y+/gi,
+    /f+a+g+/gi, /r+e+t+a+r+d+/gi, /w+h+o+r+e+/gi
+  ];
   let clean = text;
   badWords.forEach(rx => { clean = clean.replace(rx, "***"); });
   return clean;
@@ -1445,7 +1931,6 @@ function startCooldown() {
 async function sendMessage() {
   const now = Date.now();
   
-  // Cooldown check
   if (now - lastSent < 5000) {
     const remaining = Math.ceil((5000 - (now - lastSent)) / 1000);
     alert(`Please wait ${remaining} seconds`);
@@ -1466,7 +1951,6 @@ async function sendMessage() {
       return;
     }
     
-    // Check if user can participate
     const userCountDoc = await db.collection('countingUsers').doc(username).get();
     if (userCountDoc.exists) {
       const data = userCountDoc.data();
@@ -1478,7 +1962,6 @@ async function sendMessage() {
       }
     }
     
-    // Get current count
     const countDoc = await db.collection('countingState').doc('current').get();
     const currentCount = countDoc.exists ? countDoc.data().number : 0;
     
@@ -1487,9 +1970,13 @@ async function sendMessage() {
       return;
     }
     
-    // Update count and user timestamp
     await db.collection('countingState').doc('current').set({number: num, user: username, timestamp: Date.now()});
     await db.collection('countingUsers').doc(username).set({lastCount: Date.now()});
+  }
+  
+  // Update streak for private chats
+  if (currentRoomType === 'private') {
+    await updateStreak(currentRoom);
   }
   
   lastSent = now;
@@ -1499,6 +1986,8 @@ async function sendMessage() {
     ? db.collection("groupChats").doc(currentRoom).collection("messages")
     : currentRoomType === 'counting'
     ? db.collection("rooms").doc("Counting").collection("messages")
+    : currentRoomType === 'private'
+    ? db.collection("privateChats").doc(currentRoom).collection("messages")
     : db.collection("rooms").doc(currentRoom).collection("messages");
 
   collection.add({
@@ -1514,14 +2003,21 @@ async function sendMessage() {
 let currentRoom = "General 1";
 let currentRoomType = "public";
 let unsub = null;
+let lastMessageCount = {};
 
 function loadRoom(room, type = 'public') {
   if (unsub) unsub();
   currentRoom = room;
   currentRoomType = type;
   
+  // Clear unread count
+  unreadCounts[room] = 0;
+  updateNotifications();
+  
   const collection = type === 'group'
     ? db.collection("groupChats").doc(room).collection("messages")
+    : type === 'private'
+    ? db.collection("privateChats").doc(room).collection("messages")
     : db.collection("rooms").doc(room).collection("messages");
   
   document.getElementById("messages").innerHTML = "";
@@ -1530,7 +2026,7 @@ function loadRoom(room, type = 'public') {
   if (type === 'group') {
     db.collection("groupChats").doc(room).get().then(doc => {
       const data = doc.data();
-      document.getElementById("roomName").innerHTML = `💬 ${data.name} <span>Members: ${data.members.length}</span>`;
+      document.getElementById("roomName").innerHTML = `💬 ${data.name} <span class="online-btn" onclick="openOnlineUsers()">Members: ${data.members.length}</span>`;
     });
   } else if (type === 'counting') {
     db.collection('countingState').doc('current').get().then(doc => {
@@ -1538,16 +2034,22 @@ function loadRoom(room, type = 'public') {
       document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
     });
     
-    // Update count display in real-time
     db.collection('countingState').doc('current').onSnapshot(doc => {
       if (doc.exists && currentRoomType === 'counting') {
         const count = doc.data().number;
         document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
       }
     });
+  } else if (type === 'private') {
+    const users = room.split('_');
+    const otherUser = users.find(u => u !== username);
+    document.getElementById("roomName").innerHTML = `💬 ${otherUser} <span class="online-btn" onclick="openOnlineUsers()">Private Chat</span>`;
   } else {
-    document.getElementById("roomName").innerHTML = `🌌 ${room} <span>Online: <span id="onlineCount">0</span></span>`;
+    document.getElementById("roomName").innerHTML = `🌌 ${room} <span class="online-btn" onclick="openOnlineUsers()">Online: <span id="onlineCount">0</span></span>`;
   }
+  
+  // Watch typing
+  watchTyping(room, type);
   
   unsub = collection.orderBy("time").onSnapshot(snap => {
     document.getElementById("messages").innerHTML = "";
@@ -1556,14 +2058,12 @@ function loadRoom(room, type = 'public') {
       const div = document.createElement("div");
       div.className = "message";
       
-      // Avatar
       const avatar = document.createElement("div");
       avatar.className = "message-avatar";
       avatar.textContent = m.user[0].toUpperCase();
       avatar.onclick = () => openUserProfile(m.user);
       div.appendChild(avatar);
       
-      // Message content
       const content = document.createElement("div");
       content.className = "message-content";
       
@@ -1606,6 +2106,22 @@ function loadRoom(room, type = 'public') {
   
   closeFriendsPanel();
 }
+
+// Listen for new messages in all rooms for notifications
+db.collection("rooms").get().then(snapshot => {
+  snapshot.forEach(roomDoc => {
+    db.collection("rooms").doc(roomDoc.id).collection("messages").onSnapshot(snap => {
+      if (currentRoom !== roomDoc.id || currentRoomType !== 'public') {
+        const count = snap.size - (lastMessageCount[roomDoc.id] || 0);
+        if (count > 0 && lastMessageCount[roomDoc.id] !== undefined) {
+          unreadCounts[roomDoc.id] = (unreadCounts[roomDoc.id] || 0) + count;
+          updateNotifications();
+        }
+        lastMessageCount[roomDoc.id] = snap.size;
+      }
+    });
+  });
+});
 
 loadRoom(currentRoom);
 
