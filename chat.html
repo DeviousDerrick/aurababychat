@@ -42,6 +42,39 @@ body::before {
   50% { opacity: 0.8; transform: scale(1.1); }
 }
 
+/* Notification Toast */
+.notification {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  background: linear-gradient(135deg, rgba(255, 65, 108, 0.95), rgba(255, 75, 43, 0.95));
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 24px rgba(255, 65, 108, 0.6);
+  z-index: 10000;
+  animation: slideIn 0.3s ease;
+  max-width: 400px;
+  word-wrap: break-word;
+}
+
+.notification.success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.6);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(400px); opacity: 0; }
+}
+
 .topbar { 
   height: 80px; 
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
@@ -274,6 +307,25 @@ body::before {
   gap: 12px;
 }
 
+.message.hidden-msg {
+  filter: blur(8px);
+  cursor: pointer;
+  position: relative;
+}
+
+.message.hidden-msg::after {
+  content: 'Click to reveal';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: #ff416c;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  filter: blur(0);
+}
+
 .message:hover {
   transform: translateX(4px);
   box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
@@ -413,11 +465,10 @@ body::before {
 }
 
 /* Buttons */
-.friends-btn, .settings-btn, .leaderboard-btn {
+.top-btn {
   position: fixed;
   top: 90px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
   border: none;
   border-radius: 12px;
   color: white;
@@ -427,7 +478,6 @@ body::before {
   letter-spacing: 1px;
   cursor: pointer;
   z-index: 100;
-  box-shadow: 0 8px 20px rgba(255, 65, 108, 0.6);
   transition: all 0.3s ease;
 }
 
@@ -446,8 +496,18 @@ body::before {
   background: linear-gradient(135deg, #f59e0b, #d97706);
   box-shadow: 0 8px 20px rgba(245, 158, 11, 0.6);
 }
+.admin-btn {
+  right: 560px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  box-shadow: 0 8px 20px rgba(255, 65, 108, 0.6);
+}
+.banned-btn {
+  right: 720px;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.6);
+}
 
-.friends-btn:hover, .settings-btn:hover, .leaderboard-btn:hover {
+.top-btn:hover {
   transform: translateY(-2px);
 }
 
@@ -725,15 +785,138 @@ body::before {
 .leaderboard-rank.gold { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; }
 .leaderboard-rank.silver { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #000; }
 .leaderboard-rank.bronze { background: linear-gradient(135deg, #cd7f32, #e8a87c); color: #000; }
+
+.login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a0b2e 50%, #160b28 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.login-box {
+  background: linear-gradient(135deg, rgba(20, 15, 50, 0.95), rgba(30, 20, 60, 0.95));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(138, 43, 226, 0.6);
+  border-radius: 20px;
+  padding: 40px;
+  width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(138, 43, 226, 0.4);
+}
+
+.login-box h1 {
+  margin: 0 0 30px 0;
+  font-size: 32px;
+  letter-spacing: 2px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 16px 20px;
+  margin-bottom: 15px;
+  background: rgba(20, 15, 40, 0.6);
+  border: 2px solid rgba(138, 43, 226, 0.4);
+  border-radius: 12px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.login-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.login-box button {
+  width: 100%;
+  padding: 16px 20px;
+  margin-top: 10px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+}
+
+.login-box button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(138, 43, 226, 0.6);
+}
+
+.login-toggle {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.login-toggle:hover {
+  color: white;
+}
 </style>
 </head>
 <body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h1>✨ AURABABY CHAT ✨</h1>
+    <div id="loginForm">
+      <input type="text" id="loginUsername" placeholder="Username" maxlength="20">
+      <input type="password" id="loginCode" placeholder="6-Digit Code" maxlength="6">
+      <button onclick="login()">LOGIN</button>
+      <div class="login-toggle" onclick="toggleSignup()">Don't have an account? Sign up</div>
+    </div>
+    <div id="signupForm" style="display:none;">
+      <input type="text" id="signupUsername" placeholder="Choose Username" maxlength="20">
+      <input type="password" id="signupCode" placeholder="Create 6-Digit Code" maxlength="6">
+      <input type="password" id="signupCodeConfirm" placeholder="Confirm Code" maxlength="6">
+      <button onclick="signup()">SIGN UP</button>
+      <div class="login-toggle" onclick="toggleSignup()">Already have an account? Login</div>
+    </div>
+  </div>
+</div>
+
 <div class="topbar">✨ AURABABY CHAT ✨</div>
 
 <!-- Buttons -->
-<button class="friends-btn" onclick="openFriendsPanel()">👥 FRIENDS</button>
-<button class="settings-btn" onclick="openSettings()">⚙️ SETTINGS</button>
-<button class="leaderboard-btn" onclick="openLeaderboard()">🏆 LEADERBOARD</button>
+<button class="top-btn friends-btn" onclick="openFriendsPanel()">👥 FRIENDS</button>
+<button class="top-btn settings-btn" onclick="openSettings()">⚙️ SETTINGS</button>
+<button class="top-btn leaderboard-btn" onclick="openLeaderboard()">🏆 LEADERBOARD</button>
+<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN</button>
+<button class="top-btn banned-btn" onclick="openBannedServer()">🚫 BANNED</button>
+
+<!-- Banned Server Panel -->
+<div id="bannedServerOverlay" class="modal-overlay" onclick="closeBannedServer()"></div>
+<div id="bannedServerPanel" class="modal">
+  <button class="close-modal" onclick="closeBannedServer()">×</button>
+  <h2>🚫 BANNED USERS SERVER</h2>
+  <div class="modal-section">
+    <h3>Currently Banned Users</h3>
+    <div id="bannedServerList" class="user-list">Loading...</div>
+  </div>
+</div>
 
 <!-- Leaderboard Panel -->
 <div id="leaderboardOverlay" class="modal-overlay" onclick="closeLeaderboard()"></div>
@@ -777,6 +960,9 @@ body::before {
     </label>
     <label style="display:block; margin-bottom:15px;">
       <input type="checkbox" id="compactMode"> Compact Message Mode
+    </label>
+    <label style="display:block; margin-bottom:15px;">
+      <input type="checkbox" id="messageProtection"> Enable Message Protection (Hide inappropriate messages)
     </label>
   </div>
 
@@ -921,7 +1107,7 @@ body::before {
   </div>
 </div>
 
-<div class="container">
+<div class="container" id="mainApp" style="display:none;">
   <div class="sidebar">
     <div class="sidebar-section">
       <div class="section-title"><span class="admin-trigger" onclick="adminUnlock()">P</span>UBLIC ROOMS</div>
@@ -983,33 +1169,174 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Username
-let username = localStorage.getItem("name") || prompt("Enter your username:");
-localStorage.setItem("name", username);
+let username = null;
 let isAdmin = localStorage.getItem("isAdmin") === "true";
+
+// NOTIFICATION SYSTEM
+function showNotification(message, type = 'error') {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.textContent = message;
+  document.body.appendChild(notif);
+  
+  setTimeout(() => {
+    notif.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => notif.remove(), 300);
+  }, 3000);
+}
+
+// LOGIN/SIGNUP SYSTEM
+function toggleSignup() {
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+  if (loginForm.style.display === 'none') {
+    loginForm.style.display = 'block';
+    signupForm.style.display = 'none';
+  } else {
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'block';
+  }
+}
+
+async function signup() {
+  const user = document.getElementById('signupUsername').value.trim();
+  const code = document.getElementById('signupCode').value.trim();
+  const confirm = document.getElementById('signupCodeConfirm').value.trim();
+  
+  if (!user || !code || !confirm) {
+    showNotification('Please fill all fields');
+    return;
+  }
+  
+  if (user.length < 3) {
+    showNotification('Username must be at least 3 characters');
+    return;
+  }
+  
+  if (!/^\d{6}$/.test(code)) {
+    showNotification('Code must be exactly 6 digits');
+    return;
+  }
+  
+  if (code !== confirm) {
+    showNotification('Codes do not match');
+    return;
+  }
+  
+  // Check if username exists
+  const userDoc = await db.collection('users').doc(user).get();
+  if (userDoc.exists) {
+    showNotification('Username already taken');
+    return;
+  }
+  
+  // Create account
+  await db.collection('users').doc(user).set({
+    code: code,
+    createdAt: Date.now(),
+    joinTime: Date.now()
+  });
+  
+  showNotification('Account created! Please login', 'success');
+  toggleSignup();
+}
+
+async function login() {
+  const user = document.getElementById('loginUsername').value.trim();
+  const code = document.getElementById('loginCode').value.trim();
+  
+  if (!user || !code) {
+    showNotification('Please fill all fields');
+    return;
+  }
+  
+  const userDoc = await db.collection('users').doc(user).get();
+  if (!userDoc.exists) {
+    showNotification('Username not found');
+    return;
+  }
+  
+  const userData = userDoc.data();
+  if (userData.code !== code) {
+    showNotification('Incorrect code');
+    return;
+  }
+  
+  // Login successful
+  username = user;
+  localStorage.setItem('username', username);
+  localStorage.setItem('userCode', code);
+  
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+  
+  initializeApp();
+}
+
+// Auto-login if credentials exist
+window.addEventListener('load', async () => {
+  const savedUser = localStorage.getItem('username');
+  const savedCode = localStorage.getItem('userCode');
+  
+  if (savedUser && savedCode) {
+    const userDoc = await db.collection('users').doc(savedUser).get();
+    if (userDoc.exists && userDoc.data().code === savedCode) {
+      username = savedUser;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+      initializeApp();
+    }
+  }
+});
+
+function initializeApp() {
+  // Initialize profile
+  document.getElementById("myUsername").textContent = username;
+  document.getElementById("myAvatar").textContent = username[0].toUpperCase();
+
+  // Get join time from user doc
+  db.collection("users").doc(username).get().then(doc => {
+    const joinTime = doc.data().joinTime || Date.now();
+    localStorage.setItem("joinTime", joinTime);
+    updateMyTime();
+  });
+
+  db.collection("profiles").doc(username).set({
+    avatar: username[0].toUpperCase(),
+    bio: "AuraBaby user",
+    createdAt: Date.now()
+  }, {merge: true});
+
+  // Show admin button if admin
+  if (isAdmin) {
+    document.getElementById('adminBtn').style.display = 'block';
+  }
+
+  // Start presence, load chats, etc
+  startPresence();
+  loadPrivateChats();
+  loadRoom(currentRoom);
+  checkBan();
+}
 
 // Admin unlock function
 function adminUnlock() {
-  if (isAdmin) return alert("You're already admin!");
+  if (isAdmin) {
+    showNotification("You're already admin!", 'success');
+    return;
+  }
   const pass = prompt("Enter admin password:");
   if (pass === "chickenfish67demonlordohio") {
     isAdmin = true;
     localStorage.setItem("isAdmin", "true");
-    alert("Admin unlocked!");
-    location.reload();
+    document.getElementById('adminBtn').style.display = 'block';
+    showNotification("Admin unlocked!", 'success');
   } else if (pass) {
-    alert("Wrong password!");
+    showNotification("Wrong password!");
   }
 }
 
-// Initialize profile
-document.getElementById("myUsername").textContent = username;
-document.getElementById("myAvatar").textContent = username[0].toUpperCase();
-
 // Time tracking
-const joinTime = parseInt(localStorage.getItem("joinTime")) || Date.now();
-localStorage.setItem("joinTime", joinTime);
-
 function formatTime(ms) {
   const secs = Math.floor(ms / 1000);
   const mins = Math.floor(secs / 60);
@@ -1019,10 +1346,10 @@ function formatTime(ms) {
 }
 
 function updateMyTime() {
+  const joinTime = parseInt(localStorage.getItem("joinTime")) || Date.now();
   const elapsed = Date.now() - joinTime;
   document.getElementById("myTime").textContent = `⏱️ ${formatTime(elapsed)}`;
   
-  // Update in Firebase
   db.collection("userTimes").doc(username).set({
     totalTime: elapsed,
     lastUpdate: Date.now()
@@ -1030,14 +1357,45 @@ function updateMyTime() {
 }
 
 setInterval(updateMyTime, 1000);
-updateMyTime();
 
-db.collection("profiles").doc(username).set({
-  avatar: username[0].toUpperCase(),
-  bio: "AuraBaby user",
-  createdAt: Date.now(),
-  joinTime: joinTime
-}, {merge: true});
+// BANNED SERVER
+function openBannedServer() {
+  document.getElementById('bannedServerPanel').style.display = 'block';
+  document.getElementById('bannedServerOverlay').style.display = 'block';
+  loadBannedServer();
+}
+
+function closeBannedServer() {
+  document.getElementById('bannedServerPanel').style.display = 'none';
+  document.getElementById('bannedServerOverlay').style.display = 'none';
+}
+
+function loadBannedServer() {
+  db.collection("bans").onSnapshot(snapshot => {
+    const list = document.getElementById("bannedServerList");
+    list.innerHTML = "";
+    const now = Date.now();
+    let hasBanned = false;
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.banUntil > now) {
+        hasBanned = true;
+        const timeLeft = data.banUntil - now;
+        const hours = Math.floor(timeLeft / 3600000);
+        const mins = Math.floor((timeLeft % 3600000) / 60000);
+        const secs = Math.floor((timeLeft % 60000) / 1000);
+        
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `<span><strong>${doc.id}</strong> - ${hours}h ${mins}m ${secs}s left</span>`;
+        list.appendChild(div);
+      }
+    });
+    
+    if (!hasBanned) list.innerHTML = "No users currently banned";
+  });
+}
 
 // LEADERBOARD
 function openLeaderboard() {
@@ -1129,7 +1487,6 @@ const unreadCounts = {};
 function updateNotifications() {
   document.querySelectorAll('.room').forEach(room => {
     const roomName = room.dataset.room;
-    const type = room.dataset.type;
     const isActive = room.classList.contains('active');
     
     if (!isActive && unreadCounts[roomName] > 0) {
@@ -1213,7 +1570,6 @@ async function openPrivateChat() {
   const users = [username, currentProfileUser].sort();
   const chatId = users.join('_');
   
-  // Create or get private chat
   await db.collection('privateChats').doc(chatId).set({
     users: users,
     createdAt: Date.now(),
@@ -1249,7 +1605,6 @@ function loadPrivateChats() {
       div.dataset.type = 'private';
       div.textContent = `💬 ${otherUser}`;
       
-      // Check for streak
       db.collection('streaks').doc(doc.id).get().then(streakDoc => {
         if (streakDoc.exists) {
           const streak = streakDoc.data().streak || 0;
@@ -1275,8 +1630,6 @@ function loadPrivateChats() {
   });
 }
 
-loadPrivateChats();
-
 // STREAK SYSTEM
 async function updateStreak(chatId) {
   const streakDoc = await db.collection('streaks').doc(chatId).get();
@@ -1289,23 +1642,19 @@ async function updateStreak(chatId) {
     const timeDiff = now - lastChat;
     
     if (timeDiff < oneDayMs) {
-      // Same day, don't update
       return;
     } else if (timeDiff < oneDayMs * 2) {
-      // Next day, increase streak
       await db.collection('streaks').doc(chatId).update({
         streak: (data.streak || 0) + 1,
         lastChat: now
       });
     } else {
-      // Streak broken, reset
       await db.collection('streaks').doc(chatId).set({
         streak: 1,
         lastChat: now
       });
     }
   } else {
-    // First chat
     await db.collection('streaks').doc(chatId).set({
       streak: 1,
       lastChat: now
@@ -1358,7 +1707,7 @@ function applyTheme(theme, idx, save = true) {
   
   if (save) {
     localStorage.setItem('theme', idx);
-    alert(`Theme "${theme.name}" applied!`);
+    showNotification(`Theme "${theme.name}" applied!`, 'success');
   }
 }
 
@@ -1372,6 +1721,7 @@ function openSettings() {
   document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') === 'true';
   document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
   document.getElementById('compactMode').checked = localStorage.getItem('compactMode') === 'true';
+  document.getElementById('messageProtection').checked = localStorage.getItem('messageProtection') === 'true';
 }
 
 function closeSettings() {
@@ -1381,14 +1731,15 @@ function closeSettings() {
   localStorage.setItem('showTimestamps', document.getElementById('showTimestamps').checked);
   localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
   localStorage.setItem('compactMode', document.getElementById('compactMode').checked);
+  localStorage.setItem('messageProtection', document.getElementById('messageProtection').checked);
 }
 
 function updateBio() {
   const bio = document.getElementById('bioInput').value.trim();
-  if (!bio) return alert('Enter a bio');
+  if (!bio) return showNotification('Enter a bio');
   
   db.collection('profiles').doc(username).update({bio: bio}).then(() => {
-    alert('Bio updated!');
+    showNotification('Bio updated!', 'success');
     document.getElementById('bioInput').value = '';
   });
 }
@@ -1422,7 +1773,7 @@ tagColors.forEach((color, idx) => {
 
 // ADMIN FUNCTIONS
 function openAdminPanel() {
-  if (!isAdmin) return alert("You're not an admin!");
+  if (!isAdmin) return showNotification("You're not an admin!");
   document.getElementById("adminPanel").style.display = "block";
   document.getElementById("adminOverlay").style.display = "block";
   loadBannedUsers();
@@ -1437,14 +1788,14 @@ function closeAdminPanel() {
 function banUser() {
   const targetUser = document.getElementById("banUsername").value.trim();
   const duration = parseInt(document.getElementById("banDuration").value);
-  if (!targetUser) return alert("Enter a username");
+  if (!targetUser) return showNotification("Enter a username");
   
   db.collection("bans").doc(targetUser).set({
     bannedBy: username,
     banUntil: Date.now() + duration,
     timestamp: Date.now()
   }).then(() => {
-    alert(`${targetUser} banned!`);
+    showNotification(`${targetUser} banned!`, 'success');
     document.getElementById("banUsername").value = "";
     loadBannedUsers();
   });
@@ -1453,14 +1804,14 @@ function banUser() {
 function changeUsername() {
   const targetUser = document.getElementById("targetUsername").value.trim();
   const newTag = document.getElementById("newTag").value.trim();
-  if (!targetUser || !newTag) return alert("Enter both fields");
+  if (!targetUser || !newTag) return showNotification("Enter both fields");
   
   db.collection("usernameTags").doc(targetUser).set({
     displayName: newTag,
     changedBy: username,
     timestamp: Date.now()
   }).then(() => {
-    alert(`Tag changed: ${targetUser} → ${newTag}`);
+    showNotification(`Tag changed: ${targetUser} → ${newTag}`, 'success');
     document.getElementById("targetUsername").value = "";
     document.getElementById("newTag").value = "";
   });
@@ -1469,7 +1820,7 @@ function changeUsername() {
 function assignSpecialTag() {
   const targetUser = document.getElementById("specialTagUser").value.trim();
   const tagText = document.getElementById("specialTagText").value.trim();
-  if (!targetUser || !tagText) return alert("Enter both fields");
+  if (!targetUser || !tagText) return showNotification("Enter both fields");
   
   db.collection("specialTags").doc(targetUser).set({
     tag: tagText,
@@ -1478,7 +1829,7 @@ function assignSpecialTag() {
     assignedBy: username,
     timestamp: Date.now()
   }).then(() => {
-    alert(`Special tag assigned to ${targetUser}!`);
+    showNotification(`Special tag assigned to ${targetUser}!`, 'success');
     document.getElementById("specialTagUser").value = "";
     document.getElementById("specialTagText").value = "";
   });
@@ -1649,8 +2000,8 @@ function loadFriendsForGroup() {
 
 function createGroupChat() {
   const groupName = document.getElementById("groupName").value.trim();
-  if (!groupName) return alert("Enter group name");
-  if (selectedFriends.length === 0) return alert("Select at least one friend");
+  if (!groupName) return showNotification("Enter group name");
+  if (selectedFriends.length === 0) return showNotification("Select at least one friend");
   
   const members = [username, ...selectedFriends];
   
@@ -1660,7 +2011,7 @@ function createGroupChat() {
     createdBy: username,
     createdAt: Date.now()
   }).then(() => {
-    alert(`Group "${groupName}" created!`);
+    showNotification(`Group "${groupName}" created!`, 'success');
     document.getElementById("groupName").value = "";
     selectedFriends = [];
     loadGroups();
@@ -1669,8 +2020,8 @@ function createGroupChat() {
 
 function sendFriendRequest() {
   const friendName = document.getElementById("addFriendUsername").value.trim();
-  if (!friendName) return alert("Enter username");
-  if (friendName === username) return alert("Cannot add yourself");
+  if (!friendName) return showNotification("Enter username");
+  if (friendName === username) return showNotification("Cannot add yourself");
   
   db.collection("friendRequests").add({
     from: username,
@@ -1678,7 +2029,7 @@ function sendFriendRequest() {
     timestamp: Date.now(),
     status: "pending"
   }).then(() => {
-    alert(`Friend request sent to ${friendName}!`);
+    showNotification(`Friend request sent to ${friendName}!`, 'success');
     document.getElementById("addFriendUsername").value = "";
   });
 }
@@ -1717,7 +2068,7 @@ function acceptFriendRequest(requestId, friendName) {
   db.collection("friends").doc(username).set({[friendName]: true}, {merge: true});
   db.collection("friends").doc(friendName).set({[username]: true}, {merge: true});
   db.collection("friendRequests").doc(requestId).update({status: "accepted"});
-  alert(`You are now friends with ${friendName}!`);
+  showNotification(`You are now friends with ${friendName}!`, 'success');
 }
 
 function rejectFriendRequest(requestId) {
@@ -1769,8 +2120,10 @@ function openUserProfile(user) {
   db.collection("profiles").doc(user).get().then(doc => {
     const data = doc.data() || {};
     document.getElementById("profileBio").textContent = data.bio || "AuraBaby user";
-    
-    const userJoinTime = data.joinTime || Date.now();
+  });
+  
+  db.collection("users").doc(user).get().then(doc => {
+    const userJoinTime = doc.data().joinTime || Date.now();
     const elapsed = Date.now() - userJoinTime;
     const secs = Math.floor(elapsed / 1000);
     const mins = Math.floor(secs / 60);
@@ -1794,7 +2147,6 @@ function openUserProfile(user) {
         friends[user] ? "✓ Friends" : "ADD FRIEND";
     });
     
-    // Check for private chat streak
     const users = [username, user].sort();
     const chatId = users.join('_');
     db.collection('streaks').doc(chatId).get().then(streakDoc => {
@@ -1870,7 +2222,9 @@ async function checkBan() {
     const banData = banDoc.data();
     if (banData.banUntil > Date.now()) {
       const timeLeft = Math.ceil((banData.banUntil - Date.now()) / 60000);
-      alert(`You are banned for ${timeLeft} more minutes`);
+      showNotification(`You are banned for ${timeLeft} more minutes`);
+      document.getElementById("msgInput").disabled = true;
+      document.getElementById("msgInput").placeholder = "You are banned";
       return true;
     } else {
       await db.collection("bans").doc(username).delete();
@@ -1895,14 +2249,31 @@ let lastSent = 0;
 let cooldownInterval = null;
 
 function filterText(text) {
+  // Remove all special characters to prevent bypassing
+  const cleanText = text.replace(/[^a-zA-Z0-9\s]/g, '').toLowerCase();
+  
   const badWords = [
-    /f+u+c+k+/gi, /s+h+i+t+/gi, /b+i+t+c+h+/gi, /n+i+g+g+a+/gi, /n+i+g+g+e+r+/gi,
-    /p+e+n+i+s+/gi, /d+i+c+k+/gi, /c+u+n+t+/gi, /a+s+s+h+o+l+e+/gi, /p+u+s+s+y+/gi,
-    /f+a+g+/gi, /r+e+t+a+r+d+/gi, /w+h+o+r+e+/gi
+    // Sexual content
+    /p+o+r+n+/gi, /t+i+t+s+/gi, /b+o+o+b+s+/gi, /a+s+s+/gi, /s+e+x+/gi, /p+e+n+i+s+/gi, 
+    /d+i+c+k+/gi, /c+o+c+k+/gi, /p+u+s+s+y+/gi, /v+a+g+i+n+a+/gi, /c+u+m+/gi, /h+o+r+n+y+/gi,
+    /n+u+d+e+/gi, /n+a+k+e+d+/gi, /r+a+p+e+/gi, /m+o+l+e+s+t+/gi, /p+e+d+o+/gi,
+    // Slurs and offensive
+    /f+u+c+k+/gi, /s+h+i+t+/gi, /b+i+t+c+h+/gi, /n+i+g+g+a+/gi, /n+i+g+g+e+r+/gi, /n+i+g+a+/gi,
+    /f+a+g+/gi, /r+e+t+a+r+d+/gi, /w+h+o+r+e+/gi, /s+l+u+t+/gi, /c+u+n+t+/gi,
+    /a+s+s+h+o+l+e+/gi, /b+a+s+t+a+r+d+/gi, /d+a+m+n+/gi
   ];
-  let clean = text;
-  badWords.forEach(rx => { clean = clean.replace(rx, "***"); });
-  return clean;
+  
+  let filtered = text;
+  let hasInappropriate = false;
+  
+  badWords.forEach(rx => {
+    if (rx.test(cleanText)) {
+      hasInappropriate = true;
+      filtered = filtered.replace(rx, "***");
+    }
+  });
+  
+  return {text: filtered, inappropriate: hasInappropriate};
 }
 
 function startCooldown() {
@@ -1933,7 +2304,7 @@ async function sendMessage() {
   
   if (now - lastSent < 5000) {
     const remaining = Math.ceil((5000 - (now - lastSent)) / 1000);
-    alert(`Please wait ${remaining} seconds`);
+    showNotification(`Please wait ${remaining} seconds`);
     return;
   }
   
@@ -1947,7 +2318,7 @@ async function sendMessage() {
   if (currentRoomType === 'counting') {
     const num = parseInt(input.value.trim());
     if (isNaN(num)) {
-      alert('Counting channel: numbers only!');
+      showNotification('Counting channel: numbers only!');
       return;
     }
     
@@ -1957,7 +2328,7 @@ async function sendMessage() {
       const hourAgo = Date.now() - 3600000;
       if (data.lastCount > hourAgo) {
         const timeLeft = Math.ceil((3600000 - (Date.now() - data.lastCount)) / 60000);
-        alert(`You must wait ${timeLeft} more minutes before counting again!`);
+        showNotification(`You must wait ${timeLeft} more minutes before counting again!`);
         return;
       }
     }
@@ -1966,13 +2337,16 @@ async function sendMessage() {
     const currentCount = countDoc.exists ? countDoc.data().number : 0;
     
     if (num !== currentCount + 1) {
-      alert(`Wrong number! Next number should be ${currentCount + 1}`);
+      showNotification(`Wrong number! Next number should be ${currentCount + 1}`);
       return;
     }
     
     await db.collection('countingState').doc('current').set({number: num, user: username, timestamp: Date.now()});
     await db.collection('countingUsers').doc(username).set({lastCount: Date.now()});
   }
+  
+  // Filter message
+  const filtered = filterText(input.value);
   
   // Update streak for private chats
   if (currentRoomType === 'private') {
@@ -1992,7 +2366,8 @@ async function sendMessage() {
 
   collection.add({
     user: username,
-    text: filterText(input.value),
+    text: filtered.text,
+    inappropriate: filtered.inappropriate,
     time: firebase.firestore.FieldValue.serverTimestamp()
   });
 
@@ -2048,15 +2423,25 @@ function loadRoom(room, type = 'public') {
     document.getElementById("roomName").innerHTML = `🌌 ${room} <span class="online-btn" onclick="openOnlineUsers()">Online: <span id="onlineCount">0</span></span>`;
   }
   
-  // Watch typing
   watchTyping(room, type);
   
   unsub = collection.orderBy("time").onSnapshot(snap => {
     document.getElementById("messages").innerHTML = "";
+    const messageProtection = localStorage.getItem('messageProtection') === 'true';
+    
     snap.forEach(doc => {
       const m = doc.data();
       const div = document.createElement("div");
       div.className = "message";
+      
+      // Apply message protection
+      if (messageProtection && m.inappropriate) {
+        div.classList.add('hidden-msg');
+        div.onclick = function() {
+          this.classList.remove('hidden-msg');
+          this.onclick = null;
+        };
+      }
       
       const avatar = document.createElement("div");
       avatar.className = "message-avatar";
@@ -2107,7 +2492,7 @@ function loadRoom(room, type = 'public') {
   closeFriendsPanel();
 }
 
-// Listen for new messages in all rooms for notifications
+// Listen for new messages
 db.collection("rooms").get().then(snapshot => {
   snapshot.forEach(roomDoc => {
     db.collection("rooms").doc(roomDoc.id).collection("messages").onSnapshot(snap => {
@@ -2123,8 +2508,6 @@ db.collection("rooms").get().then(snapshot => {
   });
 });
 
-loadRoom(currentRoom);
-
 document.querySelectorAll(".room").forEach(r => {
   r.onclick = function() {
     document.querySelectorAll(".room").forEach(x => x.classList.remove("active"));
@@ -2134,31 +2517,25 @@ document.querySelectorAll(".room").forEach(r => {
 });
 
 // Online presence
-setInterval(() => {
-  db.collection("presence").doc(username).set({lastSeen: Date.now()});
-}, 3000);
+function startPresence() {
+  setInterval(() => {
+    db.collection("presence").doc(username).set({lastSeen: Date.now()});
+  }, 3000);
 
-db.collection("presence").onSnapshot(snap => {
-  let online = 0;
-  const now = Date.now();
-  snap.forEach(doc => {
-    if (now - doc.data().lastSeen < 7000) online++;
+  db.collection("presence").onSnapshot(snap => {
+    let online = 0;
+    const now = Date.now();
+    snap.forEach(doc => {
+      if (now - doc.data().lastSeen < 7000) online++;
+    });
+    const countEl = document.getElementById("onlineCount");
+    if (countEl) countEl.textContent = online;
   });
-  const countEl = document.getElementById("onlineCount");
-  if (countEl) countEl.textContent = online;
-});
+}
 
 // Enter to send
 document.getElementById("msgInput").addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage();
-});
-
-// Check ban on load
-checkBan().then(isBanned => {
-  if (isBanned) {
-    document.getElementById("msgInput").disabled = true;
-    document.getElementById("msgInput").placeholder = "You are banned";
-  }
 });
 </script>
 </body>
