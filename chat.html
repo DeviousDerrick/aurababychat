@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>AuraBaby Chat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body { margin:0; background:#0f1220; color:#fff; font-family:Arial; }
 .topbar { height:60px; background:#6a5cff; display:flex; align-items:center; padding:0 20px; font-weight:bold; }
@@ -13,26 +12,23 @@ body { margin:0; background:#0f1220; color:#fff; font-family:Arial; }
 .room { padding:10px; cursor:pointer; border-radius:6px; }
 .room.active { background:#6a5cff; }
 .chat { flex:1; display:flex; flex-direction:column; }
-.chat-header { padding:10px; background:#13163a; }
+.chat-header { padding:10px; background:#13163a; display:flex; justify-content:space-between; align-items:center; }
 .messages { flex:1; padding:10px; overflow-y:auto; }
 .message { margin-bottom:6px; }
 .input { display:flex; padding:10px; background:#13163a; }
 .input input { flex:1; padding:8px; }
 </style>
 </head>
-
 <body>
 <div class="topbar">AURABABY CHAT</div>
-
 <div class="container">
   <div class="sidebar">
     <div class="room active" data-room="General 1">General 1</div>
     <div class="room" data-room="General 2">General 2</div>
     <div class="room" data-room="General 3">General 3</div>
   </div>
-
   <div class="chat">
-    <div class="chat-header" id="roomName">General 1</div>
+    <div class="chat-header" id="roomName">General 1 <span style="font-weight:normal; font-size:14px; margin-left:20px;">Online Users: <span id="onlineCount">0</span></span></div>
     <div class="messages" id="messages"></div>
     <div class="input">
       <input id="msgInput" placeholder="Type message..." />
@@ -41,10 +37,9 @@ body { margin:0; background:#0f1220; color:#fff; font-family:Arial; }
   </div>
 </div>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyCYMK_j1QYx-OUdfXAv78PYMMy61C_rTHU",
@@ -54,63 +49,91 @@ const firebaseConfig = {
   messagingSenderId: "302163119026",
   appId: "1:302163119026:web:3f9b15be86d318aac572ab"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let username = localStorage.getItem("name") || prompt("Username:");
+// Username + Admin Login
+let username = localStorage.getItem("name") || prompt("Enter your username:");
 localStorage.setItem("name", username);
+let isAdmin = false;
+const adminPass = prompt("Enter admin password (leave blank if not admin):");
+if (adminPass === "chickenfish67demonlordohio") { isAdmin = true; alert("Admin mode enabled"); }
 
-let currentRoom = "General 1";
-let unsub = null;
+// Profile system
+db.collection("profiles").doc(username).set({avatar:"🙂", bio:"AuraBaby user"},{merge:true});
 
-function loadRoom(room) {
-  if (unsub) unsub();
-  document.getElementById("messages").innerHTML = "";
+// Friend system (basic)
+function addFriend(friendName){ db.collection("friends").doc(username).set({[friendName]:true},{merge:true}); }
+db.collection("friends").doc(username).onSnapshot(doc=>{ console.log("Friends:", doc.data()); });
 
-  unsub = db.collection("rooms")
-    .doc(room)
-    .collection("messages")
-    .orderBy("time")
-    .onSnapshot(snap => {
-      document.getElementById("messages").innerHTML = "";
-      snap.forEach(doc => {
-        const m = doc.data();
-        const div = document.createElement("div");
-        div.className = "message";
-        div.textContent = m.user + ": " + m.text;
-        document.getElementById("messages").appendChild(div);
-      });
-    });
-}
-
-loadRoom(currentRoom);
-
-function sendMessage() {
-  const input = document.getElementById("msgInput");
-  if (!input.value) return;
-
-  db.collection("rooms")
-    .doc(currentRoom)
-    .collection("messages")
-    .add({
-      user: username,
-      text: input.value,
-      time: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-  input.value = "";
-}
-
-document.querySelectorAll(".room").forEach(r => {
-  r.onclick = () => {
-    document.querySelectorAll(".room").forEach(x => x.classList.remove("active"));
-    r.classList.add("active");
-    currentRoom = r.dataset.room;
-    document.getElementById("roomName").textContent = currentRoom;
-    loadRoom(currentRoom);
-  };
+// Online users tracking
+setInterval(()=>{
+  db.collection("presence").doc(username).set({lastSeen:Date.now()});
+},3000);
+db.collection("presence").onSnapshot(snap=>{
+  let online=0;
+  const now=Date.now();
+  snap.forEach(doc=>{ if(now-doc.data().lastSeen<7000) online++; });
+  document.getElementById("onlineCount").textContent = online;
 });
+
+// Cooldown + smart filter
+let lastSent=0;
+function filterText(text){
+  const badWords=[/fuck/gi,/shit/gi,/bitch/gi];
+  let clean=text;
+  badWords.forEach(rx=>{ clean=clean.replace(rx,"***"); });
+  return clean;
+}
+function sendMessage(){
+  const now=Date.now();
+  if(now-lastSent<5000){ alert("Please wait 5 seconds before sending another message."); return; }
+  lastSent=now;
+
+  const input=document.getElementById("msgInput");
+  if(!input.value) return;
+
+  db.collection("rooms").doc(currentRoom).collection("messages").add({
+    user: username,
+    text: filterText(input.value),
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  input.value="";
+}
+
+// Room switching and message display
+let currentRoom="General 1";
+let unsub=null;
+function loadRoom(room){
+  if(unsub) unsub();
+  document.getElementById("messages").innerHTML="";
+  unsub=db.collection("rooms").doc(room).collection("messages").orderBy("time").onSnapshot(snap=>{
+    document.getElementById("messages").innerHTML="";
+    snap.forEach(doc=>{
+      const m=doc.data();
+      const div=document.createElement("div");
+      div.className="message";
+      div.textContent=m.user+": "+m.text;
+      if(isAdmin){
+        const delBtn=document.createElement("button");
+        delBtn.textContent="Delete";
+        delBtn.style.marginLeft="10px";
+        delBtn.onclick=()=>{ db.collection("rooms").doc(currentRoom).collection("messages").doc(doc.id).delete(); };
+        div.appendChild(delBtn);
+      }
+      document.getElementById("messages").appendChild(div);
+    });
+  });
+}
+loadRoom(currentRoom);
+document.querySelectorAll(".room").forEach(r=>{ r.onclick=()=>{
+  document.querySelectorAll(".room").forEach(x=>x.classList.remove("active"));
+  r.classList.add("active");
+  currentRoom=r.dataset.room;
+  document.getElementById("roomName").textContent=currentRoom+" Online Users: "+document.getElementById("onlineCount").textContent;
+  loadRoom(currentRoom);
+};});
 </script>
 </body>
 </html>
