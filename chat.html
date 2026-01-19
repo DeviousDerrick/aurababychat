@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,10 +237,213 @@ body::before {
 .input button:active {
   transform: translateY(0);
 }
+
+/* Admin Panel Styles */
+.admin-btn {
+  position: fixed;
+  top: 90px;
+  right: 30px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 8px 20px rgba(255, 65, 108, 0.6);
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(255, 65, 108, 0.8);
+}
+
+.admin-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  max-height: 80vh;
+  background: linear-gradient(135deg, rgba(20, 15, 50, 0.95), rgba(30, 20, 60, 0.95));
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(138, 43, 226, 0.6);
+  border-radius: 20px;
+  padding: 30px;
+  z-index: 1000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(138, 43, 226, 0.4);
+  overflow-y: auto;
+}
+
+.admin-panel h2 {
+  margin: 0 0 20px 0;
+  font-size: 28px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+  background: linear-gradient(135deg, #667eea, #f093fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.admin-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 999;
+}
+
+.admin-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(40, 30, 80, 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.admin-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #f093fb;
+}
+
+.admin-section input,
+.admin-section select {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: rgba(20, 15, 40, 0.6);
+  border: 2px solid rgba(138, 43, 226, 0.4);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.admin-section input:focus,
+.admin-section select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+}
+
+.admin-section button {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(138, 43, 226, 0.4);
+}
+
+.admin-section button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6);
+}
+
+.close-admin {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 65, 108, 0.8);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: all 0.3s ease;
+}
+
+.close-admin:hover {
+  background: rgba(255, 65, 108, 1);
+  transform: rotate(90deg);
+}
+
+.user-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(10, 5, 30, 0.4);
+  border-radius: 8px;
+}
+
+.user-item {
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  background: rgba(40, 30, 80, 0.5);
+  border-radius: 6px;
+  font-size: 13px;
+  border-left: 3px solid #667eea;
+}
 </style>
 </head>
 <body>
 <div class="topbar">✨ AURABABY CHAT ✨</div>
+
+<!-- Admin Panel Button (only visible to admins) -->
+<button class="admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN PANEL</button>
+
+<!-- Admin Panel Modal -->
+<div id="adminPanelOverlay" class="admin-panel-overlay" style="display:none;" onclick="closeAdminPanel()"></div>
+<div id="adminPanel" class="admin-panel" style="display:none;">
+  <button class="close-admin" onclick="closeAdminPanel()">×</button>
+  <h2>👑 ADMIN CONTROL PANEL</h2>
+  
+  <div class="admin-section">
+    <h3>🚫 Ban User</h3>
+    <input type="text" id="banUsername" placeholder="Enter username to ban">
+    <select id="banDuration">
+      <option value="300000">5 minutes</option>
+      <option value="1800000">30 minutes</option>
+      <option value="3600000">1 hour</option>
+      <option value="86400000">24 hours</option>
+      <option value="604800000">7 days</option>
+      <option value="2592000000">30 days</option>
+      <option value="999999999999">Permanent</option>
+    </select>
+    <button onclick="banUser()">BAN USER</button>
+  </div>
+
+  <div class="admin-section">
+    <h3>✏️ Change Username Tag</h3>
+    <input type="text" id="targetUsername" placeholder="Enter username to modify">
+    <input type="text" id="newTag" placeholder="Enter new tag/username">
+    <button onclick="changeUsername()">CHANGE TAG</button>
+  </div>
+
+  <div class="admin-section">
+    <h3>📋 Banned Users</h3>
+    <div class="user-list" id="bannedList">Loading...</div>
+  </div>
+
+  <div class="admin-section">
+    <h3>👥 Online Users</h3>
+    <div class="user-list" id="onlineList">Loading...</div>
+  </div>
+</div>
+
 <div class="container">
   <div class="sidebar">
     <div class="room active" data-room="General 1">🌌 General 1</div>
@@ -278,10 +480,159 @@ let username = localStorage.getItem("name") || prompt("Enter your username:");
 localStorage.setItem("name", username);
 let isAdmin = false;
 const adminPass = prompt("Enter admin password (leave blank if not admin):");
-if (adminPass === "chickenfish67demonlordohio") { isAdmin = true; alert("Admin mode enabled"); }
+if (adminPass === "chickenfish67demonlordohio") { 
+  isAdmin = true; 
+  alert("Admin mode enabled"); 
+  document.getElementById("adminBtn").style.display = "block";
+}
+
+// Admin Panel Functions
+function openAdminPanel() {
+  document.getElementById("adminPanel").style.display = "block";
+  document.getElementById("adminPanelOverlay").style.display = "block";
+  loadBannedUsers();
+  loadOnlineUsers();
+}
+
+function closeAdminPanel() {
+  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById("adminPanelOverlay").style.display = "none";
+}
+
+function banUser() {
+  const targetUser = document.getElementById("banUsername").value.trim();
+  const duration = parseInt(document.getElementById("banDuration").value);
+  
+  if (!targetUser) {
+    alert("Please enter a username");
+    return;
+  }
+  
+  const banUntil = Date.now() + duration;
+  
+  db.collection("bans").doc(targetUser).set({
+    bannedBy: username,
+    banUntil: banUntil,
+    timestamp: Date.now()
+  }).then(() => {
+    alert(`User ${targetUser} has been banned!`);
+    document.getElementById("banUsername").value = "";
+    loadBannedUsers();
+  });
+}
+
+function changeUsername() {
+  const targetUser = document.getElementById("targetUsername").value.trim();
+  const newTag = document.getElementById("newTag").value.trim();
+  
+  if (!targetUser || !newTag) {
+    alert("Please enter both username and new tag");
+    return;
+  }
+  
+  db.collection("usernameTags").doc(targetUser).set({
+    displayName: newTag,
+    changedBy: username,
+    timestamp: Date.now()
+  }).then(() => {
+    alert(`Username tag changed: ${targetUser} → ${newTag}`);
+    document.getElementById("targetUsername").value = "";
+    document.getElementById("newTag").value = "";
+  });
+}
+
+function loadBannedUsers() {
+  db.collection("bans").get().then(snapshot => {
+    const list = document.getElementById("bannedList");
+    list.innerHTML = "";
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.banUntil > now) {
+        const timeLeft = Math.ceil((data.banUntil - now) / 60000);
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `${doc.id} - ${timeLeft > 1440 ? Math.ceil(timeLeft/1440) + " days" : timeLeft + " mins"} left`;
+        
+        const unbanBtn = document.createElement("button");
+        unbanBtn.textContent = "Unban";
+        unbanBtn.style.marginLeft = "10px";
+        unbanBtn.style.padding = "4px 8px";
+        unbanBtn.style.fontSize = "11px";
+        unbanBtn.onclick = () => {
+          db.collection("bans").doc(doc.id).delete();
+          loadBannedUsers();
+        };
+        div.appendChild(unbanBtn);
+        list.appendChild(div);
+      }
+    });
+    
+    if (list.innerHTML === "") {
+      list.innerHTML = "No banned users";
+    }
+  });
+}
+
+function loadOnlineUsers() {
+  db.collection("presence").get().then(snapshot => {
+    const list = document.getElementById("onlineList");
+    list.innerHTML = "";
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (now - data.lastSeen < 7000) {
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.textContent = doc.id;
+        list.appendChild(div);
+      }
+    });
+    
+    if (list.innerHTML === "") {
+      list.innerHTML = "No users online";
+    }
+  });
+}
+
+// Check if user is banned
+async function checkBan() {
+  const banDoc = await db.collection("bans").doc(username).get();
+  if (banDoc.exists) {
+    const banData = banDoc.data();
+    if (banData.banUntil > Date.now()) {
+      const timeLeft = Math.ceil((banData.banUntil - Date.now()) / 60000);
+      alert(`You are banned for ${timeLeft} more minutes`);
+      return true;
+    } else {
+      // Ban expired, remove it
+      await db.collection("bans").doc(username).delete();
+    }
+  }
+  return false;
+}
+
+// Get display name
+async function getDisplayName(user) {
+  const tagDoc = await db.collection("usernameTags").doc(user).get();
+  if (tagDoc.exists) {
+    return tagDoc.data().displayName;
+  }
+  return user;
+}
 
 // Profile system
 db.collection("profiles").doc(username).set({avatar:"🙂", bio:"AuraBaby user"},{merge:true});
+
+// Check if user is banned on load
+checkBan().then(isBanned => {
+  if (isBanned) {
+    document.getElementById("msgInput").disabled = true;
+    document.getElementById("msgInput").placeholder = "You are banned from sending messages";
+  }
+});
 
 // Friend system (basic)
 function addFriend(friendName){ db.collection("friends").doc(username).set({[friendName]:true},{merge:true}); }
@@ -309,18 +660,23 @@ function filterText(text){
 function sendMessage(){
   const now=Date.now();
   if(now-lastSent<5000){ alert("Please wait 5 seconds before sending another message."); return; }
-  lastSent=now;
+  
+  // Check if user is banned
+  checkBan().then(isBanned => {
+    if (isBanned) return;
+    
+    lastSent=now;
+    const input=document.getElementById("msgInput");
+    if(!input.value) return;
 
-  const input=document.getElementById("msgInput");
-  if(!input.value) return;
+    db.collection("rooms").doc(currentRoom).collection("messages").add({
+      user: username,
+      text: filterText(input.value),
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-  db.collection("rooms").doc(currentRoom).collection("messages").add({
-    user: username,
-    text: filterText(input.value),
-    time: firebase.firestore.FieldValue.serverTimestamp()
+    input.value="";
   });
-
-  input.value="";
 }
 
 // Room switching and message display
@@ -335,7 +691,12 @@ function loadRoom(room){
       const m=doc.data();
       const div=document.createElement("div");
       div.className="message";
-      div.textContent=m.user+": "+m.text;
+      
+      // Get display name and show message
+      getDisplayName(m.user).then(displayName => {
+        div.textContent = displayName + ": " + m.text;
+      });
+      
       if(isAdmin){
         const delBtn=document.createElement("button");
         delBtn.textContent="Delete";
