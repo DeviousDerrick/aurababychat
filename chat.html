@@ -9,11 +9,19 @@
 * { box-sizing: border-box; }
 body { 
   margin: 0; 
-  background: linear-gradient(135deg, #0a0e27 0%, #1a0b2e 50%, #160b28 100%);
+  background: var(--bg-gradient);
   color: #fff; 
   font-family: 'Poppins', Arial, sans-serif;
   font-weight: 800;
   overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+:root {
+  --bg-gradient: linear-gradient(135deg, #0a0e27 0%, #1a0b2e 50%, #160b28 100%);
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #f093fb;
 }
 
 body::before {
@@ -36,7 +44,7 @@ body::before {
 
 .topbar { 
   height: 80px; 
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
   display: flex; 
   align-items: center; 
   padding: 0 30px; 
@@ -74,7 +82,7 @@ body::before {
 
 .section-title {
   font-size: 14px;
-  color: #f093fb;
+  color: var(--accent-color);
   margin-bottom: 10px;
   letter-spacing: 1px;
 }
@@ -99,8 +107,8 @@ body::before {
 }
 
 .room.active { 
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #f093fb;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  border-color: var(--accent-color);
   box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6), 0 0 40px rgba(240, 147, 251, 0.4);
   transform: translateX(8px);
 }
@@ -121,7 +129,7 @@ body::before {
 }
 
 .profile-card:hover {
-  border-color: #f093fb;
+  border-color: var(--accent-color);
   box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
 }
 
@@ -129,7 +137,7 @@ body::before {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -188,7 +196,7 @@ body::before {
 }
 
 .messages::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border-radius: 10px;
 }
 
@@ -198,22 +206,50 @@ body::before {
   background: linear-gradient(135deg, rgba(30, 20, 60, 0.5), rgba(40, 30, 70, 0.5));
   backdrop-filter: blur(5px);
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--primary-color);
   font-size: 15px;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .message:hover {
   transform: translateX(4px);
   box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
-  border-left-color: #f093fb;
+  border-left-color: var(--accent-color);
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.5);
+}
+
+.message-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(138, 43, 226, 0.7);
+}
+
+.message-content {
+  flex: 1;
 }
 
 .message .username {
   cursor: pointer;
   transition: all 0.3s ease;
+  font-weight: 800;
 }
 
 .message .username:hover {
@@ -255,6 +291,20 @@ body::before {
   backdrop-filter: blur(10px);
   gap: 14px;
   border-top: 2px solid rgba(138, 43, 226, 0.3);
+  flex-direction: column;
+}
+
+.input-row {
+  display: flex;
+  gap: 14px;
+}
+
+.cooldown-timer {
+  font-size: 14px;
+  color: var(--accent-color);
+  padding: 8px 0;
+  text-align: center;
+  letter-spacing: 1px;
 }
 
 .input input { 
@@ -273,7 +323,7 @@ body::before {
 
 .input input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-color);
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
   background: rgba(40, 30, 80, 0.8);
 }
@@ -285,7 +335,7 @@ body::before {
 
 .input button {
   padding: 16px 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   border: none;
   border-radius: 12px;
   color: white;
@@ -301,11 +351,11 @@ body::before {
 .input button:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(138, 43, 226, 0.6), 0 0 40px rgba(240, 147, 251, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
 }
 
-/* Admin Panel & Modals */
-.admin-btn, .friends-btn {
+/* Buttons */
+.admin-btn, .friends-btn, .settings-btn {
   position: fixed;
   top: 90px;
   padding: 12px 24px;
@@ -326,11 +376,16 @@ body::before {
 .admin-btn { right: 30px; }
 .friends-btn { 
   right: 200px; 
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
 }
+.settings-btn {
+  right: 380px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6);
+}
 
-.admin-btn:hover, .friends-btn:hover {
+.admin-btn:hover, .friends-btn:hover, .settings-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(255, 65, 108, 0.8);
 }
@@ -370,7 +425,7 @@ body::before {
   font-size: 28px;
   letter-spacing: 2px;
   text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
-  background: linear-gradient(135deg, #667eea, #f093fb);
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -388,7 +443,7 @@ body::before {
   margin: 0 0 15px 0;
   font-size: 18px;
   letter-spacing: 1px;
-  color: #f093fb;
+  color: var(--accent-color);
 }
 
 .modal-section input, .modal-section select {
@@ -406,14 +461,14 @@ body::before {
 
 .modal-section input:focus, .modal-section select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-color);
   box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
 }
 
 .modal-section button {
   width: 100%;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
   border-radius: 8px;
   color: white;
@@ -467,7 +522,7 @@ body::before {
   background: rgba(40, 30, 80, 0.5);
   border-radius: 6px;
   font-size: 13px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid var(--primary-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -485,14 +540,14 @@ body::before {
   margin-bottom: 8px;
   background: rgba(40, 30, 80, 0.5);
   border-radius: 8px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid var(--primary-color);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .friend-item:hover, .group-item:hover {
   background: rgba(50, 40, 90, 0.6);
-  border-left-color: #f093fb;
+  border-left-color: var(--accent-color);
   transform: translateX(4px);
 }
 
@@ -517,6 +572,32 @@ body::before {
   transform: scale(1.1);
 }
 
+.theme-option {
+  padding: 15px;
+  margin-bottom: 10px;
+  background: rgba(40, 30, 80, 0.5);
+  border-radius: 8px;
+  border: 2px solid rgba(138, 43, 226, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.theme-option:hover, .theme-option.selected {
+  border-color: var(--accent-color);
+  background: rgba(50, 40, 90, 0.6);
+  transform: translateX(4px);
+}
+
+.theme-preview {
+  width: 60px;
+  height: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .tab-buttons {
   display: flex;
   gap: 10px;
@@ -537,8 +618,8 @@ body::before {
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-color: #f093fb;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-color: var(--accent-color);
 }
 </style>
 </head>
@@ -548,6 +629,38 @@ body::before {
 <!-- Buttons -->
 <button class="admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN</button>
 <button class="friends-btn" onclick="openFriendsPanel()">👥 FRIENDS</button>
+<button class="settings-btn" onclick="openSettings()">⚙️ SETTINGS</button>
+
+<!-- Settings Panel -->
+<div id="settingsOverlay" class="modal-overlay" onclick="closeSettings()"></div>
+<div id="settingsPanel" class="modal">
+  <button class="close-modal" onclick="closeSettings()">×</button>
+  <h2>⚙️ SETTINGS</h2>
+  
+  <div class="modal-section">
+    <h3>🎨 Theme</h3>
+    <div id="themeOptions"></div>
+  </div>
+
+  <div class="modal-section">
+    <h3>💬 Chat Settings</h3>
+    <label style="display:block; margin-bottom:15px;">
+      <input type="checkbox" id="showTimestamps"> Show Message Timestamps
+    </label>
+    <label style="display:block; margin-bottom:15px;">
+      <input type="checkbox" id="soundEnabled"> Enable Sound Notifications
+    </label>
+    <label style="display:block; margin-bottom:15px;">
+      <input type="checkbox" id="compactMode"> Compact Message Mode
+    </label>
+  </div>
+
+  <div class="modal-section">
+    <h3>👤 Profile Settings</h3>
+    <input type="text" id="bioInput" placeholder="Enter your bio">
+    <button onclick="updateBio()">UPDATE BIO</button>
+  </div>
+</div>
 
 <!-- Admin Panel -->
 <div id="adminOverlay" class="modal-overlay" onclick="closeAdminPanel()"></div>
@@ -680,6 +793,7 @@ body::before {
       <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
       <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
       <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
+      <div class="room" data-room="Counting" data-type="counting">🔢 Counting</div>
     </div>
 
     <div class="sidebar-section" id="groupChatsSection" style="display:none;">
@@ -700,8 +814,11 @@ body::before {
     <div class="chat-header" id="roomName">🌌 General 1 <span>Online: <span id="onlineCount">0</span></span></div>
     <div class="messages" id="messages"></div>
     <div class="input">
-      <input id="msgInput" placeholder="Type your message..." />
-      <button onclick="sendMessage()">SEND</button>
+      <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
+      <div class="input-row">
+        <input id="msgInput" placeholder="Type your message..." />
+        <button onclick="sendMessage()">SEND</button>
+      </div>
     </div>
   </div>
 </div>
@@ -742,6 +859,89 @@ db.collection("profiles").doc(username).set({
   createdAt: Date.now()
 }, {merge: true});
 
+// THEMES
+const themes = [
+  {name: 'Galaxy Purple', bg: 'linear-gradient(135deg, #0a0e27 0%, #1a0b2e 50%, #160b28 100%)', primary: '#667eea', secondary: '#764ba2', accent: '#f093fb'},
+  {name: 'Ocean Blue', bg: 'linear-gradient(135deg, #0a1628 0%, #0e2747 50%, #1a3a52 100%)', primary: '#3b82f6', secondary: '#1e40af', accent: '#60a5fa'},
+  {name: 'Forest Green', bg: 'linear-gradient(135deg, #0a1e0a 0%, #0f2e0f 50%, #1a3a1a 100%)', primary: '#10b981', secondary: '#059669', accent: '#34d399'},
+  {name: 'Sunset Orange', bg: 'linear-gradient(135deg, #2e1a0a 0%, #3d220e 50%, #4d2a12 100%)', primary: '#f97316', secondary: '#ea580c', accent: '#fb923c'},
+  {name: 'Rose Pink', bg: 'linear-gradient(135deg, #2e0a1e 0%, #3d0e28 50%, #4d1232 100%)', primary: '#ec4899', secondary: '#db2777', accent: '#f472b6'},
+  {name: 'Cyberpunk', bg: 'linear-gradient(135deg, #0a0e1e 0%, #1a0b2e 50%, #2e0b3e 100%)', primary: '#06b6d4', secondary: '#0891b2', accent: '#22d3ee'}
+];
+
+function renderThemes() {
+  const container = document.getElementById('themeOptions');
+  themes.forEach((theme, idx) => {
+    const div = document.createElement('div');
+    div.className = 'theme-option';
+    div.innerHTML = `
+      <div class="theme-preview" style="background: ${theme.primary}"></div>
+      <div style="flex:1;">
+        <div style="font-size:16px;">${theme.name}</div>
+        <div style="font-size:12px; opacity:0.7;">Click to apply</div>
+      </div>
+    `;
+    div.onclick = () => applyTheme(theme, idx);
+    container.appendChild(div);
+  });
+  
+  // Load saved theme
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    const theme = themes[parseInt(saved)];
+    if (theme) applyTheme(theme, parseInt(saved), false);
+  }
+}
+
+function applyTheme(theme, idx, save = true) {
+  document.documentElement.style.setProperty('--bg-gradient', theme.bg);
+  document.documentElement.style.setProperty('--primary-color', theme.primary);
+  document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+  document.documentElement.style.setProperty('--accent-color', theme.accent);
+  
+  document.querySelectorAll('.theme-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  
+  if (save) {
+    localStorage.setItem('theme', idx);
+    alert(`Theme "${theme.name}" applied!`);
+  }
+}
+
+renderThemes();
+
+// SETTINGS
+function openSettings() {
+  document.getElementById('settingsPanel').style.display = 'block';
+  document.getElementById('settingsOverlay').style.display = 'block';
+  
+  // Load saved settings
+  document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') === 'true';
+  document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
+  document.getElementById('compactMode').checked = localStorage.getItem('compactMode') === 'true';
+}
+
+function closeSettings() {
+  document.getElementById('settingsPanel').style.display = 'none';
+  document.getElementById('settingsOverlay').style.display = 'none';
+  
+  // Save settings
+  localStorage.setItem('showTimestamps', document.getElementById('showTimestamps').checked);
+  localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
+  localStorage.setItem('compactMode', document.getElementById('compactMode').checked);
+}
+
+function updateBio() {
+  const bio = document.getElementById('bioInput').value.trim();
+  if (!bio) return alert('Enter a bio');
+  
+  db.collection('profiles').doc(username).update({bio: bio}).then(() => {
+    alert('Bio updated!');
+    document.getElementById('bioInput').value = '';
+  });
+}
+
 // Color presets for tags
 const tagColors = [
   {name: 'Purple', bg: '#8b5cf6', text: '#fff'},
@@ -756,7 +956,6 @@ const tagColors = [
 
 let selectedColor = tagColors[0];
 
-// Render color picker
 const colorPicker = document.getElementById('tagColorPicker');
 tagColors.forEach((color, idx) => {
   const div = document.createElement('div');
@@ -945,14 +1144,12 @@ function loadGroups() {
     snapshot.forEach(doc => {
       const data = doc.data();
       
-      // Add to modal
       const div = document.createElement("div");
       div.className = "group-item";
       div.textContent = `${data.name} (${data.members.length} members)`;
       div.onclick = () => loadRoom(doc.id, 'group');
       list.appendChild(div);
       
-      // Add to sidebar
       const sideDiv = document.createElement("div");
       sideDiv.className = "room";
       sideDiv.dataset.room = doc.id;
@@ -1122,7 +1319,6 @@ function openUserProfile(user) {
     document.getElementById("profileBio").textContent = data.bio || "AuraBaby user";
   });
   
-  // Show/hide add friend button
   if (user === username) {
     document.getElementById("profileFriendSection").style.display = "none";
   } else {
@@ -1138,7 +1334,6 @@ function openUserProfile(user) {
 }
 
 function loadProfileData(user) {
-  // Load friends
   db.collection("friends").doc(user).get().then(doc => {
     const list = document.getElementById("profileFriends");
     list.innerHTML = "";
@@ -1156,7 +1351,6 @@ function loadProfileData(user) {
     if (list.innerHTML === "") list.innerHTML = "No friends";
   });
   
-  // Load groups
   db.collection("groupChats").where("members", "array-contains", user).get().then(snapshot => {
     const list = document.getElementById("profileGroups");
     list.innerHTML = "";
@@ -1216,6 +1410,8 @@ async function getSpecialTag(user) {
 }
 
 let lastSent = 0;
+let cooldownInterval = null;
+
 function filterText(text) {
   const badWords = [/fuck/gi, /shit/gi, /bitch/gi];
   let clean = text;
@@ -1223,29 +1419,95 @@ function filterText(text) {
   return clean;
 }
 
-function sendMessage() {
-  const now = Date.now();
-  if (now - lastSent < 5000) return alert("Wait 5 seconds");
+function startCooldown() {
+  const timerEl = document.getElementById('cooldownTimer');
+  timerEl.style.display = 'block';
   
-  checkBan().then(isBanned => {
-    if (isBanned) return;
+  let timeLeft = 5;
+  timerEl.textContent = `Can chat in ${timeLeft}s`;
+  
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  
+  cooldownInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      timerEl.textContent = `Can chat in ${timeLeft}s`;
+    } else {
+      timerEl.textContent = 'Ready to chat!';
+      setTimeout(() => {
+        timerEl.style.display = 'none';
+      }, 500);
+      clearInterval(cooldownInterval);
+    }
+  }, 1000);
+}
+
+async function sendMessage() {
+  const now = Date.now();
+  
+  // Cooldown check
+  if (now - lastSent < 5000) {
+    const remaining = Math.ceil((5000 - (now - lastSent)) / 1000);
+    alert(`Please wait ${remaining} seconds`);
+    return;
+  }
+  
+  const isBanned = await checkBan();
+  if (isBanned) return;
+  
+  const input = document.getElementById("msgInput");
+  if (!input.value) return;
+
+  // Counting channel logic
+  if (currentRoomType === 'counting') {
+    const num = parseInt(input.value.trim());
+    if (isNaN(num)) {
+      alert('Counting channel: numbers only!');
+      return;
+    }
     
-    lastSent = now;
-    const input = document.getElementById("msgInput");
-    if (!input.value) return;
+    // Check if user can participate
+    const userCountDoc = await db.collection('countingUsers').doc(username).get();
+    if (userCountDoc.exists) {
+      const data = userCountDoc.data();
+      const hourAgo = Date.now() - 3600000;
+      if (data.lastCount > hourAgo) {
+        const timeLeft = Math.ceil((3600000 - (Date.now() - data.lastCount)) / 60000);
+        alert(`You must wait ${timeLeft} more minutes before counting again!`);
+        return;
+      }
+    }
+    
+    // Get current count
+    const countDoc = await db.collection('countingState').doc('current').get();
+    const currentCount = countDoc.exists ? countDoc.data().number : 0;
+    
+    if (num !== currentCount + 1) {
+      alert(`Wrong number! Next number should be ${currentCount + 1}`);
+      return;
+    }
+    
+    // Update count and user timestamp
+    await db.collection('countingState').doc('current').set({number: num, user: username, timestamp: Date.now()});
+    await db.collection('countingUsers').doc(username).set({lastCount: Date.now()});
+  }
+  
+  lastSent = now;
+  startCooldown();
 
-    const collection = currentRoomType === 'group' 
-      ? db.collection("groupChats").doc(currentRoom).collection("messages")
-      : db.collection("rooms").doc(currentRoom).collection("messages");
+  const collection = currentRoomType === 'group' 
+    ? db.collection("groupChats").doc(currentRoom).collection("messages")
+    : currentRoomType === 'counting'
+    ? db.collection("rooms").doc("Counting").collection("messages")
+    : db.collection("rooms").doc(currentRoom).collection("messages");
 
-    collection.add({
-      user: username,
-      text: filterText(input.value),
-      time: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    input.value = "";
+  collection.add({
+    user: username,
+    text: filterText(input.value),
+    time: firebase.firestore.FieldValue.serverTimestamp()
   });
+
+  input.value = "";
 }
 
 // Room switching
@@ -1270,6 +1532,19 @@ function loadRoom(room, type = 'public') {
       const data = doc.data();
       document.getElementById("roomName").innerHTML = `💬 ${data.name} <span>Members: ${data.members.length}</span>`;
     });
+  } else if (type === 'counting') {
+    db.collection('countingState').doc('current').get().then(doc => {
+      const count = doc.exists ? doc.data().number : 0;
+      document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
+    });
+    
+    // Update count display in real-time
+    db.collection('countingState').doc('current').onSnapshot(doc => {
+      if (doc.exists && currentRoomType === 'counting') {
+        const count = doc.data().number;
+        document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
+      }
+    });
   } else {
     document.getElementById("roomName").innerHTML = `🌌 ${room} <span>Online: <span id="onlineCount">0</span></span>`;
   }
@@ -1281,6 +1556,17 @@ function loadRoom(room, type = 'public') {
       const div = document.createElement("div");
       div.className = "message";
       
+      // Avatar
+      const avatar = document.createElement("div");
+      avatar.className = "message-avatar";
+      avatar.textContent = m.user[0].toUpperCase();
+      avatar.onclick = () => openUserProfile(m.user);
+      div.appendChild(avatar);
+      
+      // Message content
+      const content = document.createElement("div");
+      content.className = "message-content";
+      
       getDisplayName(m.user).then(displayName => {
         getSpecialTag(m.user).then(specialTag => {
           const usernameSpan = document.createElement("span");
@@ -1288,7 +1574,7 @@ function loadRoom(room, type = 'public') {
           usernameSpan.textContent = displayName;
           usernameSpan.onclick = () => openUserProfile(m.user);
           
-          div.appendChild(usernameSpan);
+          content.appendChild(usernameSpan);
           
           if (specialTag) {
             const tagSpan = document.createElement("span");
@@ -1296,13 +1582,15 @@ function loadRoom(room, type = 'public') {
             tagSpan.textContent = specialTag.tag;
             tagSpan.style.background = specialTag.bgColor;
             tagSpan.style.color = specialTag.textColor;
-            div.appendChild(tagSpan);
+            content.appendChild(tagSpan);
           }
           
           const textNode = document.createTextNode(": " + m.text);
-          div.appendChild(textNode);
+          content.appendChild(textNode);
         });
       });
+      
+      div.appendChild(content);
       
       if (isAdmin) {
         const delBtn = document.createElement("button");
