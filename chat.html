@@ -1,2360 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Aurababy Chat</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-
-<style>
-:root {
-  --purple-deep: #1a0d2e;
-  --purple-mid: #2d1b4e;
-  --purple-bright: #7b2cbf;
-  --blue-bright: #00b4d8;
-  --pink-neon: #f72585;
-  --white: #ffffff;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-  font-family: "Poppins", sans-serif;
-  color: var(--white);
-  overflow: hidden;
-}
-
-body {
-  background: linear-gradient(125deg, #1a0d2e 0%, #2d1b4e 25%, #3e1f5c 50%, #2d1b4e 75%, #1a0d2e 100%);
-  background-size: 400% 400%;
-  animation: gradientFlow 20s ease infinite;
-  position: relative;
-}
-
-@keyframes gradientFlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.3;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.orb1 {
-  width: 500px;
-  height: 500px;
-  background: var(--purple-bright);
-  top: -250px;
-  left: -250px;
-  animation: float 25s ease-in-out infinite;
-}
-
-.orb2 {
-  width: 400px;
-  height: 400px;
-  background: var(--blue-bright);
-  bottom: -200px;
-  right: -200px;
-  animation: float 30s ease-in-out infinite reverse;
-}
-
-.orb3 {
-  width: 350px;
-  height: 350px;
-  background: var(--pink-neon);
-  top: 50%;
-  left: 50%;
-  animation: float 35s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(100px, -100px) scale(1.1); }
-  66% { transform: translate(-100px, 100px) scale(0.9); }
-}
-
-/* LOGIN SCREEN */
-.login-screen {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  padding: 20px;
-}
-
-.login-box {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 32px;
-  padding: 60px 50px;
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  animation: loginSlide 0.5s ease;
-}
-
-@keyframes loginSlide {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.login-title {
-  font-size: 3em;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--white), var(--blue-bright), var(--pink-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 15px;
-  animation: titleGlow 3s ease-in-out infinite;
-}
-
-@keyframes titleGlow {
-  0%, 100% { filter: drop-shadow(0 0 20px rgba(123,44,191,0.5)); }
-  50% { filter: drop-shadow(0 0 40px rgba(247,37,133,0.8)); }
-}
-
-.login-subtitle {
-  font-size: 1.2em;
-  opacity: 0.8;
-  margin-bottom: 40px;
-  font-weight: 400;
-}
-
-.login-input {
-  width: 100%;
-  background: rgba(255,255,255,0.08);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
-  padding: 20px 25px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2em;
-  font-weight: 600;
-  text-align: center;
-  outline: none;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.login-input:focus {
-  border-color: var(--blue-bright);
-  box-shadow: 0 0 30px rgba(0,180,216,0.4);
-}
-
-.login-input::placeholder {
-  color: rgba(255,255,255,0.5);
-}
-
-.login-button {
-  width: 100%;
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  border: none;
-  border-radius: 16px;
-  padding: 20px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2em;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(123,44,191,0.4);
-}
-
-.login-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(247,37,133,0.6);
-}
-
-.login-button:active {
-  transform: translateY(-1px);
-}
-
-.password-container {
-  display: none;
-  margin-top: 20px;
-}
-
-.password-container.show {
-  display: block;
-}
-
-/* MAIN CHAT LAYOUT */
-.chat-app {
-  position: relative;
-  z-index: 1;
-  display: none;
-  height: 100vh;
-  flex-direction: row;
-}
-
-.chat-app.active {
-  display: flex;
-}
-
-/* LEFT SIDEBAR */
-.sidebar {
-  width: 300px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border-right: 2px solid rgba(255,255,255,0.1);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  border-radius: 10px;
-}
-
-.profile-section {
-  padding: 30px 20px;
-  text-align: center;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 2px solid rgba(255,255,255,0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.profile-section:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 15px;
-  font-size: 2.5em;
-  box-shadow: 0 0 30px rgba(123,44,191,0.6);
-  animation: avatarPulse 3s ease-in-out infinite;
-}
-
-@keyframes avatarPulse {
-  0%, 100% { box-shadow: 0 0 30px rgba(123,44,191,0.6); }
-  50% { box-shadow: 0 0 50px rgba(247,37,133,0.8); }
-}
-
-.profile-username {
-  font-size: 1.3em;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--white), var(--blue-bright));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 8px;
-}
-
-.profile-username.admin {
-  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: rainbow 3s linear infinite;
-}
-
-@keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-.profile-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85em;
-  opacity: 0.8;
-}
-
-.admin-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  border-radius: 12px;
-  font-size: 0.7em;
-  font-weight: 800;
-  margin-top: 5px;
-  box-shadow: 0 0 15px rgba(255,215,0,0.5);
-  animation: adminGlow 2s ease-in-out infinite;
-}
-
-@keyframes adminGlow {
-  0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.5); }
-  50% { box-shadow: 0 0 25px rgba(255,215,0,0.8); }
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: #00ff00;
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-  box-shadow: 0 0 10px #00ff00;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.2); }
-}
-
-.sidebar-section {
-  padding: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.section-title {
-  font-size: 0.85em;
-  font-weight: 800;
-  text-transform: uppercase;
-  opacity: 0.6;
-  margin-bottom: 15px;
-  letter-spacing: 1px;
-}
-
-.chat-room {
-  padding: 15px;
-  margin-bottom: 8px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 2px solid transparent;
-}
-
-.chat-room:hover {
-  background: rgba(255,255,255,0.1);
-  transform: translateX(5px);
-}
-
-.chat-room.active {
-  background: rgba(123,44,191,0.2);
-  border-color: var(--purple-bright);
-  box-shadow: 0 0 20px rgba(123,44,191,0.3);
-}
-
-.room-icon {
-  font-size: 1.5em;
-}
-
-.room-info {
-  flex: 1;
-}
-
-.room-name {
-  font-weight: 600;
-  font-size: 1em;
-}
-
-.room-count {
-  font-size: 0.75em;
-  opacity: 0.6;
-  margin-top: 2px;
-}
-
-.friend-item {
-  padding: 12px 15px;
-  margin-bottom: 8px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.friend-item:hover {
-  background: rgba(255,255,255,0.1);
-  transform: translateX(5px);
-}
-
-.friend-avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--blue-bright), var(--pink-neon));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em;
-}
-
-.friend-name {
-  font-weight: 600;
-  font-size: 0.95em;
-}
-
-.admin-panel-btn {
-  padding: 15px;
-  margin: 10px 20px;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  border: none;
-  border-radius: 12px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(255,215,0,0.4);
-}
-
-.admin-panel-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(255,215,0,0.6);
-}
-
-/* MAIN CHAT AREA */
-.chat-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-header {
-  padding: 25px 30px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border-bottom: 2px solid rgba(255,255,255,0.1);
-}
-
-.chat-header-title {
-  font-size: 1.8em;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--white), var(--blue-bright), var(--pink-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.chat-header-subtitle {
-  font-size: 0.9em;
-  opacity: 0.7;
-  margin-top: 5px;
-}
-
-.messages-container {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-}
-
-.messages-container::-webkit-scrollbar {
-  width: 10px;
-}
-
-.messages-container::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-}
-
-.messages-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  border-radius: 10px;
-}
-
-.message {
-  margin-bottom: 20px;
-  animation: messageSlide 0.3s ease;
-  display: flex;
-  gap: 12px;
-}
-
-@keyframes messageSlide {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.message.muted {
-  opacity: 0.3;
-  filter: blur(3px);
-}
-
-.message-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5em;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  object-fit: cover;
-}
-
-.message-avatar:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(123,44,191,0.6);
-}
-
-.message-content-wrapper {
-  flex: 1;
-}
-
-.message-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-  flex-wrap: wrap;
-}
-
-.message-username {
-  font-weight: 800;
-  font-size: 1em;
-  background: linear-gradient(135deg, var(--blue-bright), var(--pink-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  cursor: pointer;
-}
-
-.message-username.admin {
-  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: rainbow 3s linear infinite;
-}
-
-.message-badge {
-  padding: 3px 8px;
-  border-radius: 8px;
-  font-size: 0.7em;
-  font-weight: 800;
-  display: inline-block;
-}
-
-.message-badge.admin {
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  box-shadow: 0 0 10px rgba(255,215,0,0.5);
-}
-
-.message-badge.custom {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  box-shadow: 0 0 10px rgba(123,44,191,0.5);
-}
-
-.message-timestamp {
-  font-size: 0.75em;
-  opacity: 0.6;
-  font-weight: 400;
-}
-
-.message-content {
-  background: rgba(255,255,255,0.08);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  font-weight: 400;
-  line-height: 1.5;
-  max-width: 600px;
-}
-
-.user-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.user-action-btn {
-  padding: 4px 10px;
-  border: none;
-  border-radius: 8px;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.75em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.user-action-btn.block {
-  background: rgba(255,0,0,0.2);
-  color: #ff6666;
-  border: 1px solid rgba(255,0,0,0.4);
-}
-
-.user-action-btn.mute {
-  background: rgba(255,165,0,0.2);
-  color: #ffaa66;
-  border: 1px solid rgba(255,165,0,0.4);
-}
-
-.user-action-btn:hover {
-  transform: translateY(-2px);
-}
-
-.input-container {
-  padding: 20px 30px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border-top: 2px solid rgba(255,255,255,0.1);
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-.message-input {
-  flex: 1;
-  background: rgba(255,255,255,0.08);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 16px;
-  padding: 15px 20px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1em;
-  font-weight: 400;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.message-input:focus {
-  border-color: var(--purple-bright);
-  box-shadow: 0 0 20px rgba(123,44,191,0.4);
-}
-
-.message-input::placeholder {
-  color: rgba(255,255,255,0.5);
-}
-
-.message-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.send-button {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  border: none;
-  border-radius: 16px;
-  padding: 15px 35px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1em;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(123,44,191,0.4);
-}
-
-.send-button:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(247,37,133,0.6);
-}
-
-.send-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.cooldown-timer {
-  font-size: 0.85em;
-  opacity: 0.7;
-  padding: 0 10px;
-}
-
-/* ADMIN PANEL */
-.admin-panel {
-  position: fixed;
-  top: 0;
-  right: -600px;
-  width: 600px;
-  height: 100vh;
-  background: rgba(26,13,46,0.98);
-  backdrop-filter: blur(20px);
-  border-left: 2px solid rgba(255,215,0,0.3);
-  z-index: 2000;
-  transition: right 0.3s ease;
-  overflow-y: auto;
-  box-shadow: -10px 0 40px rgba(0,0,0,0.5);
-}
-
-.admin-panel.active {
-  right: 0;
-}
-
-.admin-panel-header {
-  padding: 30px;
-  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2));
-  border-bottom: 2px solid rgba(255,215,0,0.3);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.admin-panel-title {
-  font-size: 2em;
-  font-weight: 800;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 15px;
-}
-
-.close-admin-btn {
-  position: absolute;
-  top: 25px;
-  right: 25px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  border: none;
-  color: var(--white);
-  font-size: 1.5em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.close-admin-btn:hover {
-  background: rgba(255,255,255,0.2);
-  transform: rotate(90deg);
-}
-
-.admin-search {
-  width: 100%;
-  padding: 15px 20px;
-  background: rgba(255,255,255,0.05);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 12px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1em;
-  outline: none;
-  margin-top: 15px;
-}
-
-.admin-section {
-  padding: 25px 30px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.admin-section-title {
-  font-size: 1.3em;
-  font-weight: 800;
-  margin-bottom: 15px;
-  color: #ffd700;
-}
-
-.player-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.player-card {
-  background: rgba(255,255,255,0.05);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.player-card.banned {
-  opacity: 0.5;
-  border-color: rgba(255,0,0,0.5);
-}
-
-.player-avatar-small {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3em;
-  cursor: pointer;
-}
-
-.player-details {
-  flex: 1;
-}
-
-.player-name {
-  font-weight: 700;
-  font-size: 1em;
-}
-
-.player-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 8px;
-  font-family: "Poppins", sans-serif;
-  font-size: 0.8em;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.action-btn.promote {
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  color: var(--white);
-}
-
-.action-btn.badge {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  color: var(--white);
-}
-
-.action-btn.ban {
-  background: linear-gradient(135deg, #ff0000, #cc0000);
-  color: var(--white);
-}
-
-.action-btn.unban {
-  background: linear-gradient(135deg, #00ff00, #00cc00);
-  color: var(--white);
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* MODALS */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(10px);
-  z-index: 3000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: rgba(26,13,46,0.95);
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 32px;
-  padding: 40px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.modal-title {
-  font-size: 2em;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--white), var(--pink-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 25px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 600;
-  font-size: 1.1em;
-}
-
-.form-input {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 12px;
-  padding: 15px 20px;
-  color: var(--white);
-  font-family: "Poppins", sans-serif;
-  font-size: 1em;
-  outline: none;
-}
-
-.form-input:focus {
-  border-color: var(--blue-bright);
-  box-shadow: 0 0 20px rgba(0,180,216,0.3);
-}
-
-input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--purple-bright);
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 25px;
-}
-
-.modal-btn {
-  flex: 1;
-  padding: 15px;
-  border: none;
-  border-radius: 12px;
-  font-family: "Poppins", sans-serif;
-  font-size: 1em;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.modal-btn.primary {
-  background: linear-gradient(135deg, var(--purple-bright), var(--pink-neon));
-  color: var(--white);
-}
-
-.modal-btn.secondary {
-  background: rgba(255,255,255,0.1);
-  color: var(--white);
-}
-
-.modal-btn:hover {
-  transform: translateY(-3px);
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: -300px;
-    top: 0;
-    bottom: 0;
-    z-index: 1000;
-    transition: left 0.3s ease;
-  }
-  
-  .sidebar.mobile-open {
-    left: 0;
-  }
-  
-  .admin-panel {
-    width: 100%;
-    right: -100%;
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraBaby Chat</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #0f1220;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar */
+    .topbar {
+      height: 60px;
+      background: linear-gradient(90deg, #7b5cff, #5cc9ff);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    /* Main layout */
+    .container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: #161a33;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #222655;
+    }
+
+    .profile {
+      padding: 16px;
+      border-bottom: 1px solid #222655;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #5cc9ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .username {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .rooms {
+      padding: 10px;
+      flex: 1;
+    }
+
+    .room {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      background: transparent;
+    }
+
+    .room:hover {
+      background: #232866;
+    }
+
+    .room.active {
+      background: #5cc9ff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* Chat area */
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0f1220;
+    }
+
+    .chat-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid #222655;
+      font-weight: bold;
+      background: #13163a;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+
+    .input-bar {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #222655;
+      background: #13163a;
+    }
+
+    .input-bar input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #1b1f4d;
+      color: #fff;
+    }
+
+    .input-bar button {
+      margin-left: 10px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #5cc9ff;
+      font-weight: bold;
+    }
+  </style>
 </head>
-
 <body>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+  <div class="topbar">AURABABY CHAT</div>
 
-<!-- LOGIN SCREEN -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <h1 class="login-title">🌌 AURABABY</h1>
-    <p class="login-subtitle">Choose your username to get started</p>
-    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; background: rgba(0,255,0,0.1); border: 2px solid rgba(0,255,0,0.3); border-radius: 20px; margin-bottom: 30px;">
-      <span style="width: 10px; height: 10px; background: #00ff00; border-radius: 50%; animation: pulse 2s ease-in-out infinite; box-shadow: 0 0 15px #00ff00;"></span>
-      <span style="font-size: 0.85em; font-weight: 600;">🔥 Firebase Real-Time Sync Active</span>
-    </div>
-    <input 
-      type="text" 
-      class="login-input" 
-      id="usernameInput" 
-      placeholder="Enter your username..."
-      maxlength="20"
-    />
-    <div class="password-container" id="passwordContainer">
-      <input 
-        type="password" 
-        class="login-input" 
-        id="passwordInput" 
-        placeholder="Enter admin password..."
-      />
-      <button class="login-button" onclick="checkAdminPassword()" style="margin-top: 15px;">✅ Verify Admin Password</button>
-    </div>
-    <button class="login-button" id="loginButton">START CHATTING 🚀</button>
-    <button class="login-button" onclick="showAdminLogin()" style="margin-top: 15px; background: linear-gradient(135deg, #ffd700, #ff8c00); font-size: 0.9em;">🔑 Admin Login</button>
-  </div>
-</div>
-
-<!-- MAIN CHAT APP -->
-<div class="chat-app" id="chatApp">
-  <div class="sidebar">
-    <div class="profile-section" onclick="goToOwnProfile()">
-      <div class="profile-avatar" id="profileAvatar">👤</div>
-      <div class="profile-username" id="profileUsername">Username</div>
-      <div id="adminBadgeContainer"></div>
-      <div class="profile-status">
-        <span class="status-dot"></span>
-        <span>Online</span>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="profile">
+        <div class="avatar">A</div>
+        <div class="username">AuraUser</div>
+      </div>
+      <div class="rooms">
+        <div class="room active" data-room="General 1">General 1</div>
+        <div class="room" data-room="General 2">General 2</div>
+        <div class="room" data-room="General 3">General 3</div>
       </div>
     </div>
 
-    <div id="adminPanelButtonContainer"></div>
-    
-    <!-- Settings Button -->
-    <div style="padding: 10px 20px;">
-      <button class="admin-panel-btn" style="width: 100%; background: linear-gradient(135deg, var(--blue-bright), var(--purple-bright));" onclick="window.location.href='./settings.html'">⚙️ SETTINGS</button>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="section-title">Chat Rooms</div>
-      <div class="chat-room active" data-room="general">
-        <div class="room-icon">💬</div>
-        <div class="room-info">
-          <div class="room-name">General</div>
-          <div class="room-count" id="generalCount">0 online</div>
-        </div>
+    <!-- Chat -->
+    <div class="chat">
+      <div class="chat-header" id="chatHeader">General 1</div>
+      <div class="messages" id="messages">
+        <div class="message">Welcome to General 1 👋</div>
       </div>
-      <div class="chat-room" data-room="counting">
-        <div class="room-icon">🔢</div>
-        <div class="room-info">
-          <div class="room-name">Counting</div>
-          <div class="room-count">Bot Active</div>
-        </div>
-      </div>
-      <div class="chat-room" data-room="gaming">
-        <div class="room-icon">🎮</div>
-        <div class="room-info">
-          <div class="room-name">Gaming</div>
-          <div class="room-count">0 online</div>
-        </div>
-      </div>
-      <div class="chat-room" data-room="music">
-        <div class="room-icon">🎵</div>
-        <div class="room-info">
-          <div class="room-name">Music</div>
-          <div class="room-count">0 online</div>
-        </div>
-      </div>
-      <div class="chat-room" data-room="random">
-        <div class="room-icon">✨</div>
-        <div class="room-info">
-          <div class="room-name">Random</div>
-          <div class="room-count">0 online</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="section-title">Group Chats</div>
-      <div id="groupChatsList">
-        <div class="friend-item" onclick="showCreateGroupModal()">
-          <div class="friend-avatar">➕</div>
-          <div class="friend-name">Create Group</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="section-title">Friends</div>
-      <div id="friendsList">
-        <div class="friend-item" onclick="showAddFriendModal()">
-          <div class="friend-avatar">➕</div>
-          <div class="friend-name">Add Friend</div>
-        </div>
+      <div class="input-bar">
+        <input type="text" placeholder="Type a message..." disabled />
+        <button disabled>Send</button>
       </div>
     </div>
   </div>
 
-  <div class="chat-main">
-    <div class="chat-header">
-      <div class="chat-header-title" id="currentRoomName">💬 General</div>
-      <div class="chat-header-subtitle" id="currentRoomDesc">Welcome to the general chat room!</div>
-    </div>
+  <script>
+  // ===== BASIC KID-SAFE CHAT LOGIC =====
+  let currentRoom = "General 1";
+  let username = localStorage.getItem("aurababy_username") || prompt("Enter a username:") || "Guest";
+  localStorage.setItem("aurababy_username", username);
 
-    <div class="messages-container" id="messages"></div>
+  const messagesDiv = document.getElementById("messages");
+  const input = document.querySelector(".input-bar input");
+  const button = document.querySelector(".input-bar button");
+  const header = document.getElementById("chatHeader");
 
-    <div class="input-container">
-      <input 
-        type="text" 
-        class="message-input" 
-        id="messageInput" 
-        placeholder="Type your message..."
-        maxlength="500"
-      />
-      <span class="cooldown-timer" id="cooldownTimer"></span>
-      <button class="send-button" id="sendButton">SEND 🚀</button>
-    </div>
-  </div>
-</div>
+  input.disabled = false;
+  button.disabled = false;
 
-<!-- ADMIN PANEL -->
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-panel-header">
-    <h2 class="admin-panel-title">⚡ ADMIN PANEL</h2>
-    <button class="close-admin-btn" id="closeAdminBtn">×</button>
-    <input type="text" class="admin-search" id="adminSearch" placeholder="Search players...">
-  </div>
-  
-  <div class="admin-section">
-    <h3 class="admin-section-title">👥 All Players</h3>
-    <div class="player-list" id="playerList"></div>
-  </div>
-</div>
-
-<!-- Badge Modal -->
-<div class="modal" id="badgeModal">
-  <div class="modal-content">
-    <h2 class="modal-title">Set Custom Badge</h2>
-    <div class="form-group">
-      <label class="form-label">Badge Text</label>
-      <input type="text" class="form-input" id="badgeText" placeholder="VIP, STAFF, etc..." maxlength="20">
-    </div>
-    <div class="modal-buttons">
-      <button class="modal-btn secondary" onclick="closeBadgeModal()">Cancel</button>
-      <button class="modal-btn primary" onclick="saveBadge()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Ban Modal -->
-<div class="modal" id="banModal">
-  <div class="modal-content">
-    <h2 class="modal-title">Ban Player</h2>
-    <div class="form-group">
-      <label class="form-label">Ban Duration</label>
-      <input type="text" class="form-input" id="banDuration" placeholder="e.g., 30m, 2h, 1d, permanent">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Reason</label>
-      <input type="text" class="form-input" id="banReason" placeholder="Reason for ban...">
-    </div>
-    <div class="modal-buttons">
-      <button class="modal-btn secondary" onclick="closeBanModal()">Cancel</button>
-      <button class="modal-btn primary" onclick="confirmBan()">Ban Player</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Friend Modal -->
-<div class="modal" id="addFriendModal">
-  <div class="modal-content">
-    <h2 class="modal-title">Add Friend</h2>
-    <div class="form-group">
-      <label class="form-label">Friend's Username</label>
-      <input type="text" class="form-input" id="friendUsername" placeholder="Enter username...">
-    </div>
-    <div class="modal-buttons">
-      <button class="modal-btn secondary" onclick="closeAddFriendModal()">Cancel</button>
-      <button class="modal-btn primary" onclick="addFriend()">Add Friend</button>
-    </div>
-  </div>
-</div>
-
-<!-- Create Group Modal -->
-<div class="modal" id="createGroupModal">
-  <div class="modal-content">
-    <h2 class="modal-title">Create Group Chat</h2>
-    <div class="form-group">
-      <label class="form-label">Group Name</label>
-      <input type="text" class="form-input" id="groupName" placeholder="Enter group name..." maxlength="30">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Select Friends</label>
-      <div id="friendCheckboxList" style="max-height: 200px; overflow-y: auto; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px;">
-        <p style="opacity: 0.7;">Add friends first to create a group!</p>
-      </div>
-    </div>
-    <div class="modal-buttons">
-      <button class="modal-btn secondary" onclick="closeCreateGroupModal()">Cancel</button>
-      <button class="modal-btn primary" onclick="createGroup()">Create Group</button>
-    </div>
-  </div>
-</div>
-
-<script>
-const ADMIN_PASSWORD = 'chicken103chicken103chickenfishfarting103';
-
-// Smart profanity filter - catches actual bad words but allows legitimate usernames
-const BAD_WORDS = [
-  // Severe profanity - whole word matches only
-  { word: 'fuck', severe: true },
-  { word: 'shit', severe: true },
-  { word: 'bitch', severe: true },
-  { word: 'asshole', severe: true },
-  { word: 'bastard', severe: true },
-  { word: 'cunt', severe: true },
-  { word: 'pussy', severe: false },
-  { word: 'dick', severe: false },
-  { word: 'cock', severe: false },
-  { word: 'slut', severe: true },
-  { word: 'whore', severe: true },
-  { word: 'nigger', severe: true },
-  { word: 'nigga', severe: true },
-  { word: 'fag', severe: true },
-  { word: 'rape', severe: true },
-];
-
-function containsProfanity(text) {
-  const lower = text.toLowerCase().trim();
-  
-  // Replace common character substitutions for checking
-  const normalized = lower
-    .replace(/[*$@!_]/g, '')  // Remove masking characters
-    .replace(/0/g, 'o')
-    .replace(/1/g, 'i')
-    .replace(/3/g, 'e')
-    .replace(/4/g, 'a')
-    .replace(/5/g, 's')
-    .replace(/7/g, 't')
-    .replace(/8/g, 'b')
-    .replace(/\s+/g, ' ');  // Normalize spaces
-  
-  // Check each bad word
-  for (const {word, severe} of BAD_WORDS) {
-    // For severe words, check whole word boundaries and also as standalone
-    if (severe) {
-      // Check if it's the entire username or a whole word
-      const wholeWordPattern = new RegExp(`^${word}$|\\b${word}\\b`, 'i');
-      if (wholeWordPattern.test(normalized) || wholeWordPattern.test(lower)) {
-        return true;
-      }
-      
-      // Check for obvious attempts to bypass (like f.u.c.k or f u c k)
-      const spacedWord = word.split('').join('[\\s\\._-]*');
-      const spacedPattern = new RegExp(spacedWord, 'i');
-      if (spacedPattern.test(normalized)) {
-        return true;
-      }
-    } else {
-      // For less severe words, only match whole words
-      const wholeWordPattern = new RegExp(`\\b${word}\\b`, 'i');
-      if (wholeWordPattern.test(normalized)) {
-        return true;
-      }
-    }
-  }
-  
-  return false;
-}
-
-let currentUsername = '';
-let currentRoom = 'general';
-let currentGroupChat = null;
-let messages = {};
-let groupMessages = {};
-let onlineUsers = new Set();
-let sessionStartTime = Date.now();
-let isAdmin = false;
-let lastMessageTime = 0;
-let cooldownInterval = null;
-let selectedPlayerForBadge = '';
-let selectedPlayerForBan = '';
-let blockedUsers = new Set();
-let mutedUsers = new Set();
-
-const roomInfo = {
-  general: { name: '💬 General', desc: 'Welcome to the general chat room!' },
-  counting: { name: '🔢 Counting', desc: 'Count to infinity! One number per person, 1 hour cooldown.' },
-  gaming: { name: '🎮 Gaming', desc: 'Talk about your favorite games!' },
-  music: { name: '🎵 Music', desc: 'Share your favorite tunes!' },
-  random: { name: '✨ Random', desc: 'Anything goes here!' }
-};
-
-// Initialize empty message arrays (will be loaded from Firebase)
-['general', 'counting', 'gaming', 'music', 'random'].forEach(room => {
-  messages[room] = [];
-});
-
-const loginScreen = document.getElementById('loginScreen');
-const chatApp = document.getElementById('chatApp');
-const usernameInput = document.getElementById('usernameInput');
-const passwordInput = document.getElementById('passwordInput');
-const passwordContainer = document.getElementById('passwordContainer');
-const loginButton = document.getElementById('loginButton');
-const profileUsername = document.getElementById('profileUsername');
-const profileAvatar = document.getElementById('profileAvatar');
-const messagesContainer = document.getElementById('messages');
-const messageInput = document.getElementById('messageInput');
-const sendButton = document.getElementById('sendButton');
-const currentRoomName = document.getElementById('currentRoomName');
-const currentRoomDesc = document.getElementById('currentRoomDesc');
-const generalCount = document.getElementById('generalCount');
-const cooldownTimer = document.getElementById('cooldownTimer');
-
-// Don't add any input event listener that breaks normal login
-
-passwordInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    checkAdminPassword();
-  }
-});
-
-function showAdminLogin() {
-  usernameInput.value = '';
-  usernameInput.placeholder = 'First enter admin password below...';
-  usernameInput.disabled = true;
-  passwordContainer.classList.add('show');
-  passwordInput.focus();
-}
-
-function checkAdminPassword() {
-  const password = passwordInput.value;
-  if (password === ADMIN_PASSWORD) {
-    adminPasswordEntered = true;
-    passwordContainer.classList.remove('show');
-    usernameInput.disabled = false;
-    usernameInput.value = '';
-    usernameInput.placeholder = '✅ Admin Powers Granted! Enter username...';
-    usernameInput.style.borderColor = '#ffd700';
-    usernameInput.style.boxShadow = '0 0 30px rgba(255,215,0,0.6)';
-    
-    // Update button text
-    loginButton.textContent = '🌟 START AS ADMIN 🌟';
-    loginButton.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
-    
-    alert('✅ ADMIN POWERS GRANTED! You can now enter any username with admin privileges.');
-    usernameInput.focus();
-  } else {
-    alert('❌ Incorrect admin password!');
-    passwordInput.value = '';
-  }
-}
-
-async function checkUsername() {
-  try {
-    const saved = await window.storage.get('aurababy_username');
-    if (saved && saved.value) {
-      currentUsername = saved.value;
-      await checkAdminStatus();
-      await checkIfBanned();
-    }
-  } catch (error) {
-    console.log('No saved username');
-  }
-}
-
-async function checkAdminStatus() {
-  try {
-    const adminRef = ref(database, `admins/${currentUsername}`);
-    const snapshot = await get(adminRef);
-    isAdmin = snapshot.exists() && snapshot.val() === true;
-  } catch (error) {
-    isAdmin = false;
-  }
-}
-
-async function checkIfBanned() {
-  try {
-    const banRef = ref(database, `bans/${currentUsername}`);
-    const snapshot = await get(banRef);
-    
-    if (snapshot.exists()) {
-      const ban = snapshot.val();
-      if (ban.until === 'permanent' || Date.now() < ban.until) {
-        alert(`You are banned${ban.until === 'permanent' ? ' permanently' : ' until ' + new Date(ban.until).toLocaleString()}.\nReason: ${ban.reason}`);
-        window.storage.delete('aurababy_username');
-        return;
-      } else {
-        await remove(banRef);
-      }
-    }
-    startChat();
-  } catch (error) {
-    startChat();
-  }
-}
-
-async function login() {
-  const username = usernameInput.value.trim();
-  if (!username) {
-    alert('Please enter a username!');
-    return;
-  }
-  
-  // Check for profanity in username
-  if (containsProfanity(username)) {
-    alert('Username contains inappropriate content. Please choose a different username.');
-    return;
-  }
-  
-  // Check if admin password was entered
-  if (adminPasswordEntered) {
-    isAdmin = true;
-    const adminRef = ref(database, `admins/${username}`);
-    await set(adminRef, true);
-    console.log('Admin powers granted for user:', username);
-  } else {
-    isAdmin = false;
-  }
-  
-  currentUsername = username;
-  
-  try {
-    await window.storage.set('aurababy_username', username);
-    await loadBlockedAndMuted();
-    await checkIfBanned();
-  } catch (error) {
-    console.error('Storage error:', error);
-    startChat();
-  }
-}
-
-async function loadBlockedAndMuted() {
-  try {
-    const blockedData = await window.storage.get(`blocked_${currentUsername}`);
-    if (blockedData && blockedData.value) {
-      blockedUsers = new Set(JSON.parse(blockedData.value));
-    }
-    
-    const mutedData = await window.storage.get(`muted_${currentUsername}`);
-    if (mutedData && mutedData.value) {
-      mutedUsers = new Set(JSON.parse(mutedData.value));
-    }
-  } catch (error) {
-    console.log('No blocked/muted users');
-  }
-}
-
-function startChat() {
-  loginScreen.style.display = 'none';
-  chatApp.classList.add('active');
-  profileUsername.textContent = currentUsername;
-  
-  if (isAdmin) {
-    profileUsername.classList.add('admin');
-    document.getElementById('adminBadgeContainer').innerHTML = '<div class="admin-badge">ADMIN</div>';
-    document.getElementById('adminPanelButtonContainer').innerHTML = '<button class="admin-panel-btn" onclick="openAdminPanel()">⚡ ADMIN PANEL</button>';
-  }
-  
-  loadUserAvatar();
-  setOnlineStatus(true);
-  loadFriends();
-  loadGroupChats();
-  initCountingBot();
-  setupMessageListener(currentRoom);
-  setupOnlineUsersListener();
-  messageInput.focus();
-  
-  setInterval(updateTimeSpent, 60000);
-}
-
-// Set user online status in Firebase
-function setOnlineStatus(isOnline) {
-  const userStatusRef = ref(database, `online/${currentUsername}`);
-  
-  if (isOnline) {
-    set(userStatusRef, {
-      online: true,
-      lastSeen: Date.now()
+  // Simple profanity filter
+  const bannedWords = ["badword1", "badword2", "badword3"];
+  function cleanText(text) {
+    let cleaned = text;
+    bannedWords.forEach(word => {
+      const regex = new RegExp(word, "gi");
+      cleaned = cleaned.replace(regex, "***");
     });
-    
-    // Auto set offline when disconnected
-    onDisconnect(userStatusRef).remove();
-  } else {
-    remove(userStatusRef);
+    return cleaned;
   }
-}
 
-// Listen for online users in real-time
-function setupOnlineUsersListener() {
-  const onlineRef = ref(database, 'online');
-  onValue(onlineRef, (snapshot) => {
-    onlineUsers.clear();
-    if (snapshot.exists()) {
-      const users = snapshot.val();
-      Object.keys(users).forEach(username => {
-        onlineUsers.add(username);
+  // Rate limiting (1 message per second)
+  let lastMessageTime = 0;
+
+  let unsubscribe = null;
+  function loadRoom(room) {
+    if (unsubscribe) unsubscribe();
+    messagesDiv.innerHTML = "";
+
+    unsubscribe = db
+      .collection("rooms")
+      .doc(room)
+      .collection("messages")
+      .orderBy("timestamp")
+      .onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const div = document.createElement("div");
+          div.className = "message";
+          div.textContent = msg.user + ": " + msg.text;
+          messagesDiv.appendChild(div);
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
-    }
-    updateOnlineCount();
-  });
-}
-
-// Setup real-time message listener for a room
-function setupMessageListener(room) {
-  // Remove previous listener if exists
-  if (messageListeners[room]) {
-    return; // Already listening
   }
-  
-  const messagesRef = ref(database, `rooms/${room}/messages`);
-  messageListeners[room] = onValue(messagesRef, async (snapshot) => {
-    messagesContainer.innerHTML = '';
-    if (snapshot.exists()) {
-      const msgs = snapshot.val();
-      messages[room] = Object.values(msgs);
-      
-      for (const msg of messages[room]) {
-        await addMessage(msg.username, msg.content, msg.timestamp, msg.isSystem || false);
-      }
-    }
-  });
-}
 
-async function loadUserAvatar() {
-  try {
-    const avatarData = await window.storage.get(`avatar_${currentUsername}`);
-    if (avatarData && avatarData.value) {
-      profileAvatar.innerHTML = `<img src="${avatarData.value}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-    } else {
-      profileAvatar.textContent = currentUsername.charAt(0).toUpperCase();
-    }
-  } catch (error) {
-    profileAvatar.textContent = currentUsername.charAt(0).toUpperCase();
-  }
-}
+  loadRoom(currentRoom);
 
-function goToOwnProfile() {
-  window.location.href = './profile.html';
-}
+  button.onclick = () => {
+    const now = Date.now();
+    if (now - lastMessageTime < 1000) return;
+    if (!input.value.trim()) return;
 
-function formatTime() {
-  const now = new Date();
-  return now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-}
+    lastMessageTime = now;
 
-async function addMessage(username, content, timestamp, isSystem = false, showActions = true) {
-  // Check if user is blocked
-  if (blockedUsers.has(username) && !isSystem) {
-    return;
-  }
-  
-  const messageDiv = document.createElement('div');
-  messageDiv.className = 'message';
-  
-  // Add muted class if user is muted
-  if (mutedUsers.has(username)) {
-    messageDiv.classList.add('muted');
-  }
-  
-  let avatarHTML = '';
-  let usernameClass = '';
-  let badges = '';
-  let actionsHTML = '';
-  
-  if (isSystem) {
-    avatarHTML = '<div class="message-avatar">🤖</div>';
-  } else {
-    try {
-      // Check admin status from Firebase
-      const adminRef = ref(database, `admins/${username}`);
-      const adminSnapshot = await get(adminRef);
-      const isUserAdmin = adminSnapshot.exists() && adminSnapshot.val() === true;
-      
-      if (isUserAdmin) {
-        usernameClass = 'admin';
-        badges += '<span class="message-badge admin">ADMIN</span>';
-      }
-      
-      // Check custom badge from Firebase
-      const badgeRef = ref(database, `badges/${username}`);
-      const badgeSnapshot = await get(badgeRef);
-      if (badgeSnapshot.exists()) {
-        badges += `<span class="message-badge custom">${badgeSnapshot.val()}</span>`;
-      }
-      
-      const avatarData = await window.storage.get(`avatar_${username}`);
-      if (avatarData && avatarData.value) {
-        avatarHTML = `<img src="${avatarData.value}" class="message-avatar" onclick="viewProfile('${username}')" alt="${username}">`;
-      } else {
-        avatarHTML = `<div class="message-avatar" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>`;
-      }
-      
-      if (username !== currentUsername && showActions) {
-        const isBlocked = blockedUsers.has(username);
-        const isMuted = mutedUsers.has(username);
-        actionsHTML = `
-          <div class="user-actions">
-            <button class="user-action-btn block" onclick="toggleBlock('${username}')">${isBlocked ? 'Unblock' : 'Block'}</button>
-            <button class="user-action-btn mute" onclick="toggleMute('${username}')">${isMuted ? 'Unmute' : 'Mute'}</button>
-          </div>
-        `;
-      }
-    } catch (error) {
-      avatarHTML = `<div class="message-avatar" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>`;
-    }
-  }
-  
-  messageDiv.innerHTML = `
-    ${avatarHTML}
-    <div class="message-content-wrapper">
-      <div class="message-header">
-        <span class="message-username ${usernameClass}" ${!isSystem ? `style="cursor: pointer;" onclick="viewProfile('${username}')"` : ''}>${username}</span>
-        ${badges}
-        <span class="message-timestamp">${timestamp}</span>
-      </div>
-      <div class="message-content">${content}</div>
-      ${actionsHTML}
-    </div>
-  `;
-  messagesContainer.appendChild(messageDiv);
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-
-function viewProfile(username) {
-  window.location.href = `./profile.html?user=${encodeURIComponent(username)}`;
-}
-
-async function toggleBlock(username) {
-  if (blockedUsers.has(username)) {
-    blockedUsers.delete(username);
-  } else {
-    blockedUsers.add(username);
-  }
-  
-  await window.storage.set(`blocked_${currentUsername}`, JSON.stringify([...blockedUsers]));
-  
-  // Reload current room to apply blocking
-  if (currentGroupChat) {
-    await loadGroupMessages(currentGroupChat);
-  } else if (currentRoom) {
-    await loadRoom(currentRoom);
-  }
-}
-
-async function toggleMute(username) {
-  if (mutedUsers.has(username)) {
-    mutedUsers.delete(username);
-  } else {
-    mutedUsers.add(username);
-  }
-  
-  await window.storage.set(`muted_${currentUsername}`, JSON.stringify([...mutedUsers]));
-  
-  // Reload current room to apply muting
-  if (currentGroupChat) {
-    await loadGroupMessages(currentGroupChat);
-  } else if (currentRoom) {
-    await loadRoom(currentRoom);
-  }
-}
-
-async function loadRoom(room) {
-  // This function is now handled by the real-time listener
-  // Just ensure the listener is set up
-  if (!messageListeners[room]) {
-    setupMessageListener(room);
-  }
-}
-
-// COUNTING BOT with Firebase
-async function initCountingBot() {
-  try {
-    const countRef = ref(database, 'counting');
-    const snapshot = await get(countRef);
-    
-    if (!snapshot.exists()) {
-      await set(countRef, {
-        current: 0,
-        lastUser: '',
-        lastTime: 0
+    db.collection("rooms")
+      .doc(currentRoom)
+      .collection("messages")
+      .add({
+        text: cleanText(input.value),
+        user: username,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
-    }
-  } catch (error) {
-    console.log('Counting bot initialized');
-  }
-}
 
-async function handleCountingMessage(message) {
-  const num = parseInt(message.trim());
-  if (isNaN(num)) {
-    const botMsg = {
-      username: 'CountBot',
-      content: '❌ Please enter a valid number!',
-      timestamp: formatTime(),
-      isSystem: true,
-      createdAt: Date.now()
-    };
-    const roomMsgRef = ref(database, `rooms/counting/messages`);
-    await push(roomMsgRef, botMsg);
-    return false;
-  }
-  
-  try {
-    const countRef = ref(database, 'counting');
-    const snapshot = await get(countRef);
-    const countData = snapshot.val() || { current: 0, lastUser: '', lastTime: 0 };
-    
-    const currentCount = countData.current;
-    const lastUser = countData.lastUser;
-    const lastTime = countData.lastTime;
-    
-    // Check if user is trying to count twice in a row
-    if (lastUser === currentUsername) {
-      const timeSince = Date.now() - lastTime;
-      const minutesLeft = Math.ceil((3600000 - timeSince) / 60000);
-      if (timeSince < 3600000) {
-        const botMsg = {
-          username: 'CountBot',
-          content: `❌ ${currentUsername}, you must wait ${minutesLeft} more minutes before counting again!`,
-          timestamp: formatTime(),
-          isSystem: true,
-          createdAt: Date.now()
-        };
-        const roomMsgRef = ref(database, `rooms/counting/messages`);
-        await push(roomMsgRef, botMsg);
-        return false;
-      }
-    }
-    
-    // Check if number is correct
-    const expectedNumber = currentCount + 1;
-    if (num !== expectedNumber) {
-      const resetMsg = {
-        username: 'CountBot',
-        content: `❌ Wrong number! Expected ${expectedNumber}, got ${num}. Count reset to 0! 😢`,
-        timestamp: formatTime(),
-        isSystem: true,
-        createdAt: Date.now()
-      };
-      const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, resetMsg);
-      
-      await set(countRef, {
-        current: 0,
-        lastUser: '',
-        lastTime: 0
-      });
-      return false;
-    }
-    
-    // Correct number! Update count first
-    await set(countRef, {
-      current: num,
-      lastUser: currentUsername,
-      lastTime: Date.now()
-    });
-    
-    // Show milestone messages
-    if (num % 100 === 0) {
-      const milestoneMsg = {
-        username: 'CountBot',
-        content: `🎉🎊 AMAZING! ${num} reached! What a milestone! 🎊🎉`,
-        timestamp: formatTime(),
-        isSystem: true,
-        createdAt: Date.now()
-      };
-      const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, milestoneMsg);
-    } else if (num % 50 === 0) {
-      const milestoneMsg = {
-        username: 'CountBot',
-        content: `🌟 Halfway to ${num + 50}! Keep it up! 🌟`,
-        timestamp: formatTime(),
-        isSystem: true,
-        createdAt: Date.now()
-      };
-      const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, milestoneMsg);
-    } else if (num % 10 === 0) {
-      const milestoneMsg = {
-        username: 'CountBot',
-        content: `✨ Nice! ${num} reached! ✨`,
-        timestamp: formatTime(),
-        isSystem: true,
-        createdAt: Date.now()
-      };
-      const roomMsgRef = ref(database, `rooms/counting/messages`);
-      await push(roomMsgRef, milestoneMsg);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Counting error:', error);
-    const errorMsg = {
-      username: 'CountBot',
-      content: `⚠️ Error processing count. Please try again.`,
-      timestamp: formatTime(),
-      isSystem: true,
-      createdAt: Date.now()
-    };
-    const roomMsgRef = ref(database, `rooms/counting/messages`);
-    await push(roomMsgRef, errorMsg);
-    return false;
-  }
-}
-
-async function sendMessage() {
-  const message = messageInput.value.trim();
-  if (!message) return;
-  
-  // Check for profanity
-  if (containsProfanity(message)) {
-    alert('Your message contains inappropriate content and cannot be sent.');
-    return;
-  }
-  
-  const now = Date.now();
-  const timeSinceLastMessage = (now - lastMessageTime) / 1000;
-  
-  if (timeSinceLastMessage < 5 && !isAdmin) {
-    const remaining = Math.ceil(5 - timeSinceLastMessage);
-    alert(`Please wait ${remaining} seconds before sending another message.`);
-    return;
-  }
-  
-  // Special handling for counting room
-  if (currentRoom === 'counting') {
-    const success = await handleCountingMessage(message);
-    if (!success) {
-      messageInput.value = '';
-      return;
-    }
-  }
-  
-  const timestamp = formatTime();
-  
-  const messageData = {
-    username: currentUsername,
-    content: message,
-    timestamp: timestamp,
-    isSystem: false,
-    createdAt: Date.now()
+    input.value = "";
   };
-  
-  // Save to Firebase with better error handling
-  try {
-    if (currentGroupChat) {
-      const groupMsgRef = ref(database, `groups/${currentGroupChat}/messages`);
-      await push(groupMsgRef, messageData);
-      console.log('Group message sent successfully');
-    } else if (currentRoom) {
-      const roomMsgRef = ref(database, `rooms/${currentRoom}/messages`);
-      await push(roomMsgRef, messageData);
-      console.log('Room message sent successfully to:', currentRoom);
-    }
-  } catch (error) {
-    console.error('Firebase error details:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    
-    // Check if it's a permissions error
-    if (error.code === 'PERMISSION_DENIED') {
-      alert('⚠️ Database permissions error. Please check Firebase rules are set to allow writes.');
-    } else if (error.message.includes('network')) {
-      alert('⚠️ Network error. Please check your internet connection.');
-    } else {
-      alert(`⚠️ Failed to send message: ${error.message}`);
-    }
-    return; // Don't clear input on error
-  }
-  
-  messageInput.value = '';
-  lastMessageTime = now;
-  
-  if (!isAdmin) {
-    startCooldown();
-  }
-}
 
-function startCooldown() {
-  let remaining = 5;
-  sendButton.disabled = true;
-  messageInput.disabled = true;
-  
-  cooldownInterval = setInterval(() => {
-    remaining--;
-    cooldownTimer.textContent = `${remaining}s`;
-    
-    if (remaining <= 0) {
-      clearInterval(cooldownInterval);
-      sendButton.disabled = false;
-      messageInput.disabled = false;
-      cooldownTimer.textContent = '';
-    }
-  }, 1000);
-}
+  document.querySelectorAll(".room").forEach(room => {
+    room.onclick = () => {
+      document.querySelectorAll(".room").forEach(r => r.classList.remove("active"));
+      room.classList.add("active");
 
-async function updateTimeSpent() {
-  const currentTime = Date.now();
-  const sessionMinutes = Math.floor((currentTime - sessionStartTime) / 60000);
-  
-  try {
-    const timeData = await window.storage.get(`time_${currentUsername}`);
-    const previousMinutes = timeData && timeData.value ? parseInt(timeData.value) : 0;
-    const totalMinutes = previousMinutes + sessionMinutes;
-    
-    await window.storage.set(`time_${currentUsername}`, totalMinutes.toString());
-    sessionStartTime = currentTime;
-  } catch (error) {
-    console.error('Error updating time:', error);
-  }
-}
-
-function updateOnlineCount() {
-  generalCount.textContent = `${onlineUsers.size} online`;
-}
-
-// ADMIN FUNCTIONS
-async function openAdminPanel() {
-  document.getElementById('adminPanel').classList.add('active');
-  await loadAllPlayers();
-}
-
-function closeAdminPanel() {
-  document.getElementById('adminPanel').classList.remove('active');
-}
-
-async function loadAllPlayers() {
-  const playerList = document.getElementById('playerList');
-  playerList.innerHTML = '';
-  
-  try {
-    // Get all users from online status and storage
-    const allUsernames = new Set([currentUsername]);
-    
-    // Get from online users (Firebase)
-    const onlineRef = ref(database, 'online');
-    const onlineSnapshot = await get(onlineRef);
-    if (onlineSnapshot.exists()) {
-      const users = onlineSnapshot.val();
-      Object.keys(users).forEach(username => allUsernames.add(username));
-    }
-    
-    // Also get from local storage for offline users
-    const usersData = await window.storage.list('aurababy_username');
-    if (usersData && usersData.keys) {
-      for (const key of usersData.keys) {
-        const userData = await window.storage.get(key);
-        if (userData && userData.value) {
-          allUsernames.add(userData.value);
-        }
-      }
-    }
-    
-    for (const username of allUsernames) {
-      await createPlayerCard(username, playerList);
-    }
-  } catch (error) {
-    console.error('Error loading players:', error);
-  }
-}
-
-async function createPlayerCard(username, container) {
-  const adminData = await window.storage.get(`admin_${username}`, true);
-  const isUserAdmin = adminData && adminData.value === 'true';
-  
-  const banData = await window.storage.get(`ban_${username}`, true);
-  const isBanned = banData && banData.value;
-  
-  const card = document.createElement('div');
-  card.className = `player-card${isBanned ? ' banned' : ''}`;
-  
-  let actions = '';
-  if (username !== currentUsername) {
-    if (!isUserAdmin) {
-      actions += `<button class="action-btn promote" onclick="promotePlayer('${username}')">Make Admin</button>`;
-    }
-    actions += `<button class="action-btn badge" onclick="showBadgeModal('${username}')">Set Badge</button>`;
-    if (!isBanned) {
-      actions += `<button class="action-btn ban" onclick="showBanModal('${username}')">Ban</button>`;
-    } else {
-      actions += `<button class="action-btn unban" onclick="unbanPlayer('${username}')">Unban</button>`;
-    }
-  }
-  
-  card.innerHTML = `
-    <div class="player-avatar-small" onclick="viewProfile('${username}')">${username.charAt(0).toUpperCase()}</div>
-    <div class="player-details">
-      <div class="player-name ${isUserAdmin ? 'admin' : ''}">${username}</div>
-      ${isBanned ? '<small style="color: #ff0000;">BANNED</small>' : ''}
-    </div>
-    <div class="player-actions">
-      ${actions}
-    </div>
-  `;
-  
-  container.appendChild(card);
-}
-
-async function promotePlayer(username) {
-  if (confirm(`Make ${username} an admin?`)) {
-    await window.storage.set(`admin_${username}`, 'true', true);
-    await loadAllPlayers();
-    alert(`${username} is now an admin!`);
-  }
-}
-
-function showBadgeModal(username) {
-  selectedPlayerForBadge = username;
-  document.getElementById('badgeModal').classList.add('active');
-}
-
-function closeBadgeModal() {
-  document.getElementById('badgeModal').classList.remove('active');
-  document.getElementById('badgeText').value = '';
-}
-
-async function saveBadge() {
-  const badgeText = document.getElementById('badgeText').value.trim();
-  if (badgeText) {
-    await window.storage.set(`badge_${selectedPlayerForBadge}`, badgeText, true);
-    alert(`Badge set for ${selectedPlayerForBadge}!`);
-  }
-  closeBadgeModal();
-}
-
-function showBanModal(username) {
-  selectedPlayerForBan = username;
-  document.getElementById('banModal').classList.add('active');
-}
-
-function closeBanModal() {
-  document.getElementById('banModal').classList.remove('active');
-  document.getElementById('banDuration').value = '';
-  document.getElementById('banReason').value = '';
-}
-
-async function confirmBan() {
-  const duration = document.getElementById('banDuration').value.trim().toLowerCase();
-  const reason = document.getElementById('banReason').value.trim() || 'No reason provided';
-  
-  let banUntil;
-  if (duration === 'permanent' || duration === 'perm') {
-    banUntil = 'permanent';
-  } else {
-    const match = duration.match(/^(\d+)([mhd])$/);
-    if (!match) {
-      alert('Invalid format! Use: 30m, 2h, 1d, or permanent');
-      return;
-    }
-    
-    const value = parseInt(match[1]);
-    const unit = match[2];
-    const multipliers = { m: 60000, h: 3600000, d: 86400000 };
-    banUntil = Date.now() + (value * multipliers[unit]);
-  }
-  
-  await window.storage.set(`ban_${selectedPlayerForBan}`, JSON.stringify({
-    until: banUntil,
-    reason: reason
-  }), true);
-  
-  alert(`${selectedPlayerForBan} has been banned!`);
-  closeBanModal();
-  await loadAllPlayers();
-}
-
-async function unbanPlayer(username) {
-  if (confirm(`Unban ${username}?`)) {
-    await window.storage.delete(`ban_${username}`, true);
-    alert(`${username} has been unbanned!`);
-    await loadAllPlayers();
-  }
-}
-
-document.getElementById('adminSearch').addEventListener('input', (e) => {
-  const search = e.target.value.toLowerCase();
-  document.querySelectorAll('.player-card').forEach(card => {
-    const name = card.querySelector('.player-name').textContent.toLowerCase();
-    card.style.display = name.includes(search) ? 'flex' : 'none';
-  });
-});
-
-document.getElementById('closeAdminBtn').addEventListener('click', closeAdminPanel);
-
-// FRIENDS
-async function loadFriends() {
-  try {
-    const friendsData = await window.storage.get(`friends_${currentUsername}`);
-    if (friendsData && friendsData.value) {
-      const friends = JSON.parse(friendsData.value);
-      displayFriends(friends);
-    }
-  } catch (error) {
-    console.log('No friends loaded');
-  }
-}
-
-function displayFriends(friends) {
-  const container = document.getElementById('friendsList');
-  container.innerHTML = '<div class="friend-item" onclick="showAddFriendModal()"><div class="friend-avatar">➕</div><div class="friend-name">Add Friend</div></div>';
-  
-  friends.forEach(friend => {
-    const friendDiv = document.createElement('div');
-    friendDiv.className = 'friend-item';
-    friendDiv.onclick = () => viewProfile(friend.name);
-    friendDiv.innerHTML = `
-      <div class="friend-avatar">${friend.name.charAt(0).toUpperCase()}</div>
-      <div class="friend-name">${friend.name}</div>
-    `;
-    container.appendChild(friendDiv);
-  });
-}
-
-function showAddFriendModal() {
-  document.getElementById('addFriendModal').classList.add('active');
-}
-
-function closeAddFriendModal() {
-  document.getElementById('addFriendModal').classList.remove('active');
-  document.getElementById('friendUsername').value = '';
-}
-
-async function addFriend() {
-  const friendName = document.getElementById('friendUsername').value.trim();
-  if (!friendName) {
-    alert('Please enter a username!');
-    return;
-  }
-  
-  try {
-    const friendsData = await window.storage.get(`friends_${currentUsername}`);
-    const friends = friendsData && friendsData.value ? JSON.parse(friendsData.value) : [];
-    
-    if (friends.find(f => f.name === friendName)) {
-      alert('Already friends!');
-      return;
-    }
-    
-    friends.push({ name: friendName });
-    await window.storage.set(`friends_${currentUsername}`, JSON.stringify(friends));
-    displayFriends(friends);
-    closeAddFriendModal();
-  } catch (error) {
-    alert('Failed to add friend');
-  }
-}
-
-// GROUP CHATS
-async function loadGroupChats() {
-  try {
-    const groupsData = await window.storage.get(`groups_${currentUsername}`);
-    if (groupsData && groupsData.value) {
-      const groups = JSON.parse(groupsData.value);
-      displayGroupChats(groups);
-    }
-  } catch (error) {
-    console.log('No groups loaded');
-  }
-}
-
-function displayGroupChats(groups) {
-  const container = document.getElementById('groupChatsList');
-  container.innerHTML = '<div class="friend-item" onclick="showCreateGroupModal()"><div class="friend-avatar">➕</div><div class="friend-name">Create Group</div></div>';
-  
-  groups.forEach(group => {
-    const groupDiv = document.createElement('div');
-    groupDiv.className = 'chat-room';
-    groupDiv.onclick = () => switchToGroupChat(group.id);
-    groupDiv.innerHTML = `
-      <div class="room-icon">👥</div>
-      <div class="room-info">
-        <div class="room-name">${group.name}</div>
-        <div class="room-count">${group.members.length} members</div>
-      </div>
-    `;
-    container.appendChild(groupDiv);
-  });
-}
-
-async function switchToGroupChat(groupId) {
-  document.querySelectorAll('.chat-room').forEach(r => r.classList.remove('active'));
-  currentRoom = null;
-  currentGroupChat = groupId;
-  
-  try {
-    const groupsData = await window.storage.get(`groups_${currentUsername}`);
-    const groups = JSON.parse(groupsData.value);
-    const group = groups.find(g => g.id === groupId);
-    
-    if (group) {
-      currentRoomName.textContent = `👥 ${group.name}`;
-      currentRoomDesc.textContent = `Group with ${group.members.join(', ')}`;
-      
-      // Initialize message count for this group
-      const messagesData = await window.storage.get(`group_messages_${groupId}`, true);
-      if (messagesData && messagesData.value) {
-        groupMessages[groupId] = JSON.parse(messagesData.value);
-      } else {
-        groupMessages[groupId] = [];
-      }
-      
-      await loadGroupMessages(groupId);
-    }
-  } catch (error) {
-    console.error('Error loading group:', error);
-  }
-}
-
-async function loadGroupMessages(groupId) {
-  messagesContainer.innerHTML = '';
-  try {
-    const messagesData = await window.storage.get(`group_messages_${groupId}`, true);
-    if (messagesData && messagesData.value) {
-      const msgs = JSON.parse(messagesData.value);
-      groupMessages[groupId] = msgs;
-      for (const msg of msgs) {
-        await addMessage(msg.username, msg.content, msg.timestamp, msg.isSystem);
-      }
-    }
-  } catch (error) {
-    console.log('No group messages');
-  }
-}
-
-function showCreateGroupModal() {
-  loadFriendsForGroup();
-  document.getElementById('createGroupModal').classList.add('active');
-}
-
-function closeCreateGroupModal() {
-  document.getElementById('createGroupModal').classList.remove('active');
-  document.getElementById('groupName').value = '';
-}
-
-async function loadFriendsForGroup() {
-  try {
-    const friendsData = await window.storage.get(`friends_${currentUsername}`);
-    if (friendsData && friendsData.value) {
-      const friends = JSON.parse(friendsData.value);
-      const container = document.getElementById('friendCheckboxList');
-      container.innerHTML = '';
-      
-      friends.forEach(friend => {
-        const checkbox = document.createElement('div');
-        checkbox.style.cssText = 'padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;';
-        checkbox.innerHTML = `
-          <input type="checkbox" id="friend_${friend.name}" value="${friend.name}" style="margin-right: 10px;">
-          <label for="friend_${friend.name}" style="cursor: pointer;">${friend.name}</label>
-        `;
-        container.appendChild(checkbox);
-      });
-    }
-  } catch (error) {
-    console.log('No friends to add');
-  }
-}
-
-async function createGroup() {
-  const groupName = document.getElementById('groupName').value.trim();
-  if (!groupName) {
-    alert('Please enter a group name!');
-    return;
-  }
-  
-  const selectedFriends = [];
-  document.querySelectorAll('#friendCheckboxList input[type="checkbox"]:checked').forEach(cb => {
-    selectedFriends.push(cb.value);
-  });
-  
-  if (selectedFriends.length === 0) {
-    alert('Please select at least one friend!');
-    return;
-  }
-  
-  try {
-    const groupsData = await window.storage.get(`groups_${currentUsername}`);
-    const groups = groupsData && groupsData.value ? JSON.parse(groupsData.value) : [];
-    
-    const newGroup = {
-      id: 'group_' + Date.now(),
-      name: groupName,
-      members: selectedFriends,
-      creator: currentUsername
+      currentRoom = room.dataset.room;
+      header.textContent = currentRoom;
+      loadRoom(currentRoom);
     };
-    
-    groups.push(newGroup);
-    await window.storage.set(`groups_${currentUsername}`, JSON.stringify(groups));
-    displayGroupChats(groups);
-    closeCreateGroupModal();
-    alert(`Group "${groupName}" created!`);
-  } catch (error) {
-    alert('Failed to create group');
-  }
-}
-
-// ROOM SWITCHING
-document.querySelectorAll('.chat-room').forEach(room => {
-  room.addEventListener('click', async () => {
-    document.querySelector('.chat-room.active')?.classList.remove('active');
-    room.classList.add('active');
-    
-    currentRoom = room.dataset.room;
-    currentGroupChat = null;
-    const info = roomInfo[currentRoom];
-    currentRoomName.textContent = info.name;
-    currentRoomDesc.textContent = info.desc;
-    
-    setupMessageListener(currentRoom);
   });
-});
-
-// Update online status when page unloads
-window.addEventListener('beforeunload', () => {
-  setOnlineStatus(false);
-});
-
-// Event listeners
-loginButton.addEventListener('click', login);
-usernameInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') login();
-});
-
-sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
-});
-
-// Make functions globally accessible
-window.showAdminLogin = showAdminLogin;
-window.checkAdminPassword = checkAdminPassword;
-window.openAdminPanel = openAdminPanel;
-window.closeAdminPanel = closeAdminPanel;
-window.promotePlayer = promotePlayer;
-window.showBadgeModal = showBadgeModal;
-window.closeBadgeModal = closeBadgeModal;
-window.saveBadge = saveBadge;
-window.showBanModal = showBanModal;
-window.closeBanModal = closeBanModal;
-window.confirmBan = confirmBan;
-window.unbanPlayer = unbanPlayer;
-window.viewProfile = viewProfile;
-window.toggleBlock = toggleBlock;
-window.toggleMute = toggleMute;
-window.goToOwnProfile = goToOwnProfile;
-window.showAddFriendModal = showAddFriendModal;
-window.closeAddFriendModal = closeAddFriendModal;
-window.addFriend = addFriend;
-window.showCreateGroupModal = showCreateGroupModal;
-window.closeCreateGroupModal = closeCreateGroupModal;
-window.createGroup = createGroup;
-window.switchToGroupChat = switchToGroupChat;
-
-checkUsername();
 </script>
 </body>
 </html>
