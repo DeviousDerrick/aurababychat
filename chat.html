@@ -16,7 +16,6 @@ body {
   overflow: hidden;
 }
 
-/* Animated galaxy background */
 body::before {
   content: '';
   position: fixed;
@@ -64,6 +63,20 @@ body::before {
   padding: 20px; 
   border-right: 2px solid rgba(138, 43, 226, 0.3);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 14px;
+  color: #f093fb;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
 }
 
 .room { 
@@ -90,6 +103,45 @@ body::before {
   border-color: #f093fb;
   box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6), 0 0 40px rgba(240, 147, 251, 0.4);
   transform: translateX(8px);
+}
+
+.profile-section {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 2px solid rgba(138, 43, 226, 0.3);
+}
+
+.profile-card {
+  background: linear-gradient(135deg, rgba(40, 30, 80, 0.6), rgba(50, 40, 90, 0.6));
+  border-radius: 12px;
+  padding: 15px;
+  border: 2px solid rgba(138, 43, 226, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  border-color: #f093fb;
+  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+}
+
+.profile-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.5);
+}
+
+.profile-name {
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
 }
 
 .chat { 
@@ -157,6 +209,24 @@ body::before {
   transform: translateX(4px);
   box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
   border-left-color: #f093fb;
+}
+
+.message .username {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.message .username:hover {
+  text-decoration: underline;
+}
+
+.message .special-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-left: 8px;
+  letter-spacing: 0.5px;
 }
 
 .message button {
@@ -234,15 +304,10 @@ body::before {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-.input button:active {
-  transform: translateY(0);
-}
-
-/* Admin Panel Styles */
-.admin-btn {
+/* Admin Panel & Modals */
+.admin-btn, .friends-btn {
   position: fixed;
   top: 90px;
-  right: 30px;
   padding: 12px 24px;
   background: linear-gradient(135deg, #ff416c, #ff4b2b);
   border: none;
@@ -258,18 +323,37 @@ body::before {
   transition: all 0.3s ease;
 }
 
-.admin-btn:hover {
+.admin-btn { right: 30px; }
+.friends-btn { 
+  right: 200px; 
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.6);
+}
+
+.admin-btn:hover, .friends-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(255, 65, 108, 0.8);
 }
 
-.admin-panel {
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 999;
+  display: none;
+}
+
+.modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 500px;
-  max-height: 80vh;
+  width: 600px;
+  max-height: 85vh;
   background: linear-gradient(135deg, rgba(20, 15, 50, 0.95), rgba(30, 20, 60, 0.95));
   backdrop-filter: blur(20px);
   border: 2px solid rgba(138, 43, 226, 0.6);
@@ -278,9 +362,10 @@ body::before {
   z-index: 1000;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 100px rgba(138, 43, 226, 0.4);
   overflow-y: auto;
+  display: none;
 }
 
-.admin-panel h2 {
+.modal h2 {
   margin: 0 0 20px 0;
   font-size: 28px;
   letter-spacing: 2px;
@@ -291,18 +376,7 @@ body::before {
   background-clip: text;
 }
 
-.admin-panel-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  z-index: 999;
-}
-
-.admin-section {
+.modal-section {
   margin-bottom: 30px;
   padding: 20px;
   background: rgba(40, 30, 80, 0.4);
@@ -310,15 +384,14 @@ body::before {
   border: 1px solid rgba(138, 43, 226, 0.3);
 }
 
-.admin-section h3 {
+.modal-section h3 {
   margin: 0 0 15px 0;
   font-size: 18px;
   letter-spacing: 1px;
   color: #f093fb;
 }
 
-.admin-section input,
-.admin-section select {
+.modal-section input, .modal-section select {
   width: 100%;
   padding: 12px 16px;
   margin-bottom: 10px;
@@ -331,14 +404,13 @@ body::before {
   font-size: 14px;
 }
 
-.admin-section input:focus,
-.admin-section select:focus {
+.modal-section input:focus, .modal-section select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
 }
 
-.admin-section button {
+.modal-section button {
   width: 100%;
   padding: 12px 20px;
   background: linear-gradient(135deg, #667eea, #764ba2);
@@ -354,12 +426,12 @@ body::before {
   box-shadow: 0 6px 16px rgba(138, 43, 226, 0.4);
 }
 
-.admin-section button:hover {
+.modal-section button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6);
 }
 
-.close-admin {
+.close-modal {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -375,7 +447,7 @@ body::before {
   transition: all 0.3s ease;
 }
 
-.close-admin:hover {
+.close-modal:hover {
   background: rgba(255, 65, 108, 1);
   transform: rotate(90deg);
 }
@@ -396,62 +468,236 @@ body::before {
   border-radius: 6px;
   font-size: 13px;
   border-left: 3px solid #667eea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-item button {
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  width: auto !important;
+  margin-left: 10px;
+}
+
+.friend-item, .group-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(40, 30, 80, 0.5);
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.friend-item:hover, .group-item:hover {
+  background: rgba(50, 40, 90, 0.6);
+  border-left-color: #f093fb;
+  transform: translateX(4px);
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.color-option:hover, .color-option.selected {
+  border-color: white;
+  transform: scale(1.1);
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px;
+  background: rgba(40, 30, 80, 0.4);
+  border: 2px solid rgba(138, 43, 226, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: #f093fb;
 }
 </style>
 </head>
 <body>
 <div class="topbar">✨ AURABABY CHAT ✨</div>
 
-<!-- Admin Panel Button (only visible to admins) -->
-<button class="admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN PANEL</button>
+<!-- Buttons -->
+<button class="admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑 ADMIN</button>
+<button class="friends-btn" onclick="openFriendsPanel()">👥 FRIENDS</button>
 
-<!-- Admin Panel Modal -->
-<div id="adminPanelOverlay" class="admin-panel-overlay" style="display:none;" onclick="closeAdminPanel()"></div>
-<div id="adminPanel" class="admin-panel" style="display:none;">
-  <button class="close-admin" onclick="closeAdminPanel()">×</button>
+<!-- Admin Panel -->
+<div id="adminOverlay" class="modal-overlay" onclick="closeAdminPanel()"></div>
+<div id="adminPanel" class="modal">
+  <button class="close-modal" onclick="closeAdminPanel()">×</button>
   <h2>👑 ADMIN CONTROL PANEL</h2>
   
-  <div class="admin-section">
+  <div class="modal-section">
     <h3>🚫 Ban User</h3>
-    <input type="text" id="banUsername" placeholder="Enter username to ban">
+    <input type="text" id="banUsername" placeholder="Username">
     <select id="banDuration">
       <option value="300000">5 minutes</option>
       <option value="1800000">30 minutes</option>
       <option value="3600000">1 hour</option>
       <option value="86400000">24 hours</option>
       <option value="604800000">7 days</option>
-      <option value="2592000000">30 days</option>
       <option value="999999999999">Permanent</option>
     </select>
     <button onclick="banUser()">BAN USER</button>
   </div>
 
-  <div class="admin-section">
+  <div class="modal-section">
     <h3>✏️ Change Username Tag</h3>
-    <input type="text" id="targetUsername" placeholder="Enter username to modify">
-    <input type="text" id="newTag" placeholder="Enter new tag/username">
+    <input type="text" id="targetUsername" placeholder="Username">
+    <input type="text" id="newTag" placeholder="New tag/username">
     <button onclick="changeUsername()">CHANGE TAG</button>
   </div>
 
-  <div class="admin-section">
+  <div class="modal-section">
+    <h3>🏷️ Assign Special Tag</h3>
+    <input type="text" id="specialTagUser" placeholder="Username">
+    <input type="text" id="specialTagText" placeholder="Tag (e.g., VIP, ADMIN, PRO)">
+    <div class="color-picker" id="tagColorPicker"></div>
+    <button onclick="assignSpecialTag()">ASSIGN TAG</button>
+  </div>
+
+  <div class="modal-section">
     <h3>📋 Banned Users</h3>
     <div class="user-list" id="bannedList">Loading...</div>
   </div>
 
-  <div class="admin-section">
+  <div class="modal-section">
     <h3>👥 Online Users</h3>
     <div class="user-list" id="onlineList">Loading...</div>
   </div>
 </div>
 
+<!-- Friends Panel -->
+<div id="friendsOverlay" class="modal-overlay" onclick="closeFriendsPanel()"></div>
+<div id="friendsPanel" class="modal">
+  <button class="close-modal" onclick="closeFriendsPanel()">×</button>
+  <h2>👥 FRIENDS & GROUPS</h2>
+  
+  <div class="tab-buttons">
+    <button class="tab-btn active" onclick="switchTab('friends')">Friends</button>
+    <button class="tab-btn" onclick="switchTab('groups')">Groups</button>
+    <button class="tab-btn" onclick="switchTab('add')">Add Friends</button>
+  </div>
+
+  <div id="friendsTab">
+    <div class="modal-section">
+      <h3>Your Friends</h3>
+      <div id="friendsList" class="user-list">Loading...</div>
+    </div>
+  </div>
+
+  <div id="groupsTab" style="display:none;">
+    <div class="modal-section">
+      <h3>Your Groups</h3>
+      <div id="groupsList" class="user-list">Loading...</div>
+    </div>
+    <div class="modal-section">
+      <h3>Create Group Chat</h3>
+      <input type="text" id="groupName" placeholder="Group name">
+      <div id="friendsSelectList" class="user-list"></div>
+      <button onclick="createGroupChat()">CREATE GROUP</button>
+    </div>
+  </div>
+
+  <div id="addTab" style="display:none;">
+    <div class="modal-section">
+      <h3>Add by Username</h3>
+      <input type="text" id="addFriendUsername" placeholder="Enter username">
+      <button onclick="sendFriendRequest()">SEND REQUEST</button>
+    </div>
+    <div class="modal-section">
+      <h3>Online Players</h3>
+      <div id="onlinePlayersList" class="user-list">Loading...</div>
+    </div>
+    <div class="modal-section">
+      <h3>Friend Requests</h3>
+      <div id="friendRequests" class="user-list">No pending requests</div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileOverlay" class="modal-overlay" onclick="closeProfile()"></div>
+<div id="profileModal" class="modal">
+  <button class="close-modal" onclick="closeProfile()">×</button>
+  <h2 id="profileTitle">Profile</h2>
+  
+  <div class="modal-section">
+    <div style="text-align:center;">
+      <div class="profile-avatar" id="profileAvatar" style="width:100px; height:100px; font-size:48px; margin:0 auto 20px;">?</div>
+      <h3 id="profileUsername">Username</h3>
+      <p id="profileBio" style="font-size:14px; opacity:0.8;">Bio...</p>
+    </div>
+  </div>
+
+  <div class="modal-section" id="profileFriendSection">
+    <button id="profileAddFriend" onclick="addFriendFromProfile()">ADD FRIEND</button>
+  </div>
+
+  <div class="modal-section">
+    <h3>Friends</h3>
+    <div id="profileFriends" class="user-list">Loading...</div>
+  </div>
+
+  <div class="modal-section">
+    <h3>Groups</h3>
+    <div id="profileGroups" class="user-list">Loading...</div>
+  </div>
+</div>
+
 <div class="container">
   <div class="sidebar">
-    <div class="room active" data-room="General 1">🌌 General 1</div>
-    <div class="room" data-room="General 2">💫 General 2</div>
-    <div class="room" data-room="General 3">⭐ General 3</div>
+    <div class="sidebar-section">
+      <div class="section-title">PUBLIC ROOMS</div>
+      <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
+      <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
+      <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
+    </div>
+
+    <div class="sidebar-section" id="groupChatsSection" style="display:none;">
+      <div class="section-title">GROUP CHATS</div>
+      <div id="groupChatsList"></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-card" onclick="openMyProfile()">
+        <div class="profile-avatar" id="myAvatar">?</div>
+        <div class="profile-name" id="myUsername">Username</div>
+        <div style="font-size:11px; opacity:0.7;">View Profile →</div>
+      </div>
+    </div>
   </div>
+
   <div class="chat">
-    <div class="chat-header" id="roomName">🌌 General 1 <span style="font-weight:800; font-size:16px; margin-left:20px;">Online Users: <span id="onlineCount">0</span></span></div>
+    <div class="chat-header" id="roomName">🌌 General 1 <span>Online: <span id="onlineCount">0</span></span></div>
     <div class="messages" id="messages"></div>
     <div class="input">
       <input id="msgInput" placeholder="Type your message..." />
@@ -486,36 +732,68 @@ if (adminPass === "chickenfish67demonlordohio") {
   document.getElementById("adminBtn").style.display = "block";
 }
 
-// Admin Panel Functions
+// Initialize profile
+document.getElementById("myUsername").textContent = username;
+document.getElementById("myAvatar").textContent = username[0].toUpperCase();
+
+db.collection("profiles").doc(username).set({
+  avatar: username[0].toUpperCase(),
+  bio: "AuraBaby user",
+  createdAt: Date.now()
+}, {merge: true});
+
+// Color presets for tags
+const tagColors = [
+  {name: 'Purple', bg: '#8b5cf6', text: '#fff'},
+  {name: 'Pink', bg: '#ec4899', text: '#fff'},
+  {name: 'Blue', bg: '#3b82f6', text: '#fff'},
+  {name: 'Green', bg: '#10b981', text: '#fff'},
+  {name: 'Red', bg: '#ef4444', text: '#fff'},
+  {name: 'Gold', bg: '#f59e0b', text: '#000'},
+  {name: 'Cyan', bg: '#06b6d4', text: '#fff'},
+  {name: 'Orange', bg: '#f97316', text: '#fff'}
+];
+
+let selectedColor = tagColors[0];
+
+// Render color picker
+const colorPicker = document.getElementById('tagColorPicker');
+tagColors.forEach((color, idx) => {
+  const div = document.createElement('div');
+  div.className = 'color-option' + (idx === 0 ? ' selected' : '');
+  div.style.background = color.bg;
+  div.onclick = () => {
+    document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+    div.classList.add('selected');
+    selectedColor = color;
+  };
+  colorPicker.appendChild(div);
+});
+
+// ADMIN FUNCTIONS
 function openAdminPanel() {
   document.getElementById("adminPanel").style.display = "block";
-  document.getElementById("adminPanelOverlay").style.display = "block";
+  document.getElementById("adminOverlay").style.display = "block";
   loadBannedUsers();
   loadOnlineUsers();
 }
 
 function closeAdminPanel() {
   document.getElementById("adminPanel").style.display = "none";
-  document.getElementById("adminPanelOverlay").style.display = "none";
+  document.getElementById("adminOverlay").style.display = "none";
 }
 
 function banUser() {
   const targetUser = document.getElementById("banUsername").value.trim();
   const duration = parseInt(document.getElementById("banDuration").value);
-  
-  if (!targetUser) {
-    alert("Please enter a username");
-    return;
-  }
-  
-  const banUntil = Date.now() + duration;
+  if (!targetUser) return alert("Enter a username");
   
   db.collection("bans").doc(targetUser).set({
     bannedBy: username,
-    banUntil: banUntil,
+    banUntil: Date.now() + duration,
     timestamp: Date.now()
   }).then(() => {
-    alert(`User ${targetUser} has been banned!`);
+    alert(`${targetUser} banned!`);
     document.getElementById("banUsername").value = "";
     loadBannedUsers();
   });
@@ -524,20 +802,34 @@ function banUser() {
 function changeUsername() {
   const targetUser = document.getElementById("targetUsername").value.trim();
   const newTag = document.getElementById("newTag").value.trim();
-  
-  if (!targetUser || !newTag) {
-    alert("Please enter both username and new tag");
-    return;
-  }
+  if (!targetUser || !newTag) return alert("Enter both fields");
   
   db.collection("usernameTags").doc(targetUser).set({
     displayName: newTag,
     changedBy: username,
     timestamp: Date.now()
   }).then(() => {
-    alert(`Username tag changed: ${targetUser} → ${newTag}`);
+    alert(`Tag changed: ${targetUser} → ${newTag}`);
     document.getElementById("targetUsername").value = "";
     document.getElementById("newTag").value = "";
+  });
+}
+
+function assignSpecialTag() {
+  const targetUser = document.getElementById("specialTagUser").value.trim();
+  const tagText = document.getElementById("specialTagText").value.trim();
+  if (!targetUser || !tagText) return alert("Enter both fields");
+  
+  db.collection("specialTags").doc(targetUser).set({
+    tag: tagText,
+    bgColor: selectedColor.bg,
+    textColor: selectedColor.text,
+    assignedBy: username,
+    timestamp: Date.now()
+  }).then(() => {
+    alert(`Special tag assigned to ${targetUser}!`);
+    document.getElementById("specialTagUser").value = "";
+    document.getElementById("specialTagText").value = "";
   });
 }
 
@@ -553,25 +845,19 @@ function loadBannedUsers() {
         const timeLeft = Math.ceil((data.banUntil - now) / 60000);
         const div = document.createElement("div");
         div.className = "user-item";
-        div.innerHTML = `${doc.id} - ${timeLeft > 1440 ? Math.ceil(timeLeft/1440) + " days" : timeLeft + " mins"} left`;
+        div.innerHTML = `<span>${doc.id} - ${timeLeft > 1440 ? Math.ceil(timeLeft/1440) + " days" : timeLeft + " mins"}</span>`;
         
-        const unbanBtn = document.createElement("button");
-        unbanBtn.textContent = "Unban";
-        unbanBtn.style.marginLeft = "10px";
-        unbanBtn.style.padding = "4px 8px";
-        unbanBtn.style.fontSize = "11px";
-        unbanBtn.onclick = () => {
+        const btn = document.createElement("button");
+        btn.textContent = "Unban";
+        btn.onclick = () => {
           db.collection("bans").doc(doc.id).delete();
           loadBannedUsers();
         };
-        div.appendChild(unbanBtn);
+        div.appendChild(btn);
         list.appendChild(div);
       }
     });
-    
-    if (list.innerHTML === "") {
-      list.innerHTML = "No banned users";
-    }
+    if (list.innerHTML === "") list.innerHTML = "No banned users";
   });
 }
 
@@ -582,22 +868,326 @@ function loadOnlineUsers() {
     const now = Date.now();
     
     snapshot.forEach(doc => {
-      const data = doc.data();
-      if (now - data.lastSeen < 7000) {
+      if (now - doc.data().lastSeen < 7000) {
         const div = document.createElement("div");
         div.className = "user-item";
         div.textContent = doc.id;
         list.appendChild(div);
       }
     });
-    
-    if (list.innerHTML === "") {
-      list.innerHTML = "No users online";
-    }
+    if (list.innerHTML === "") list.innerHTML = "No users online";
   });
 }
 
-// Check if user is banned
+// FRIENDS FUNCTIONS
+let selectedFriends = [];
+
+function openFriendsPanel() {
+  document.getElementById("friendsPanel").style.display = "block";
+  document.getElementById("friendsOverlay").style.display = "block";
+  loadFriends();
+  loadGroups();
+  loadFriendRequests();
+}
+
+function closeFriendsPanel() {
+  document.getElementById("friendsPanel").style.display = "none";
+  document.getElementById("friendsOverlay").style.display = "none";
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.getElementById('friendsTab').style.display = tab === 'friends' ? 'block' : 'none';
+  document.getElementById('groupsTab').style.display = tab === 'groups' ? 'block' : 'none';
+  document.getElementById('addTab').style.display = tab === 'add' ? 'block' : 'none';
+  
+  if (tab === 'groups') loadFriendsForGroup();
+  if (tab === 'add') loadOnlinePlayers();
+}
+
+function loadFriends() {
+  db.collection("friends").doc(username).onSnapshot(doc => {
+    const list = document.getElementById("friendsList");
+    list.innerHTML = "";
+    const friends = doc.data() || {};
+    
+    Object.keys(friends).forEach(friendName => {
+      if (friends[friendName]) {
+        const div = document.createElement("div");
+        div.className = "friend-item";
+        div.textContent = friendName;
+        div.onclick = () => openUserProfile(friendName);
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No friends yet";
+  });
+}
+
+function loadGroups() {
+  db.collection("groupChats").where("members", "array-contains", username).onSnapshot(snapshot => {
+    const list = document.getElementById("groupsList");
+    const sidebarList = document.getElementById("groupChatsList");
+    const section = document.getElementById("groupChatsSection");
+    
+    list.innerHTML = "";
+    sidebarList.innerHTML = "";
+    
+    if (snapshot.empty) {
+      list.innerHTML = "No groups yet";
+      section.style.display = "none";
+      return;
+    }
+    
+    section.style.display = "block";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      
+      // Add to modal
+      const div = document.createElement("div");
+      div.className = "group-item";
+      div.textContent = `${data.name} (${data.members.length} members)`;
+      div.onclick = () => loadRoom(doc.id, 'group');
+      list.appendChild(div);
+      
+      // Add to sidebar
+      const sideDiv = document.createElement("div");
+      sideDiv.className = "room";
+      sideDiv.dataset.room = doc.id;
+      sideDiv.dataset.type = "group";
+      sideDiv.textContent = `💬 ${data.name}`;
+      sideDiv.onclick = function() {
+        document.querySelectorAll(".room").forEach(r => r.classList.remove("active"));
+        this.classList.add("active");
+        loadRoom(doc.id, 'group');
+      };
+      sidebarList.appendChild(sideDiv);
+    });
+  });
+}
+
+function loadFriendsForGroup() {
+  db.collection("friends").doc(username).get().then(doc => {
+    const list = document.getElementById("friendsSelectList");
+    list.innerHTML = "";
+    const friends = doc.data() || {};
+    selectedFriends = [];
+    
+    Object.keys(friends).forEach(friendName => {
+      if (friends[friendName]) {
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.style.cursor = "pointer";
+        div.innerHTML = `<span>☐ ${friendName}</span>`;
+        div.onclick = function() {
+          const idx = selectedFriends.indexOf(friendName);
+          if (idx > -1) {
+            selectedFriends.splice(idx, 1);
+            this.querySelector('span').textContent = `☐ ${friendName}`;
+          } else {
+            selectedFriends.push(friendName);
+            this.querySelector('span').textContent = `☑ ${friendName}`;
+          }
+        };
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No friends to add";
+  });
+}
+
+function createGroupChat() {
+  const groupName = document.getElementById("groupName").value.trim();
+  if (!groupName) return alert("Enter group name");
+  if (selectedFriends.length === 0) return alert("Select at least one friend");
+  
+  const members = [username, ...selectedFriends];
+  
+  db.collection("groupChats").add({
+    name: groupName,
+    members: members,
+    createdBy: username,
+    createdAt: Date.now()
+  }).then(() => {
+    alert(`Group "${groupName}" created!`);
+    document.getElementById("groupName").value = "";
+    selectedFriends = [];
+    loadGroups();
+  });
+}
+
+function sendFriendRequest() {
+  const friendName = document.getElementById("addFriendUsername").value.trim();
+  if (!friendName) return alert("Enter username");
+  if (friendName === username) return alert("Cannot add yourself");
+  
+  db.collection("friendRequests").add({
+    from: username,
+    to: friendName,
+    timestamp: Date.now(),
+    status: "pending"
+  }).then(() => {
+    alert(`Friend request sent to ${friendName}!`);
+    document.getElementById("addFriendUsername").value = "";
+  });
+}
+
+function loadFriendRequests() {
+  db.collection("friendRequests").where("to", "==", username).where("status", "==", "pending")
+    .onSnapshot(snapshot => {
+      const list = document.getElementById("friendRequests");
+      list.innerHTML = "";
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `<span>${data.from}</span>`;
+        
+        const acceptBtn = document.createElement("button");
+        acceptBtn.textContent = "Accept";
+        acceptBtn.onclick = () => acceptFriendRequest(doc.id, data.from);
+        
+        const rejectBtn = document.createElement("button");
+        rejectBtn.textContent = "Reject";
+        rejectBtn.style.background = "linear-gradient(135deg, #ff416c, #ff4b2b)";
+        rejectBtn.onclick = () => rejectFriendRequest(doc.id);
+        
+        div.appendChild(acceptBtn);
+        div.appendChild(rejectBtn);
+        list.appendChild(div);
+      });
+      
+      if (list.innerHTML === "") list.innerHTML = "No pending requests";
+    });
+}
+
+function acceptFriendRequest(requestId, friendName) {
+  db.collection("friends").doc(username).set({[friendName]: true}, {merge: true});
+  db.collection("friends").doc(friendName).set({[username]: true}, {merge: true});
+  db.collection("friendRequests").doc(requestId).update({status: "accepted"});
+  alert(`You are now friends with ${friendName}!`);
+}
+
+function rejectFriendRequest(requestId) {
+  db.collection("friendRequests").doc(requestId).update({status: "rejected"});
+}
+
+function loadOnlinePlayers() {
+  db.collection("presence").get().then(snapshot => {
+    const list = document.getElementById("onlinePlayersList");
+    list.innerHTML = "";
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      if (now - doc.data().lastSeen < 7000 && doc.id !== username) {
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `<span>${doc.id}</span>`;
+        
+        const btn = document.createElement("button");
+        btn.textContent = "Add Friend";
+        btn.onclick = () => {
+          document.getElementById("addFriendUsername").value = doc.id;
+          sendFriendRequest();
+        };
+        div.appendChild(btn);
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No players online";
+  });
+}
+
+// PROFILE FUNCTIONS
+let currentProfileUser = null;
+
+function openMyProfile() {
+  openUserProfile(username);
+}
+
+function openUserProfile(user) {
+  currentProfileUser = user;
+  document.getElementById("profileModal").style.display = "block";
+  document.getElementById("profileOverlay").style.display = "block";
+  
+  document.getElementById("profileTitle").textContent = user === username ? "My Profile" : `${user}'s Profile`;
+  document.getElementById("profileUsername").textContent = user;
+  document.getElementById("profileAvatar").textContent = user[0].toUpperCase();
+  
+  db.collection("profiles").doc(user).get().then(doc => {
+    const data = doc.data() || {};
+    document.getElementById("profileBio").textContent = data.bio || "AuraBaby user";
+  });
+  
+  // Show/hide add friend button
+  if (user === username) {
+    document.getElementById("profileFriendSection").style.display = "none";
+  } else {
+    document.getElementById("profileFriendSection").style.display = "block";
+    db.collection("friends").doc(username).get().then(doc => {
+      const friends = doc.data() || {};
+      document.getElementById("profileAddFriend").textContent = 
+        friends[user] ? "✓ Friends" : "ADD FRIEND";
+    });
+  }
+  
+  loadProfileData(user);
+}
+
+function loadProfileData(user) {
+  // Load friends
+  db.collection("friends").doc(user).get().then(doc => {
+    const list = document.getElementById("profileFriends");
+    list.innerHTML = "";
+    const friends = doc.data() || {};
+    
+    Object.keys(friends).forEach(friend => {
+      if (friends[friend]) {
+        const div = document.createElement("div");
+        div.className = "friend-item";
+        div.textContent = friend;
+        div.onclick = () => openUserProfile(friend);
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No friends";
+  });
+  
+  // Load groups
+  db.collection("groupChats").where("members", "array-contains", user).get().then(snapshot => {
+    const list = document.getElementById("profileGroups");
+    list.innerHTML = "";
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "group-item";
+      div.textContent = data.name;
+      list.appendChild(div);
+    });
+    if (list.innerHTML === "") list.innerHTML = "No groups";
+  });
+}
+
+function addFriendFromProfile() {
+  if (!currentProfileUser) return;
+  document.getElementById("addFriendUsername").value = currentProfileUser;
+  closeProfile();
+  openFriendsPanel();
+  switchTab('add');
+  sendFriendRequest();
+}
+
+function closeProfile() {
+  document.getElementById("profileModal").style.display = "none";
+  document.getElementById("profileOverlay").style.display = "none";
+  currentProfileUser = null;
+}
+
+// MESSAGING
 async function checkBan() {
   const banDoc = await db.collection("bans").doc(username).get();
   if (banDoc.exists) {
@@ -607,115 +1197,165 @@ async function checkBan() {
       alert(`You are banned for ${timeLeft} more minutes`);
       return true;
     } else {
-      // Ban expired, remove it
       await db.collection("bans").doc(username).delete();
     }
   }
   return false;
 }
 
-// Get display name
 async function getDisplayName(user) {
   const tagDoc = await db.collection("usernameTags").doc(user).get();
-  if (tagDoc.exists) {
-    return tagDoc.data().displayName;
-  }
+  if (tagDoc.exists) return tagDoc.data().displayName;
   return user;
 }
 
-// Profile system
-db.collection("profiles").doc(username).set({avatar:"🙂", bio:"AuraBaby user"},{merge:true});
+async function getSpecialTag(user) {
+  const tagDoc = await db.collection("specialTags").doc(user).get();
+  if (tagDoc.exists) return tagDoc.data();
+  return null;
+}
 
-// Check if user is banned on load
-checkBan().then(isBanned => {
-  if (isBanned) {
-    document.getElementById("msgInput").disabled = true;
-    document.getElementById("msgInput").placeholder = "You are banned from sending messages";
-  }
-});
-
-// Friend system (basic)
-function addFriend(friendName){ db.collection("friends").doc(username).set({[friendName]:true},{merge:true}); }
-db.collection("friends").doc(username).onSnapshot(doc=>{ console.log("Friends:", doc.data()); });
-
-// Online users tracking
-setInterval(()=>{
-  db.collection("presence").doc(username).set({lastSeen:Date.now()});
-},3000);
-db.collection("presence").onSnapshot(snap=>{
-  let online=0;
-  const now=Date.now();
-  snap.forEach(doc=>{ if(now-doc.data().lastSeen<7000) online++; });
-  document.getElementById("onlineCount").textContent = online;
-});
-
-// Cooldown + smart filter
-let lastSent=0;
-function filterText(text){
-  const badWords=[/fuck/gi,/shit/gi,/bitch/gi];
-  let clean=text;
-  badWords.forEach(rx=>{ clean=clean.replace(rx,"***"); });
+let lastSent = 0;
+function filterText(text) {
+  const badWords = [/fuck/gi, /shit/gi, /bitch/gi];
+  let clean = text;
+  badWords.forEach(rx => { clean = clean.replace(rx, "***"); });
   return clean;
 }
-function sendMessage(){
-  const now=Date.now();
-  if(now-lastSent<5000){ alert("Please wait 5 seconds before sending another message."); return; }
+
+function sendMessage() {
+  const now = Date.now();
+  if (now - lastSent < 5000) return alert("Wait 5 seconds");
   
-  // Check if user is banned
   checkBan().then(isBanned => {
     if (isBanned) return;
     
-    lastSent=now;
-    const input=document.getElementById("msgInput");
-    if(!input.value) return;
+    lastSent = now;
+    const input = document.getElementById("msgInput");
+    if (!input.value) return;
 
-    db.collection("rooms").doc(currentRoom).collection("messages").add({
+    const collection = currentRoomType === 'group' 
+      ? db.collection("groupChats").doc(currentRoom).collection("messages")
+      : db.collection("rooms").doc(currentRoom).collection("messages");
+
+    collection.add({
       user: username,
       text: filterText(input.value),
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    input.value="";
+    input.value = "";
   });
 }
 
-// Room switching and message display
-let currentRoom="General 1";
-let unsub=null;
-function loadRoom(room){
-  if(unsub) unsub();
-  document.getElementById("messages").innerHTML="";
-  unsub=db.collection("rooms").doc(room).collection("messages").orderBy("time").onSnapshot(snap=>{
-    document.getElementById("messages").innerHTML="";
-    snap.forEach(doc=>{
-      const m=doc.data();
-      const div=document.createElement("div");
-      div.className="message";
+// Room switching
+let currentRoom = "General 1";
+let currentRoomType = "public";
+let unsub = null;
+
+function loadRoom(room, type = 'public') {
+  if (unsub) unsub();
+  currentRoom = room;
+  currentRoomType = type;
+  
+  const collection = type === 'group'
+    ? db.collection("groupChats").doc(room).collection("messages")
+    : db.collection("rooms").doc(room).collection("messages");
+  
+  document.getElementById("messages").innerHTML = "";
+  
+  // Update header
+  if (type === 'group') {
+    db.collection("groupChats").doc(room).get().then(doc => {
+      const data = doc.data();
+      document.getElementById("roomName").innerHTML = `💬 ${data.name} <span>Members: ${data.members.length}</span>`;
+    });
+  } else {
+    document.getElementById("roomName").innerHTML = `🌌 ${room} <span>Online: <span id="onlineCount">0</span></span>`;
+  }
+  
+  unsub = collection.orderBy("time").onSnapshot(snap => {
+    document.getElementById("messages").innerHTML = "";
+    snap.forEach(doc => {
+      const m = doc.data();
+      const div = document.createElement("div");
+      div.className = "message";
       
-      // Get display name and show message
       getDisplayName(m.user).then(displayName => {
-        div.textContent = displayName + ": " + m.text;
+        getSpecialTag(m.user).then(specialTag => {
+          const usernameSpan = document.createElement("span");
+          usernameSpan.className = "username";
+          usernameSpan.textContent = displayName;
+          usernameSpan.onclick = () => openUserProfile(m.user);
+          
+          div.appendChild(usernameSpan);
+          
+          if (specialTag) {
+            const tagSpan = document.createElement("span");
+            tagSpan.className = "special-tag";
+            tagSpan.textContent = specialTag.tag;
+            tagSpan.style.background = specialTag.bgColor;
+            tagSpan.style.color = specialTag.textColor;
+            div.appendChild(tagSpan);
+          }
+          
+          const textNode = document.createTextNode(": " + m.text);
+          div.appendChild(textNode);
+        });
       });
       
-      if(isAdmin){
-        const delBtn=document.createElement("button");
-        delBtn.textContent="Delete";
-        delBtn.style.marginLeft="10px";
-        delBtn.onclick=()=>{ db.collection("rooms").doc(currentRoom).collection("messages").doc(doc.id).delete(); };
+      if (isAdmin) {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.style.marginLeft = "10px";
+        delBtn.onclick = () => collection.doc(doc.id).delete();
         div.appendChild(delBtn);
       }
+      
       document.getElementById("messages").appendChild(div);
     });
   });
+  
+  closeFriendsPanel();
 }
+
 loadRoom(currentRoom);
-document.querySelectorAll(".room").forEach(r=>{ r.onclick=()=>{
-  document.querySelectorAll(".room").forEach(x=>x.classList.remove("active"));
-  r.classList.add("active");
-  currentRoom=r.dataset.room;
-  document.getElementById("roomName").textContent="🌌 "+currentRoom+" Online Users: "+document.getElementById("onlineCount").textContent;
-  loadRoom(currentRoom);
-};});
+
+document.querySelectorAll(".room").forEach(r => {
+  r.onclick = function() {
+    document.querySelectorAll(".room").forEach(x => x.classList.remove("active"));
+    this.classList.add("active");
+    loadRoom(this.dataset.room, this.dataset.type);
+  };
+});
+
+// Online presence
+setInterval(() => {
+  db.collection("presence").doc(username).set({lastSeen: Date.now()});
+}, 3000);
+
+db.collection("presence").onSnapshot(snap => {
+  let online = 0;
+  const now = Date.now();
+  snap.forEach(doc => {
+    if (now - doc.data().lastSeen < 7000) online++;
+  });
+  const countEl = document.getElementById("onlineCount");
+  if (countEl) countEl.textContent = online;
+});
+
+// Enter to send
+document.getElementById("msgInput").addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage();
+});
+
+// Check ban on load
+checkBan().then(isBanned => {
+  if (isBanned) {
+    document.getElementById("msgInput").disabled = true;
+    document.getElementById("msgInput").placeholder = "You are banned";
+  }
+});
 </script>
 </body>
 </html>
