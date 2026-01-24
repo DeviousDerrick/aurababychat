@@ -867,3 +867,50 @@ body::before {
 .login-toggle:hover {
   color: white;
 }
+/* ===== FOCUS MODE ===== */
+body.focus-mode .sidebar {
+  transform: translateX(-100%);
+  width: 0;
+  padding: 0;
+  border: none;
+}
+
+body.focus-mode .topbar {
+  transform: translateY(-100%);
+}
+
+body.focus-mode .container {
+  height: 100vh;
+}
+
+.sidebar,
+.topbar {
+  transition: transform 0.35s ease, width 0.35s ease, padding 0.35s ease;
+}
+
+/* Chat expands fully */
+body.focus-mode .chat {
+  width: 100%;
+}
+
+/* Focus toggle button */
+.focus-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 14px 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10002;
+  box-shadow: 0 8px 24px rgba(138, 43, 226, 0.6);
+  transition: all 0.3s ease;
+}
+
+.focus-toggle:hover {
+  transform: scale(1.15);
+}
+
