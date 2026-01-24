@@ -1356,6 +1356,20 @@ document.querySelectorAll(".room").forEach(r => {
     loadRoom(this.dataset.room, this.dataset.type);
   };
 });
+function toggleFocus() {
+  document.body.classList.toggle("focus-mode");
+
+  // Optional: remember preference
+  localStorage.setItem(
+    "focusMode",
+    document.body.classList.contains("focus-mode")
+  );
+}
+
+// Restore focus mode on reload
+if (localStorage.getItem("focusMode") === "true") {
+  document.body.classList.add("focus-mode");
+}
 
 // Online presence
 function startPresence() {
