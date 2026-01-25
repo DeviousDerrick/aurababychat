@@ -12,6 +12,79 @@ const db = firebase.firestore();
 
 let username = null;
 let isAdmin = localStorage.getItem("isAdmin") === "true";
+let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers_" + username) || "[]");
+
+// SIDEBAR TOGGLE
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+}
+
+// EMOJI PICKER
+const emojis = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️','🗨️','🗯️','💭','💤','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄'];
+
+function toggleEmojiPicker() {
+  const picker = document.getElementById('emojiPicker');
+  if (picker.style.display === 'none' || !picker.style.display) {
+    picker.style.display = 'block';
+    renderEmojis();
+  } else {
+    picker.style.display = 'none';
+  }
+}
+
+function renderEmojis() {
+  const grid = document.getElementById('emojiGrid');
+  grid.innerHTML = '';
+  emojis.forEach(emoji => {
+    const div = document.createElement('div');
+    div.className = 'emoji-item';
+    div.textContent = emoji;
+    div.onclick = () => insertEmoji(emoji);
+    grid.appendChild(div);
+  });
+}
+
+function insertEmoji(emoji) {
+  const input = document.getElementById('msgInput');
+  input.value += emoji;
+  input.focus();
+  document.getElementById('emojiPicker').style.display = 'none';
+  updateWordCount();
+}
+
+// Close emoji picker when clicking outside
+document.addEventListener('click', (e) => {
+  const picker = document.getElementById('emojiPicker');
+  const emojiBtn = document.querySelector('.emoji-btn');
+  if (picker && !picker.contains(e.target) && e.target !== emojiBtn) {
+    picker.style.display = 'none';
+  }
+});
+
+// WORD COUNT
+function updateWordCount() {
+  const input = document.getElementById('msgInput');
+  const counter = document.getElementById('wordCounter');
+  const words = input.value.trim().split(/\s+/).filter(w => w.length > 0);
+  const count = input.value.trim() === '' ? 0 : words.length;
+  
+  counter.textContent = `${count}/30 words`;
+  
+  if (count > 30) {
+    counter.classList.add('over-limit');
+  } else {
+    counter.classList.remove('over-limit');
+  }
+}
+
+document.getElementById('msgInput').addEventListener('input', updateWordCount);
+
+// AUTOSCROLL
+function scrollToBottom() {
+  const messages = document.getElementById('messages');
+  messages.scrollTop = messages.scrollHeight;
+}
 
 // NOTIFICATION SYSTEM
 function showNotification(message, type = 'error') {
@@ -64,14 +137,12 @@ async function signup() {
     return;
   }
   
-  // Check if username exists
   const userDoc = await db.collection('users').doc(user).get();
   if (userDoc.exists) {
     showNotification('Username already taken');
     return;
   }
   
-  // Create account
   await db.collection('users').doc(user).set({
     code: code,
     createdAt: Date.now(),
@@ -103,8 +174,8 @@ async function login() {
     return;
   }
   
-  // Login successful
   username = user;
+  blockedUsers = JSON.parse(localStorage.getItem("blockedUsers_" + username) || "[]");
   localStorage.setItem('username', username);
   localStorage.setItem('userCode', code);
   
@@ -114,7 +185,6 @@ async function login() {
   initializeApp();
 }
 
-// Auto-login if credentials exist
 window.addEventListener('load', async () => {
   const savedUser = localStorage.getItem('username');
   const savedCode = localStorage.getItem('userCode');
@@ -123,6 +193,7 @@ window.addEventListener('load', async () => {
     const userDoc = await db.collection('users').doc(savedUser).get();
     if (userDoc.exists && userDoc.data().code === savedCode) {
       username = savedUser;
+      blockedUsers = JSON.parse(localStorage.getItem("blockedUsers_" + username) || "[]");
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
       initializeApp();
@@ -131,11 +202,9 @@ window.addEventListener('load', async () => {
 });
 
 function initializeApp() {
-  // Initialize profile
   document.getElementById("myUsername").textContent = username;
   document.getElementById("myAvatar").textContent = username[0].toUpperCase();
 
-  // Get join time from user doc
   db.collection("users").doc(username).get().then(doc => {
     const joinTime = doc.data().joinTime || Date.now();
     localStorage.setItem("joinTime", joinTime);
@@ -148,16 +217,65 @@ function initializeApp() {
     createdAt: Date.now()
   }, {merge: true});
 
-  // Show admin button if admin
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'block';
   }
 
-  // Start presence, load chats, etc
   startPresence();
   loadPrivateChats();
   loadRoom(currentRoom);
   checkBan();
+  loadBlockedUsers();
+}
+
+// BLOCKING SYSTEM
+function blockUser(user) {
+  if (!blockedUsers.includes(user)) {
+    blockedUsers.push(user);
+    localStorage.setItem("blockedUsers_" + username, JSON.stringify(blockedUsers));
+    showNotification(`Blocked ${user}`, 'success');
+    loadBlockedUsers();
+  }
+}
+
+function unblockUser(user) {
+  blockedUsers = blockedUsers.filter(u => u !== user);
+  localStorage.setItem("blockedUsers_" + username, JSON.stringify(blockedUsers));
+  showNotification(`Unblocked ${user}`, 'success');
+  loadBlockedUsers();
+  loadRoom(currentRoom, currentRoomType);
+}
+
+function loadBlockedUsers() {
+  const list = document.getElementById('blockedUsersList');
+  if (!list) return;
+  
+  list.innerHTML = '';
+  
+  if (blockedUsers.length === 0) {
+    list.innerHTML = 'No blocked users';
+    return;
+  }
+  
+  blockedUsers.forEach(user => {
+    const div = document.createElement('div');
+    div.className = 'user-item';
+    div.innerHTML = `<span>${user}</span>`;
+    
+    const btn = document.createElement('button');
+    btn.textContent = 'Unblock';
+    btn.onclick = () => unblockUser(user);
+    div.appendChild(btn);
+    
+    list.appendChild(div);
+  });
+}
+
+function blockUserFromProfile() {
+  if (currentProfileUser && currentProfileUser !== username) {
+    blockUser(currentProfileUser);
+    closeProfile();
+  }
 }
 
 // Admin unlock function
@@ -229,7 +347,7 @@ function loadBannedServer() {
         
         const div = document.createElement("div");
         div.className = "user-item";
-        div.innerHTML = `<span><strong>${doc.id}</strong> - ${hours}h ${mins}m ${secs}s left</span>`;
+        div.innerHTML = `<span><strong>${doc.id}</strong> - ${hours}h ${mins}m ${secs}s</span>`;
         list.appendChild(div);
       }
     });
@@ -269,7 +387,7 @@ function loadLeaderboard() {
       
       const info = document.createElement('div');
       info.style.flex = '1';
-      info.innerHTML = `<div style="font-size:16px;">${doc.id}</div><div style="font-size:12px; opacity:0.7;">${formatTime(data.totalTime)}</div>`;
+      info.innerHTML = `<div>${doc.id}</div><div style="font-size:11px; opacity:0.7;">${formatTime(data.totalTime)}</div>`;
       
       div.appendChild(rank);
       div.appendChild(info);
@@ -306,7 +424,7 @@ function loadOnlineUsersList() {
         
         if (doc.id !== username) {
           const btn = document.createElement('button');
-          btn.textContent = 'View Profile';
+          btn.textContent = 'Profile';
           btn.onclick = () => {
             closeOnlineUsers();
             openUserProfile(doc.id);
@@ -381,7 +499,7 @@ function watchTyping(room, type) {
     const now = Date.now();
     
     snapshot.forEach(doc => {
-      if (doc.id !== username && now - doc.data().timestamp < 4000) {
+      if (doc.id !== username && now - doc.data().timestamp < 4000 && !blockedUsers.includes(doc.id)) {
         currentlyTyping.add(doc.id);
       }
     });
@@ -440,6 +558,8 @@ function loadPrivateChats() {
       const data = doc.data();
       const otherUser = data.users.find(u => u !== username);
       
+      if (blockedUsers.includes(otherUser)) return;
+      
       const div = document.createElement('div');
       div.className = 'room';
       div.dataset.room = doc.id;
@@ -453,8 +573,8 @@ function loadPrivateChats() {
             const badge = document.createElement('span');
             badge.className = 'streak-badge';
             badge.textContent = `🔥 ${streak}`;
-            badge.style.fontSize = '10px';
-            badge.style.marginLeft = '5px';
+            badge.style.fontSize = '9px';
+            badge.style.marginLeft = '4px';
             div.appendChild(badge);
           }
         }
@@ -521,8 +641,7 @@ function renderThemes() {
     div.innerHTML = `
       <div class="theme-preview" style="background: ${theme.primary}"></div>
       <div style="flex:1;">
-        <div style="font-size:16px;">${theme.name}</div>
-        <div style="font-size:12px; opacity:0.7;">Click to apply</div>
+        <div>${theme.name}</div>
       </div>
     `;
     div.onclick = () => applyTheme(theme, idx);
@@ -559,10 +678,11 @@ function openSettings() {
   document.getElementById('settingsPanel').style.display = 'block';
   document.getElementById('settingsOverlay').style.display = 'block';
   
-  document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') === 'true';
+  document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') !== 'false';
   document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
-  document.getElementById('compactMode').checked = localStorage.getItem('compactMode') === 'true';
   document.getElementById('messageProtection').checked = localStorage.getItem('messageProtection') === 'true';
+  
+  loadBlockedUsers();
 }
 
 function closeSettings() {
@@ -571,7 +691,6 @@ function closeSettings() {
   
   localStorage.setItem('showTimestamps', document.getElementById('showTimestamps').checked);
   localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
-  localStorage.setItem('compactMode', document.getElementById('compactMode').checked);
   localStorage.setItem('messageProtection', document.getElementById('messageProtection').checked);
 }
 
@@ -600,17 +719,19 @@ const tagColors = [
 let selectedColor = tagColors[0];
 
 const colorPicker = document.getElementById('tagColorPicker');
-tagColors.forEach((color, idx) => {
-  const div = document.createElement('div');
-  div.className = 'color-option' + (idx === 0 ? ' selected' : '');
-  div.style.background = color.bg;
-  div.onclick = () => {
-    document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
-    div.classList.add('selected');
-    selectedColor = color;
-  };
-  colorPicker.appendChild(div);
-});
+if (colorPicker) {
+  tagColors.forEach((color, idx) => {
+    const div = document.createElement('div');
+    div.className = 'color-option' + (idx === 0 ? ' selected' : '');
+    div.style.background = color.bg;
+    div.onclick = () => {
+      document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedColor = color;
+    };
+    colorPicker.appendChild(div);
+  });
+}
 
 // ADMIN FUNCTIONS
 function openAdminPanel() {
@@ -618,7 +739,6 @@ function openAdminPanel() {
   document.getElementById("adminPanel").style.display = "block";
   document.getElementById("adminOverlay").style.display = "block";
   loadBannedUsers();
-  loadOnlineUsers();
 }
 
 function closeAdminPanel() {
@@ -677,8 +797,10 @@ function assignSpecialTag() {
 }
 
 function loadBannedUsers() {
+  const list = document.getElementById("bannedList");
+  if (!list) return;
+  
   db.collection("bans").get().then(snapshot => {
-    const list = document.getElementById("bannedList");
     list.innerHTML = "";
     const now = Date.now();
     
@@ -688,7 +810,7 @@ function loadBannedUsers() {
         const timeLeft = Math.ceil((data.banUntil - now) / 60000);
         const div = document.createElement("div");
         div.className = "user-item";
-        div.innerHTML = `<span>${doc.id} - ${timeLeft > 1440 ? Math.ceil(timeLeft/1440) + " days" : timeLeft + " mins"}</span>`;
+        div.innerHTML = `<span>${doc.id} - ${timeLeft > 1440 ? Math.ceil(timeLeft/1440) + "d" : timeLeft + "m"}</span>`;
         
         const btn = document.createElement("button");
         btn.textContent = "Unban";
@@ -701,24 +823,6 @@ function loadBannedUsers() {
       }
     });
     if (list.innerHTML === "") list.innerHTML = "No banned users";
-  });
-}
-
-function loadOnlineUsers() {
-  db.collection("presence").get().then(snapshot => {
-    const list = document.getElementById("onlineList");
-    list.innerHTML = "";
-    const now = Date.now();
-    
-    snapshot.forEach(doc => {
-      if (now - doc.data().lastSeen < 7000) {
-        const div = document.createElement("div");
-        div.className = "user-item";
-        div.textContent = doc.id;
-        list.appendChild(div);
-      }
-    });
-    if (list.innerHTML === "") list.innerHTML = "No users online";
   });
 }
 
@@ -757,7 +861,7 @@ function loadFriends() {
     const friends = doc.data() || {};
     
     Object.keys(friends).forEach(friendName => {
-      if (friends[friendName]) {
+      if (friends[friendName] && !blockedUsers.includes(friendName)) {
         const div = document.createElement("div");
         div.className = "friend-item";
         div.textContent = friendName;
@@ -790,7 +894,7 @@ function loadGroups() {
       
       const div = document.createElement("div");
       div.className = "group-item";
-      div.textContent = `${data.name} (${data.members.length} members)`;
+      div.textContent = `${data.name} (${data.members.length})`;
       div.onclick = () => loadRoom(doc.id, 'group');
       list.appendChild(div);
       
@@ -817,7 +921,7 @@ function loadFriendsForGroup() {
     selectedFriends = [];
     
     Object.keys(friends).forEach(friendName => {
-      if (friends[friendName]) {
+      if (friends[friendName] && !blockedUsers.includes(friendName)) {
         const div = document.createElement("div");
         div.className = "user-item";
         div.style.cursor = "pointer";
@@ -923,13 +1027,13 @@ function loadOnlinePlayers() {
     const now = Date.now();
     
     snapshot.forEach(doc => {
-      if (now - doc.data().lastSeen < 7000 && doc.id !== username) {
+      if (now - doc.data().lastSeen < 7000 && doc.id !== username && !blockedUsers.includes(doc.id)) {
         const div = document.createElement("div");
         div.className = "user-item";
         div.innerHTML = `<span>${doc.id}</span>`;
         
         const btn = document.createElement("button");
-        btn.textContent = "Add Friend";
+        btn.textContent = "Add";
         btn.onclick = () => {
           document.getElementById("addFriendUsername").value = doc.id;
           sendFriendRequest();
@@ -966,21 +1070,29 @@ function openUserProfile(user) {
   db.collection("users").doc(user).get().then(doc => {
     const userJoinTime = doc.data().joinTime || Date.now();
     const elapsed = Date.now() - userJoinTime;
-    const secs = Math.floor(elapsed / 1000);
-    const mins = Math.floor(secs / 60);
-    const hours = Math.floor(mins / 60);
-    const days = Math.floor(hours / 24);
-    document.getElementById("profileTimeSpent").textContent = 
-      `⏱️ Time on AuraBaby: ${days} days, ${hours % 24} hours, ${mins % 60} minutes, ${secs % 60} seconds`;
+    document.getElementById("profileTimeSpent").textContent = `⏱️ Time: ${formatTime(elapsed)}`;
   });
   
+  const actionsDiv = document.getElementById("profileActions");
+  const blockBtn = document.getElementById("profileBlockBtn");
+  
   if (user === username) {
-    document.getElementById("profileFriendSection").style.display = "none";
-    document.getElementById("profilePrivateChat").style.display = "none";
+    actionsDiv.style.display = "none";
     document.getElementById("profileStreakSection").style.display = "none";
   } else {
-    document.getElementById("profileFriendSection").style.display = "block";
-    document.getElementById("profilePrivateChat").style.display = "block";
+    actionsDiv.style.display = "block";
+    
+    // Update block button
+    if (blockedUsers.includes(user)) {
+      blockBtn.textContent = "UNBLOCK";
+      blockBtn.onclick = () => {
+        unblockUser(user);
+        closeProfile();
+      };
+    } else {
+      blockBtn.textContent = "BLOCK";
+      blockBtn.onclick = blockUserFromProfile;
+    }
     
     db.collection("friends").doc(username).get().then(doc => {
       const friends = doc.data() || {};
@@ -1004,41 +1116,6 @@ function openUserProfile(user) {
       }
     });
   }
-  
-  loadProfileData(user);
-}
-
-function loadProfileData(user) {
-  db.collection("friends").doc(user).get().then(doc => {
-    const list = document.getElementById("profileFriends");
-    list.innerHTML = "";
-    const friends = doc.data() || {};
-    
-    Object.keys(friends).forEach(friend => {
-      if (friends[friend]) {
-        const div = document.createElement("div");
-        div.className = "friend-item";
-        div.textContent = friend;
-        div.onclick = () => openUserProfile(friend);
-        list.appendChild(div);
-      }
-    });
-    if (list.innerHTML === "") list.innerHTML = "No friends";
-  });
-  
-  db.collection("groupChats").where("members", "array-contains", user).get().then(snapshot => {
-    const list = document.getElementById("profileGroups");
-    list.innerHTML = "";
-    
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "group-item";
-      div.textContent = data.name;
-      list.appendChild(div);
-    });
-    if (list.innerHTML === "") list.innerHTML = "No groups";
-  });
 }
 
 function addFriendFromProfile() {
@@ -1090,15 +1167,12 @@ let lastSent = 0;
 let cooldownInterval = null;
 
 function filterText(text) {
-  // Remove all special characters to prevent bypassing
   const cleanText = text.replace(/[^a-zA-Z0-9\s]/g, '').toLowerCase();
   
   const badWords = [
-    // Sexual content
     /p+o+r+n+/gi, /t+i+t+s+/gi, /b+o+o+b+s+/gi, /a+s+s+/gi, /s+e+x+/gi, /p+e+n+i+s+/gi, 
     /d+i+c+k+/gi, /c+o+c+k+/gi, /p+u+s+s+y+/gi, /v+a+g+i+n+a+/gi, /c+u+m+/gi, /h+o+r+n+y+/gi,
     /n+u+d+e+/gi, /n+a+k+e+d+/gi, /r+a+p+e+/gi, /m+o+l+e+s+t+/gi, /p+e+d+o+/gi,
-    // Slurs and offensive
     /f+u+c+k+/gi, /s+h+i+t+/gi, /b+i+t+c+h+/gi, /n+i+g+g+a+/gi, /n+i+g+g+e+r+/gi, /n+i+g+a+/gi,
     /f+a+g+/gi, /r+e+t+a+r+d+/gi, /w+h+o+r+e+/gi, /s+l+u+t+/gi, /c+u+n+t+/gi,
     /a+s+s+h+o+l+e+/gi, /b+a+s+t+a+r+d+/gi, /d+a+m+n+/gi
@@ -1122,19 +1196,16 @@ function startCooldown() {
   timerEl.style.display = 'block';
   
   let timeLeft = 5;
-  timerEl.textContent = `Can chat in ${timeLeft}s`;
+  timerEl.textContent = `${timeLeft}s`;
   
   if (cooldownInterval) clearInterval(cooldownInterval);
   
   cooldownInterval = setInterval(() => {
     timeLeft--;
     if (timeLeft > 0) {
-      timerEl.textContent = `Can chat in ${timeLeft}s`;
+      timerEl.textContent = `${timeLeft}s`;
     } else {
-      timerEl.textContent = 'Ready to chat!';
-      setTimeout(() => {
-        timerEl.style.display = 'none';
-      }, 500);
+      timerEl.style.display = 'none';
       clearInterval(cooldownInterval);
     }
   }, 1000);
@@ -1145,7 +1216,7 @@ async function sendMessage() {
   
   if (now - lastSent < 5000) {
     const remaining = Math.ceil((5000 - (now - lastSent)) / 1000);
-    showNotification(`Please wait ${remaining} seconds`);
+    showNotification(`Wait ${remaining}s`);
     return;
   }
   
@@ -1153,13 +1224,21 @@ async function sendMessage() {
   if (isBanned) return;
   
   const input = document.getElementById("msgInput");
-  if (!input.value) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  // 30 WORD LIMIT CHECK
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  if (words.length > 30) {
+    showNotification('Message too long! Max 30 words');
+    return;
+  }
 
   // Counting channel logic
   if (currentRoomType === 'counting') {
-    const num = parseInt(input.value.trim());
+    const num = parseInt(text);
     if (isNaN(num)) {
-      showNotification('Counting channel: numbers only!');
+      showNotification('Counting: numbers only!');
       return;
     }
     
@@ -1169,7 +1248,7 @@ async function sendMessage() {
       const hourAgo = Date.now() - 3600000;
       if (data.lastCount > hourAgo) {
         const timeLeft = Math.ceil((3600000 - (Date.now() - data.lastCount)) / 60000);
-        showNotification(`You must wait ${timeLeft} more minutes before counting again!`);
+        showNotification(`Wait ${timeLeft}m to count again!`);
         return;
       }
     }
@@ -1178,7 +1257,7 @@ async function sendMessage() {
     const currentCount = countDoc.exists ? countDoc.data().number : 0;
     
     if (num !== currentCount + 1) {
-      showNotification(`Wrong number! Next number should be ${currentCount + 1}`);
+      showNotification(`Wrong! Next is ${currentCount + 1}`);
       return;
     }
     
@@ -1186,10 +1265,8 @@ async function sendMessage() {
     await db.collection('countingUsers').doc(username).set({lastCount: Date.now()});
   }
   
-  // Filter message
-  const filtered = filterText(input.value);
+  const filtered = filterText(text);
   
-  // Update streak for private chats
   if (currentRoomType === 'private') {
     await updateStreak(currentRoom);
   }
@@ -1213,6 +1290,7 @@ async function sendMessage() {
   });
 
   input.value = "";
+  updateWordCount();
 }
 
 // Room switching
@@ -1226,7 +1304,6 @@ function loadRoom(room, type = 'public') {
   currentRoom = room;
   currentRoomType = type;
   
-  // Clear unread count
   unreadCounts[room] = 0;
   updateNotifications();
   
@@ -1259,12 +1336,14 @@ function loadRoom(room, type = 'public') {
   } else if (type === 'private') {
     const users = room.split('_');
     const otherUser = users.find(u => u !== username);
-    document.getElementById("roomName").innerHTML = `💬 ${otherUser} <span class="online-btn" onclick="openOnlineUsers()">Private Chat</span>`;
+    document.getElementById("roomName").innerHTML = `💬 ${otherUser}`;
   } else {
     document.getElementById("roomName").innerHTML = `🌌 ${room} <span class="online-btn" onclick="openOnlineUsers()">Online: <span id="onlineCount">0</span></span>`;
   }
   
   watchTyping(room, type);
+  
+  const showTimestamps = localStorage.getItem('showTimestamps') !== 'false';
   
   unsub = collection.orderBy("time").onSnapshot(snap => {
     document.getElementById("messages").innerHTML = "";
@@ -1272,10 +1351,13 @@ function loadRoom(room, type = 'public') {
     
     snap.forEach(doc => {
       const m = doc.data();
+      
+      // Filter blocked users
+      if (blockedUsers.includes(m.user)) return;
+      
       const div = document.createElement("div");
       div.className = "message";
       
-      // Apply message protection
       if (messageProtection && m.inappropriate) {
         div.classList.add('hidden-msg');
         div.onclick = function() {
@@ -1311,6 +1393,17 @@ function loadRoom(room, type = 'public') {
             content.appendChild(tagSpan);
           }
           
+          // Add timestamp
+          if (showTimestamps && m.time) {
+            const timestamp = document.createElement("span");
+            timestamp.className = "timestamp";
+            const date = m.time.toDate();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const mins = date.getMinutes().toString().padStart(2, '0');
+            timestamp.textContent = `${hours}:${mins}`;
+            content.appendChild(timestamp);
+          }
+          
           const textNode = document.createTextNode(": " + m.text);
           content.appendChild(textNode);
         });
@@ -1320,14 +1413,16 @@ function loadRoom(room, type = 'public') {
       
       if (isAdmin) {
         const delBtn = document.createElement("button");
-        delBtn.textContent = "Delete";
-        delBtn.style.marginLeft = "10px";
+        delBtn.textContent = "Del";
         delBtn.onclick = () => collection.doc(doc.id).delete();
         div.appendChild(delBtn);
       }
       
       document.getElementById("messages").appendChild(div);
     });
+    
+    // AUTOSCROLL TO BOTTOM
+    scrollToBottom();
   });
   
   closeFriendsPanel();
@@ -1356,20 +1451,6 @@ document.querySelectorAll(".room").forEach(r => {
     loadRoom(this.dataset.room, this.dataset.type);
   };
 });
-function toggleFocus() {
-  document.body.classList.toggle("focus-mode");
-
-  // Optional: remember preference
-  localStorage.setItem(
-    "focusMode",
-    document.body.classList.contains("focus-mode")
-  );
-}
-
-// Restore focus mode on reload
-if (localStorage.getItem("focusMode") === "true") {
-  document.body.classList.add("focus-mode");
-}
 
 // Online presence
 function startPresence() {
