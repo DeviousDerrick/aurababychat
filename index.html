@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>AuraBaby Chat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="chat.css">
 </head>
 <body>
@@ -84,20 +84,39 @@
 
   <div class="modal-section">
     <h3>💬 Chat Settings</h3>
-    <label style="display:block; margin-bottom:15px;">
-      <input type="checkbox" id="showTimestamps" checked> Show Timestamps
-    </label>
-    <label style="display:block; margin-bottom:15px;">
-      <input type="checkbox" id="soundEnabled"> Sound Notifications
-    </label>
-    <label style="display:block; margin-bottom:15px;">
-      <input type="checkbox" id="messageProtection"> Hide Inappropriate Messages
-    </label>
+    <label><input type="checkbox" id="showTimestamps" checked> Show Timestamps</label>
+    <label><input type="checkbox" id="soundEnabled"> Sound Notifications</label>
+    <label><input type="checkbox" id="messageProtection"> Hide Inappropriate Messages</label>
+    <label><input type="checkbox" id="autoScroll" checked> Auto-scroll to Bottom</label>
+    <label><input type="checkbox" id="showAvatars" checked> Show User Avatars</label>
+    <label><input type="checkbox" id="compactMode"> Compact Message Mode</label>
+    <label><input type="checkbox" id="showTyping" checked> Show Typing Indicators</label>
+    <label><input type="checkbox" id="enterToSend" checked> Enter to Send</label>
+  </div>
+
+  <div class="modal-section">
+    <h3>📏 Display Settings</h3>
+    <label>Font Size: <select id="fontSize">
+      <option value="small">Small</option>
+      <option value="medium" selected>Medium</option>
+      <option value="large">Large</option>
+    </select></label>
+    <label>Message Density: <select id="messageDensity">
+      <option value="compact">Compact</option>
+      <option value="normal" selected>Normal</option>
+      <option value="comfortable">Comfortable</option>
+    </select></label>
   </div>
 
   <div class="modal-section">
     <h3>👤 Profile</h3>
-    <input type="text" id="bioInput" placeholder="Enter your bio">
+    <div style="text-align:center; margin-bottom:15px;">
+      <img id="settingsAvatar" class="settings-avatar" src="" alt="Avatar" style="display:none;">
+      <div id="settingsAvatarPlaceholder" class="settings-avatar">?</div>
+      <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+      <button onclick="document.getElementById('avatarUpload').click()">CHANGE AVATAR</button>
+    </div>
+    <input type="text" id="bioInput" placeholder="Enter your bio" maxlength="100">
     <button onclick="updateBio()">UPDATE BIO</button>
   </div>
 
@@ -128,6 +147,46 @@
   </div>
 
   <div class="modal-section">
+    <h3>🔇 Mute User</h3>
+    <input type="text" id="muteUsername" placeholder="Username">
+    <select id="muteDuration">
+      <option value="300000">5 minutes</option>
+      <option value="1800000">30 minutes</option>
+      <option value="3600000">1 hour</option>
+    </select>
+    <button onclick="muteUser()">MUTE USER</button>
+  </div>
+
+  <div class="modal-section">
+    <h3>👢 Kick User</h3>
+    <input type="text" id="kickUsername" placeholder="Username">
+    <button onclick="kickUser()">KICK USER</button>
+  </div>
+
+  <div class="modal-section">
+    <h3>📢 Send Announcement</h3>
+    <input type="text" id="announcementText" placeholder="Announcement text">
+    <select id="announcementRoom">
+      <option value="all">All Rooms</option>
+      <option value="General 1">General 1</option>
+      <option value="General 2">General 2</option>
+      <option value="General 3">General 3</option>
+    </select>
+    <button onclick="sendAnnouncement()">SEND</button>
+  </div>
+
+  <div class="modal-section">
+    <h3>🗑️ Clear Messages</h3>
+    <select id="clearRoom">
+      <option value="General 1">General 1</option>
+      <option value="General 2">General 2</option>
+      <option value="General 3">General 3</option>
+      <option value="Counting">Counting</option>
+    </select>
+    <button onclick="clearRoomMessages()">CLEAR ROOM</button>
+  </div>
+
+  <div class="modal-section">
     <h3>✏️ Change Username</h3>
     <input type="text" id="targetUsername" placeholder="Username">
     <input type="text" id="newTag" placeholder="New tag/username">
@@ -145,6 +204,11 @@
   <div class="modal-section">
     <h3>📋 Banned Users</h3>
     <div class="user-list" id="bannedList">Loading...</div>
+  </div>
+
+  <div class="modal-section">
+    <h3>🔇 Muted Users</h3>
+    <div class="user-list" id="mutedList">Loading...</div>
   </div>
 </div>
 
@@ -168,13 +232,14 @@
 
   <div id="groupsTab" style="display:none;">
     <div class="modal-section">
+      <h3>Your Groups</h3>
       <div id="groupsList" class="user-list">Loading...</div>
     </div>
     <div class="modal-section">
       <h3>Create Group</h3>
       <input type="text" id="groupName" placeholder="Group name">
       <div id="friendsSelectList" class="user-list"></div>
-      <button onclick="createGroupChat()">CREATE</button>
+      <button onclick="createGroupChat()">CREATE GROUP</button>
     </div>
   </div>
 
@@ -184,11 +249,11 @@
       <button onclick="sendFriendRequest()">SEND REQUEST</button>
     </div>
     <div class="modal-section">
-      <h3>Online</h3>
+      <h3>Online Players</h3>
       <div id="onlinePlayersList" class="user-list">Loading...</div>
     </div>
     <div class="modal-section">
-      <h3>Requests</h3>
+      <h3>Friend Requests</h3>
       <div id="friendRequests" class="user-list">No pending requests</div>
     </div>
   </div>
@@ -202,23 +267,41 @@
   
   <div class="modal-section">
     <div style="text-align:center;">
-      <div class="profile-avatar" id="profileAvatar" style="width:80px; height:80px; font-size:40px; margin:0 auto 15px;">?</div>
+      <img id="profileAvatarImg" class="profile-avatar-large" src="" alt="" style="display:none;">
+      <div class="profile-avatar-large" id="profileAvatar">?</div>
       <h3 id="profileUsername">Username</h3>
-      <p id="profileBio" style="font-size:13px; opacity:0.8;">Bio...</p>
+      <p id="profileBio" style="font-size:13px; opacity:0.8; margin-top:10px;">Bio...</p>
       <p id="profileTimeSpent" style="font-size:11px; opacity:0.7; margin-top:8px;">⏱️ Time: Loading...</p>
     </div>
   </div>
 
   <div class="modal-section" id="profileActions">
     <button id="profileAddFriend" onclick="addFriendFromProfile()">ADD FRIEND</button>
-    <button onclick="openPrivateChat()" style="margin-top:10px;">💬 CHAT</button>
+    <button onclick="openPrivateChat()" style="margin-top:10px;">💬 PRIVATE CHAT</button>
     <button id="profileBlockBtn" onclick="blockUserFromProfile()" style="margin-top:10px; background: linear-gradient(135deg, #dc2626, #991b1b);">BLOCK</button>
   </div>
 
   <div class="modal-section" id="profileStreakSection" style="display:none;">
-    <h3>🔥 Streak</h3>
+    <h3>🔥 Chat Streak</h3>
     <p id="profileStreak" style="font-size:18px; text-align:center;">0 days</p>
   </div>
+
+  <div class="modal-section">
+    <h3>Friends</h3>
+    <div id="profileFriends" class="user-list">Loading...</div>
+  </div>
+
+  <div class="modal-section">
+    <h3>Groups</h3>
+    <div id="profileGroups" class="user-list">Loading...</div>
+  </div>
+</div>
+
+<!-- Image Viewer Modal -->
+<div id="imageViewerOverlay" class="modal-overlay" onclick="closeImageViewer()"></div>
+<div id="imageViewerModal" class="image-viewer-modal">
+  <button class="close-modal" onclick="closeImageViewer()">×</button>
+  <img id="imageViewerImg" src="" alt="">
 </div>
 
 <!-- Emoji Picker -->
@@ -248,6 +331,7 @@
 
     <div class="profile-section">
       <div class="profile-card" onclick="openMyProfile()">
+        <img id="myAvatarImg" class="profile-avatar" src="" alt="" style="display:none;">
         <div class="profile-avatar" id="myAvatar">?</div>
         <div class="profile-name" id="myUsername">Username</div>
         <div class="profile-time" id="myTime">⏱️ 0d 0h</div>
@@ -267,6 +351,8 @@
       <div class="word-counter" id="wordCounter">0/30 words</div>
       <div class="input-row">
         <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
+        <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+        <button class="image-btn" onclick="document.getElementById('imageUpload').click()">🖼️</button>
         <input id="msgInput" placeholder="Type your message..." />
         <button onclick="sendMessage()">SEND</button>
       </div>
@@ -277,6 +363,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <script src="chat.js"></script>
 </body>
 </html>
