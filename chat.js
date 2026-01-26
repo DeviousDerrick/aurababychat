@@ -9,10 +9,12 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 let username = null;
 let isAdmin = localStorage.getItem("isAdmin") === "true";
-let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers_" + username) || "[]");
+let blockedUsers = [];
+let userAvatar = null;
 
 // SIDEBAR TOGGLE
 function toggleSidebar() {
@@ -21,7 +23,7 @@ function toggleSidebar() {
 }
 
 // EMOJI PICKER
-const emojis = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️','🗨️','🗯️','💭','💤','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄'];
+const emojis = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️','🗨️','🗯️','💭','💤','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','🎮','🎯','🎲','🎰','🎸','🎹','🎺','🎻','🥁','🎭','🎨','🎬','🎤','🎧','🎼','🎵','🎶','🎪','🎡','🎢','🎠','⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🏓','🏸','🏒','🏑','🥍','🏏','🥅','⛳','🪀','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌'];
 
 function toggleEmojiPicker() {
   const picker = document.getElementById('emojiPicker');
@@ -53,7 +55,6 @@ function insertEmoji(emoji) {
   updateWordCount();
 }
 
-// Close emoji picker when clicking outside
 document.addEventListener('click', (e) => {
   const picker = document.getElementById('emojiPicker');
   const emojiBtn = document.querySelector('.emoji-btn');
@@ -61,6 +62,99 @@ document.addEventListener('click', (e) => {
     picker.style.display = 'none';
   }
 });
+
+// IMAGE UPLOAD FOR MESSAGES
+document.getElementById('imageUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Check file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showNotification('Image too large! Max 2MB');
+    return;
+  }
+  
+  if (!file.type.startsWith('image/')) {
+    showNotification('Please select an image file');
+    return;
+  }
+  
+  try {
+    showNotification('Uploading image...', 'success');
+    const storageRef = storage.ref(`chat-images/${Date.now()}_${file.name}`);
+    const snapshot = await storageRef.put(file);
+    const imageUrl = await snapshot.ref.getDownloadURL();
+    
+    sendMessage(imageUrl);
+    e.target.value = '';
+  } catch (error) {
+    console.error('Upload error:', error);
+    showNotification('Failed to upload image');
+  }
+});
+
+// AVATAR UPLOAD
+document.getElementById('avatarUpload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  if (file.size > 1 * 1024 * 1024) {
+    showNotification('Avatar too large! Max 1MB');
+    return;
+  }
+  
+  if (!file.type.startsWith('image/')) {
+    showNotification('Please select an image file');
+    return;
+  }
+  
+  try {
+    showNotification('Uploading avatar...', 'success');
+    const storageRef = storage.ref(`avatars/${username}_${Date.now()}`);
+    const snapshot = await storageRef.put(file);
+    const avatarUrl = await snapshot.ref.getDownloadURL();
+    
+    await db.collection('profiles').doc(username).update({
+      avatar: avatarUrl,
+      avatarUpdated: Date.now()
+    });
+    
+    userAvatar = avatarUrl;
+    updateAvatarDisplay();
+    showNotification('Avatar updated!', 'success');
+    e.target.value = '';
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    showNotification('Failed to upload avatar');
+  }
+});
+
+function updateAvatarDisplay() {
+  if (userAvatar && userAvatar.startsWith('http')) {
+    document.getElementById('myAvatarImg').src = userAvatar;
+    document.getElementById('myAvatarImg').style.display = 'flex';
+    document.getElementById('myAvatar').style.display = 'none';
+    
+    document.getElementById('settingsAvatar').src = userAvatar;
+    document.getElementById('settingsAvatar').style.display = 'flex';
+    document.getElementById('settingsAvatarPlaceholder').style.display = 'none';
+  } else {
+    document.getElementById('myAvatar').textContent = username[0].toUpperCase();
+    document.getElementById('settingsAvatarPlaceholder').textContent = username[0].toUpperCase();
+  }
+}
+
+// IMAGE VIEWER
+function openImageViewer(imageUrl) {
+  document.getElementById('imageViewerImg').src = imageUrl;
+  document.getElementById('imageViewerModal').style.display = 'block';
+  document.getElementById('imageViewerOverlay').style.display = 'block';
+}
+
+function closeImageViewer() {
+  document.getElementById('imageViewerModal').style.display = 'none';
+  document.getElementById('imageViewerOverlay').style.display = 'none';
+}
 
 // WORD COUNT
 function updateWordCount() {
@@ -82,8 +176,10 @@ document.getElementById('msgInput').addEventListener('input', updateWordCount);
 
 // AUTOSCROLL
 function scrollToBottom() {
-  const messages = document.getElementById('messages');
-  messages.scrollTop = messages.scrollHeight;
+  if (localStorage.getItem('autoScroll') !== 'false') {
+    const messages = document.getElementById('messages');
+    messages.scrollTop = messages.scrollHeight;
+  }
 }
 
 // NOTIFICATION SYSTEM
@@ -149,6 +245,12 @@ async function signup() {
     joinTime: Date.now()
   });
   
+  await db.collection('profiles').doc(user).set({
+    bio: "AuraBaby user",
+    avatar: user[0].toUpperCase(),
+    createdAt: Date.now()
+  });
+  
   showNotification('Account created! Please login', 'success');
   toggleSignup();
 }
@@ -201,9 +303,17 @@ window.addEventListener('load', async () => {
   }
 });
 
-function initializeApp() {
+async function initializeApp() {
   document.getElementById("myUsername").textContent = username;
   document.getElementById("myAvatar").textContent = username[0].toUpperCase();
+
+  // Load user profile
+  const profileDoc = await db.collection("profiles").doc(username).get();
+  if (profileDoc.exists) {
+    const profileData = profileDoc.data();
+    userAvatar = profileData.avatar;
+    updateAvatarDisplay();
+  }
 
   db.collection("users").doc(username).get().then(doc => {
     const joinTime = doc.data().joinTime || Date.now();
@@ -211,22 +321,40 @@ function initializeApp() {
     updateMyTime();
   });
 
-  db.collection("profiles").doc(username).set({
-    avatar: username[0].toUpperCase(),
-    bio: "AuraBaby user",
-    createdAt: Date.now()
-  }, {merge: true});
-
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'block';
   }
 
+  applySettings();
   startPresence();
   loadPrivateChats();
+  loadGroups();
   loadRoom(currentRoom);
   checkBan();
   loadBlockedUsers();
 }
+
+// SETTINGS MANAGEMENT
+function applySettings() {
+  const fontSize = localStorage.getItem('fontSize') || 'medium';
+  const density = localStorage.getItem('messageDensity') || 'normal';
+  
+  document.body.className = '';
+  if (fontSize === 'small') document.body.classList.add('font-small');
+  if (fontSize === 'large') document.body.classList.add('font-large');
+  if (density === 'compact') document.body.classList.add('density-compact');
+  if (density === 'comfortable') document.body.classList.add('density-comfortable');
+}
+
+document.getElementById('fontSize')?.addEventListener('change', (e) => {
+  localStorage.setItem('fontSize', e.target.value);
+  applySettings();
+});
+
+document.getElementById('messageDensity')?.addEventListener('change', (e) => {
+  localStorage.setItem('messageDensity', e.target.value);
+  applySettings();
+});
 
 // BLOCKING SYSTEM
 function blockUser(user) {
@@ -235,6 +363,7 @@ function blockUser(user) {
     localStorage.setItem("blockedUsers_" + username, JSON.stringify(blockedUsers));
     showNotification(`Blocked ${user}`, 'success');
     loadBlockedUsers();
+    loadRoom(currentRoom, currentRoomType);
   }
 }
 
@@ -273,7 +402,11 @@ function loadBlockedUsers() {
 
 function blockUserFromProfile() {
   if (currentProfileUser && currentProfileUser !== username) {
-    blockUser(currentProfileUser);
+    if (blockedUsers.includes(currentProfileUser)) {
+      unblockUser(currentProfileUser);
+    } else {
+      blockUser(currentProfileUser);
+    }
     closeProfile();
   }
 }
@@ -469,6 +602,7 @@ let currentlyTyping = new Set();
 
 function sendTypingIndicator() {
   if (!currentRoom || currentRoomType === 'counting') return;
+  if (localStorage.getItem('showTyping') === 'false') return;
   
   const path = currentRoomType === 'group' 
     ? `groupChats/${currentRoom}/typing`
@@ -488,6 +622,8 @@ function sendTypingIndicator() {
 }
 
 function watchTyping(room, type) {
+  if (localStorage.getItem('showTyping') === 'false') return;
+  
   const path = type === 'group'
     ? `groupChats/${room}/typing`
     : type === 'private'
@@ -681,6 +817,13 @@ function openSettings() {
   document.getElementById('showTimestamps').checked = localStorage.getItem('showTimestamps') !== 'false';
   document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
   document.getElementById('messageProtection').checked = localStorage.getItem('messageProtection') === 'true';
+  document.getElementById('autoScroll').checked = localStorage.getItem('autoScroll') !== 'false';
+  document.getElementById('showAvatars').checked = localStorage.getItem('showAvatars') !== 'false';
+  document.getElementById('compactMode').checked = localStorage.getItem('compactMode') === 'true';
+  document.getElementById('showTyping').checked = localStorage.getItem('showTyping') !== 'false';
+  document.getElementById('enterToSend').checked = localStorage.getItem('enterToSend') !== 'false';
+  document.getElementById('fontSize').value = localStorage.getItem('fontSize') || 'medium';
+  document.getElementById('messageDensity').value = localStorage.getItem('messageDensity') || 'normal';
   
   loadBlockedUsers();
 }
@@ -692,6 +835,13 @@ function closeSettings() {
   localStorage.setItem('showTimestamps', document.getElementById('showTimestamps').checked);
   localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
   localStorage.setItem('messageProtection', document.getElementById('messageProtection').checked);
+  localStorage.setItem('autoScroll', document.getElementById('autoScroll').checked);
+  localStorage.setItem('showAvatars', document.getElementById('showAvatars').checked);
+  localStorage.setItem('compactMode', document.getElementById('compactMode').checked);
+  localStorage.setItem('showTyping', document.getElementById('showTyping').checked);
+  localStorage.setItem('enterToSend', document.getElementById('enterToSend').checked);
+  
+  applySettings();
 }
 
 function updateBio() {
@@ -739,6 +889,7 @@ function openAdminPanel() {
   document.getElementById("adminPanel").style.display = "block";
   document.getElementById("adminOverlay").style.display = "block";
   loadBannedUsers();
+  loadMutedUsers();
 }
 
 function closeAdminPanel() {
@@ -760,6 +911,74 @@ function banUser() {
     document.getElementById("banUsername").value = "";
     loadBannedUsers();
   });
+}
+
+function muteUser() {
+  const targetUser = document.getElementById("muteUsername").value.trim();
+  const duration = parseInt(document.getElementById("muteDuration").value);
+  if (!targetUser) return showNotification("Enter a username");
+  
+  db.collection("mutes").doc(targetUser).set({
+    mutedBy: username,
+    muteUntil: Date.now() + duration,
+    timestamp: Date.now()
+  }).then(() => {
+    showNotification(`${targetUser} muted!`, 'success');
+    document.getElementById("muteUsername").value = "";
+    loadMutedUsers();
+  });
+}
+
+function kickUser() {
+  const targetUser = document.getElementById("kickUsername").value.trim();
+  if (!targetUser) return showNotification("Enter a username");
+  
+  db.collection("kicks").doc(targetUser).set({
+    kickedBy: username,
+    timestamp: Date.now()
+  }).then(() => {
+    showNotification(`${targetUser} kicked!`, 'success');
+    document.getElementById("kickUsername").value = "";
+  });
+}
+
+function sendAnnouncement() {
+  const text = document.getElementById("announcementText").value.trim();
+  const room = document.getElementById("announcementRoom").value;
+  if (!text) return showNotification("Enter announcement text");
+  
+  if (room === 'all') {
+    ['General 1', 'General 2', 'General 3'].forEach(r => {
+      db.collection("rooms").doc(r).collection("messages").add({
+        user: "SYSTEM",
+        text: `📢 ${text}`,
+        isAnnouncement: true,
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+  } else {
+    db.collection("rooms").doc(room).collection("messages").add({
+      user: "SYSTEM",
+      text: `📢 ${text}`,
+      isAnnouncement: true,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+  
+  showNotification("Announcement sent!", 'success');
+  document.getElementById("announcementText").value = "";
+}
+
+async function clearRoomMessages() {
+  const room = document.getElementById("clearRoom").value;
+  if (!confirm(`Clear all messages in ${room}?`)) return;
+  
+  const messages = await db.collection("rooms").doc(room).collection("messages").get();
+  const batch = db.batch();
+  messages.docs.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+  
+  showNotification(`${room} messages cleared!`, 'success');
 }
 
 function changeUsername() {
@@ -823,6 +1042,36 @@ function loadBannedUsers() {
       }
     });
     if (list.innerHTML === "") list.innerHTML = "No banned users";
+  });
+}
+
+function loadMutedUsers() {
+  const list = document.getElementById("mutedList");
+  if (!list) return;
+  
+  db.collection("mutes").get().then(snapshot => {
+    list.innerHTML = "";
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.muteUntil > now) {
+        const timeLeft = Math.ceil((data.muteUntil - now) / 60000);
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `<span>${doc.id} - ${timeLeft}m</span>`;
+        
+        const btn = document.createElement("button");
+        btn.textContent = "Unmute";
+        btn.onclick = () => {
+          db.collection("mutes").doc(doc.id).delete();
+          loadMutedUsers();
+        };
+        div.appendChild(btn);
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No muted users";
   });
 }
 
@@ -895,7 +1144,10 @@ function loadGroups() {
       const div = document.createElement("div");
       div.className = "group-item";
       div.textContent = `${data.name} (${data.members.length})`;
-      div.onclick = () => loadRoom(doc.id, 'group');
+      div.onclick = () => {
+        closeFriendsPanel();
+        loadRoom(doc.id, 'group');
+      };
       list.appendChild(div);
       
       const sideDiv = document.createElement("div");
@@ -1053,25 +1305,37 @@ function openMyProfile() {
   openUserProfile(username);
 }
 
-function openUserProfile(user) {
+async function openUserProfile(user) {
   currentProfileUser = user;
   document.getElementById("profileModal").style.display = "block";
   document.getElementById("profileOverlay").style.display = "block";
   
   document.getElementById("profileTitle").textContent = user === username ? "My Profile" : `${user}'s Profile`;
   document.getElementById("profileUsername").textContent = user;
-  document.getElementById("profileAvatar").textContent = user[0].toUpperCase();
   
-  db.collection("profiles").doc(user).get().then(doc => {
-    const data = doc.data() || {};
+  // Load profile data
+  const profileDoc = await db.collection("profiles").doc(user).get();
+  if (profileDoc.exists) {
+    const data = profileDoc.data();
     document.getElementById("profileBio").textContent = data.bio || "AuraBaby user";
-  });
+    
+    if (data.avatar && data.avatar.startsWith('http')) {
+      document.getElementById("profileAvatarImg").src = data.avatar;
+      document.getElementById("profileAvatarImg").style.display = 'flex';
+      document.getElementById("profileAvatar").style.display = 'none';
+    } else {
+      document.getElementById("profileAvatar").textContent = user[0].toUpperCase();
+      document.getElementById("profileAvatarImg").style.display = 'none';
+      document.getElementById("profileAvatar").style.display = 'flex';
+    }
+  }
   
-  db.collection("users").doc(user).get().then(doc => {
-    const userJoinTime = doc.data().joinTime || Date.now();
+  const userDoc = await db.collection("users").doc(user).get();
+  if (userDoc.exists) {
+    const userJoinTime = userDoc.data().joinTime || Date.now();
     const elapsed = Date.now() - userJoinTime;
     document.getElementById("profileTimeSpent").textContent = `⏱️ Time: ${formatTime(elapsed)}`;
-  });
+  }
   
   const actionsDiv = document.getElementById("profileActions");
   const blockBtn = document.getElementById("profileBlockBtn");
@@ -1082,7 +1346,6 @@ function openUserProfile(user) {
   } else {
     actionsDiv.style.display = "block";
     
-    // Update block button
     if (blockedUsers.includes(user)) {
       blockBtn.textContent = "UNBLOCK";
       blockBtn.onclick = () => {
@@ -1116,6 +1379,38 @@ function openUserProfile(user) {
       }
     });
   }
+  
+  // Load friends and groups
+  db.collection("friends").doc(user).get().then(doc => {
+    const list = document.getElementById("profileFriends");
+    list.innerHTML = "";
+    const friends = doc.data() || {};
+    
+    Object.keys(friends).forEach(friend => {
+      if (friends[friend]) {
+        const div = document.createElement("div");
+        div.className = "friend-item";
+        div.textContent = friend;
+        div.onclick = () => openUserProfile(friend);
+        list.appendChild(div);
+      }
+    });
+    if (list.innerHTML === "") list.innerHTML = "No friends";
+  });
+  
+  db.collection("groupChats").where("members", "array-contains", user).get().then(snapshot => {
+    const list = document.getElementById("profileGroups");
+    list.innerHTML = "";
+    
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "group-item";
+      div.textContent = data.name;
+      list.appendChild(div);
+    });
+    if (list.innerHTML === "") list.innerHTML = "No groups";
+  });
 }
 
 function addFriendFromProfile() {
@@ -1151,6 +1446,21 @@ async function checkBan() {
   return false;
 }
 
+async function checkMute() {
+  const muteDoc = await db.collection("mutes").doc(username).get();
+  if (muteDoc.exists) {
+    const muteData = muteDoc.data();
+    if (muteData.muteUntil > Date.now()) {
+      const timeLeft = Math.ceil((muteData.muteUntil - Date.now()) / 60000);
+      showNotification(`You are muted for ${timeLeft} more minutes`);
+      return true;
+    } else {
+      await db.collection("mutes").doc(username).delete();
+    }
+  }
+  return false;
+}
+
 async function getDisplayName(user) {
   const tagDoc = await db.collection("usernameTags").doc(user).get();
   if (tagDoc.exists) return tagDoc.data().displayName;
@@ -1160,6 +1470,14 @@ async function getDisplayName(user) {
 async function getSpecialTag(user) {
   const tagDoc = await db.collection("specialTags").doc(user).get();
   if (tagDoc.exists) return tagDoc.data();
+  return null;
+}
+
+async function getUserAvatar(user) {
+  const profileDoc = await db.collection("profiles").doc(user).get();
+  if (profileDoc.exists && profileDoc.data().avatar) {
+    return profileDoc.data().avatar;
+  }
   return null;
 }
 
@@ -1211,10 +1529,10 @@ function startCooldown() {
   }, 1000);
 }
 
-async function sendMessage() {
+async function sendMessage(imageUrl = null) {
   const now = Date.now();
   
-  if (now - lastSent < 5000) {
+  if (now - lastSent < 5000 && !imageUrl) {
     const remaining = Math.ceil((5000 - (now - lastSent)) / 1000);
     showNotification(`Wait ${remaining}s`);
     return;
@@ -1223,19 +1541,25 @@ async function sendMessage() {
   const isBanned = await checkBan();
   if (isBanned) return;
   
+  const isMuted = await checkMute();
+  if (isMuted) return;
+  
   const input = document.getElementById("msgInput");
-  const text = input.value.trim();
-  if (!text) return;
+  const text = imageUrl ? "" : input.value.trim();
+  
+  if (!text && !imageUrl) return;
 
   // 30 WORD LIMIT CHECK
-  const words = text.split(/\s+/).filter(w => w.length > 0);
-  if (words.length > 30) {
-    showNotification('Message too long! Max 30 words');
-    return;
+  if (text) {
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    if (words.length > 30) {
+      showNotification('Message too long! Max 30 words');
+      return;
+    }
   }
 
   // Counting channel logic
-  if (currentRoomType === 'counting') {
+  if (currentRoomType === 'counting' && !imageUrl) {
     const num = parseInt(text);
     if (isNaN(num)) {
       showNotification('Counting: numbers only!');
@@ -1265,14 +1589,14 @@ async function sendMessage() {
     await db.collection('countingUsers').doc(username).set({lastCount: Date.now()});
   }
   
-  const filtered = filterText(text);
+  const filtered = text ? filterText(text) : {text: "", inappropriate: false};
   
   if (currentRoomType === 'private') {
     await updateStreak(currentRoom);
   }
   
   lastSent = now;
-  startCooldown();
+  if (!imageUrl) startCooldown();
 
   const collection = currentRoomType === 'group' 
     ? db.collection("groupChats").doc(currentRoom).collection("messages")
@@ -1282,15 +1606,25 @@ async function sendMessage() {
     ? db.collection("privateChats").doc(currentRoom).collection("messages")
     : db.collection("rooms").doc(currentRoom).collection("messages");
 
-  collection.add({
+  const messageData = {
     user: username,
-    text: filtered.text,
-    inappropriate: filtered.inappropriate,
     time: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  };
 
-  input.value = "";
-  updateWordCount();
+  if (imageUrl) {
+    messageData.imageUrl = imageUrl;
+    messageData.text = text || "";
+  } else {
+    messageData.text = filtered.text;
+    messageData.inappropriate = filtered.inappropriate;
+  }
+
+  collection.add(messageData);
+
+  if (!imageUrl) {
+    input.value = "";
+    updateWordCount();
+  }
 }
 
 // Room switching
@@ -1299,7 +1633,7 @@ let currentRoomType = "public";
 let unsub = null;
 let lastMessageCount = {};
 
-function loadRoom(room, type = 'public') {
+async function loadRoom(room, type = 'public') {
   if (unsub) unsub();
   currentRoom = room;
   currentRoomType = type;
@@ -1317,15 +1651,15 @@ function loadRoom(room, type = 'public') {
   
   // Update header
   if (type === 'group') {
-    db.collection("groupChats").doc(room).get().then(doc => {
-      const data = doc.data();
+    const groupDoc = await db.collection("groupChats").doc(room).get();
+    if (groupDoc.exists) {
+      const data = groupDoc.data();
       document.getElementById("roomName").innerHTML = `💬 ${data.name} <span class="online-btn" onclick="openOnlineUsers()">Members: ${data.members.length}</span>`;
-    });
+    }
   } else if (type === 'counting') {
-    db.collection('countingState').doc('current').get().then(doc => {
-      const count = doc.exists ? doc.data().number : 0;
-      document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
-    });
+    const countDoc = await db.collection('countingState').doc('current').get();
+    const count = countDoc.exists ? countDoc.data().number : 0;
+    document.getElementById("roomName").innerHTML = `🔢 Counting <span>Current: ${count}</span>`;
     
     db.collection('countingState').doc('current').onSnapshot(doc => {
       if (doc.exists && currentRoomType === 'counting') {
@@ -1344,21 +1678,25 @@ function loadRoom(room, type = 'public') {
   watchTyping(room, type);
   
   const showTimestamps = localStorage.getItem('showTimestamps') !== 'false';
+  const showAvatars = localStorage.getItem('showAvatars') !== 'false';
+  const compactMode = localStorage.getItem('compactMode') === 'true';
   
   unsub = collection.orderBy("time").onSnapshot(snap => {
     document.getElementById("messages").innerHTML = "";
     const messageProtection = localStorage.getItem('messageProtection') === 'true';
     
-    snap.forEach(doc => {
+    snap.forEach(async doc => {
       const m = doc.data();
       
-      // Filter blocked users
-      if (blockedUsers.includes(m.user)) return;
+      // Filter blocked users and system messages
+      if (blockedUsers.includes(m.user) && m.user !== 'SYSTEM') return;
       
       const div = document.createElement("div");
       div.className = "message";
+      if (compactMode) div.classList.add('compact-mode');
+      if (m.isAnnouncement) div.classList.add('announcement');
       
-      if (messageProtection && m.inappropriate) {
+      if (messageProtection && m.inappropriate && !m.imageUrl) {
         div.classList.add('hidden-msg');
         div.onclick = function() {
           this.classList.remove('hidden-msg');
@@ -1366,52 +1704,92 @@ function loadRoom(room, type = 'public') {
         };
       }
       
-      const avatar = document.createElement("div");
-      avatar.className = "message-avatar";
-      avatar.textContent = m.user[0].toUpperCase();
-      avatar.onclick = () => openUserProfile(m.user);
-      div.appendChild(avatar);
+      // Avatar
+      if (showAvatars && m.user !== 'SYSTEM') {
+        const userAv = await getUserAvatar(m.user);
+        if (userAv && userAv.startsWith('http')) {
+          const avatarImg = document.createElement("img");
+          avatarImg.className = "message-avatar";
+          avatarImg.src = userAv;
+          avatarImg.onclick = () => openUserProfile(m.user);
+          div.appendChild(avatarImg);
+        } else {
+          const avatar = document.createElement("div");
+          avatar.className = "message-avatar";
+          avatar.textContent = m.user[0].toUpperCase();
+          avatar.onclick = () => openUserProfile(m.user);
+          div.appendChild(avatar);
+        }
+      }
       
       const content = document.createElement("div");
       content.className = "message-content";
       
-      getDisplayName(m.user).then(displayName => {
-        getSpecialTag(m.user).then(specialTag => {
-          const usernameSpan = document.createElement("span");
-          usernameSpan.className = "username";
-          usernameSpan.textContent = displayName;
-          usernameSpan.onclick = () => openUserProfile(m.user);
-          
-          content.appendChild(usernameSpan);
-          
-          if (specialTag) {
-            const tagSpan = document.createElement("span");
-            tagSpan.className = "special-tag";
-            tagSpan.textContent = specialTag.tag;
-            tagSpan.style.background = specialTag.bgColor;
-            tagSpan.style.color = specialTag.textColor;
-            content.appendChild(tagSpan);
+      if (m.user !== 'SYSTEM') {
+        const displayName = await getDisplayName(m.user);
+        const specialTag = await getSpecialTag(m.user);
+        
+        const usernameSpan = document.createElement("span");
+        usernameSpan.className = "username";
+        usernameSpan.textContent = displayName;
+        usernameSpan.onclick = () => openUserProfile(m.user);
+        
+        content.appendChild(usernameSpan);
+        
+        if (specialTag) {
+          const tagSpan = document.createElement("span");
+          tagSpan.className = "special-tag";
+          tagSpan.textContent = specialTag.tag;
+          tagSpan.style.background = specialTag.bgColor;
+          tagSpan.style.color = specialTag.textColor;
+          content.appendChild(tagSpan);
+        }
+        
+        if (showTimestamps && m.time) {
+          const timestamp = document.createElement("span");
+          timestamp.className = "timestamp";
+          const date = m.time.toDate();
+          const hours = date.getHours().toString().padStart(2, '0');
+          const mins = date.getMinutes().toString().padStart(2, '0');
+          timestamp.textContent = `${hours}:${mins}`;
+          content.appendChild(timestamp);
+        }
+      }
+      
+      if (m.text) {
+        const textNode = document.createTextNode(m.user === 'SYSTEM' ? m.text : ": " + m.text);
+        content.appendChild(textNode);
+      }
+      
+      if (m.imageUrl) {
+        const imageDiv = document.createElement("div");
+        const img = document.createElement("img");
+        img.className = "message-image";
+        img.src = m.imageUrl;
+        img.onclick = () => openImageViewer(m.imageUrl);
+        
+        const toggleBtn = document.createElement("span");
+        toggleBtn.className = "image-toggle";
+        toggleBtn.textContent = "Minimize";
+        toggleBtn.onclick = () => {
+          if (img.classList.contains('minimized')) {
+            img.classList.remove('minimized');
+            toggleBtn.textContent = "Minimize";
+          } else {
+            img.classList.add('minimized');
+            toggleBtn.textContent = "Expand";
           }
-          
-          // Add timestamp
-          if (showTimestamps && m.time) {
-            const timestamp = document.createElement("span");
-            timestamp.className = "timestamp";
-            const date = m.time.toDate();
-            const hours = date.getHours().toString().padStart(2, '0');
-            const mins = date.getMinutes().toString().padStart(2, '0');
-            timestamp.textContent = `${hours}:${mins}`;
-            content.appendChild(timestamp);
-          }
-          
-          const textNode = document.createTextNode(": " + m.text);
-          content.appendChild(textNode);
-        });
-      });
+        };
+        
+        imageDiv.appendChild(img);
+        imageDiv.appendChild(document.createElement("br"));
+        imageDiv.appendChild(toggleBtn);
+        content.appendChild(imageDiv);
+      }
       
       div.appendChild(content);
       
-      if (isAdmin) {
+      if (isAdmin && m.user !== 'SYSTEM') {
         const delBtn = document.createElement("button");
         delBtn.textContent = "Del";
         delBtn.onclick = () => collection.doc(doc.id).delete();
@@ -1471,5 +1849,7 @@ function startPresence() {
 
 // Enter to send
 document.getElementById("msgInput").addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter" && localStorage.getItem('enterToSend') !== 'false') {
+    sendMessage();
+  }
 });
