@@ -358,15 +358,24 @@ body {
   color: white;
   font-family: 'Poppins', Arial, sans-serif;
   font-weight: 700;
-  font-size: 18px;
   cursor: pointer;
   z-index: 100;
   transition: all 0.2s;
-  width: 44px;
-  height: 44px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  height: 36px;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-text {
+  font-size: 10px;
+  letter-spacing: 0.5px;
 }
 
 .friends-btn { 
@@ -374,16 +383,20 @@ body {
   background: linear-gradient(135deg, #667eea, #764ba2);
 }
 .settings-btn {
-  right: 65px;
+  right: 105px;
   background: linear-gradient(135deg, #10b981, #059669);
 }
 .admin-btn {
-  right: 115px;
+  right: 205px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 .banned-btn {
-  right: 165px;
+  right: 295px;
   background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+.blocked-btn {
+  right: 385px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
 .top-btn:hover {
@@ -706,13 +719,22 @@ body {
   }
   
   .top-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
+    padding: 6px 8px;
+    font-size: 9px;
+    height: 32px;
+  }
+  
+  .btn-icon {
+    font-size: 14px;
+  }
+  
+  .btn-text {
+    font-size: 8px;
   }
   
   .friends-btn { right: 10px; }
-  .settings-btn { right: 55px; }
-  .admin-btn { right: 100px; }
-  .banned-btn { right: 145px; }
+  .settings-btn { right: 85px; }
+  .admin-btn { right: 165px; }
+  .banned-btn { right: 240px; }
+  .blocked-btn { right: 310px; }
 }
