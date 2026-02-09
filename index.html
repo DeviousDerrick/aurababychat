@@ -5,7 +5,7 @@
   <title>AuraBaby Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -34,10 +34,11 @@
   ✨ AURABABY CHAT ✨
 </div>
 
-<button class="top-btn friends-btn" onclick="openFriendsPanel()">👥</button>
-<button class="top-btn settings-btn" onclick="openSettings()">⚙️</button>
-<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑</button>
-<button class="top-btn banned-btn" onclick="openBannedServer()">🚫</button>
+<button class="top-btn friends-btn" onclick="openFriendsPanel()"><span class="btn-icon">👥</span><span class="btn-text">FRIENDS</span></button>
+<button class="top-btn settings-btn" onclick="openSettings()"><span class="btn-icon">⚙️</span><span class="btn-text">SETTINGS</span></button>
+<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()"><span class="btn-icon">👑</span><span class="btn-text">ADMIN</span></button>
+<button class="top-btn banned-btn" onclick="openBannedServer()"><span class="btn-icon">🚫</span><span class="btn-text">BANNED</span></button>
+<button class="top-btn blocked-btn" onclick="openBlockedPanel()"><span class="btn-icon">🔇</span><span class="btn-text">BLOCKED</span></button>
 
 <div class="container" id="mainApp" style="display:none;">
   <div class="sidebar" id="sidebar">
@@ -233,10 +234,20 @@
   </div>
 </div>
 
+<!-- Blocked Users Panel -->
+<div class="modal-overlay" id="blockedPanelOverlay" onclick="closeBlockedPanel()"></div>
+<div class="modal" id="blockedPanel">
+  <button class="close-modal" onclick="closeBlockedPanel()">✕</button>
+  <h2>🔇 Blocked Users</h2>
+  <div class="modal-section">
+    <div id="blockedPanelList" class="user-list">Loading...</div>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<script src="chat.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
