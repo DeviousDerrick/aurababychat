@@ -10,6 +10,37 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Profile Images Mapping
+const profileImages = {
+  'aurababy': 'https://i.ibb.co/Y4L448c1/aurababy.jpg',
+  'kingdarren': 'https://i.ibb.co/1YGkQ5M4/kingdarren.jpg',
+  'daniel': 'https://i.ibb.co/RTwqxcck/daniel.jpg',
+  'manuel': 'https://i.ibb.co/JRr6BWjb/theonewhocknocks.jpg',
+  'grant': 'https://i.ibb.co/TqHnrtSp/grant.jpg',
+  'joony': 'https://i.ibb.co/fd9Kg05w/output.jpg',
+  'zoely': 'https://i.ibb.co/fVLDq186/zoely.png',
+  'lemmet': 'https://i.ibb.co/TBmZmYYh/newlemmet.jpg',
+  'kelly': 'https://i.ibb.co/Xk2DybZg/kelly.jpg',
+  'bryce': 'https://i.ibb.co/pvgyknnq/bryce.jpg',
+  'fattiebaby': 'https://i.ibb.co/FkyMMCRv/fattiebaby.jpg',
+  'goonerbaby': 'https://i.ibb.co/b5DH8g26/goonerbaby.jpg',
+  'teros': 'https://i.ibb.co/Nd6v0WjN/teros.jpg',
+  'gangstababy': 'https://i.ibb.co/TM91vD3z/Officalgangstababy.png',
+  'darkabby': 'https://i.ibb.co/vCTDWs40/output-1.jpg',
+  'poorbaby': 'https://i.ibb.co/Nn9v6ZBw/poorbaby.jpg',
+  'richbaby': 'https://i.ibb.co/DDSNbypf/richbaby.jpg',
+  'thebabythatholdsaura': 'https://i.ibb.co/Kx8ZSGCB/The-Baby-That-Holds-Aura.jpg',
+  'jollybaby': 'https://i.ibb.co/bgp5mdQZ/jollybaby.png',
+  'cupidbaby': 'https://i.ibb.co/1GbNb2PX/Untitled-4.png',
+  'judgemntbaby': 'https://i.ibb.co/TqtxsJ52/judgment.jpg',
+  'justicen': 'https://i.ibb.co/dwkHnD65/Justicebaby.jpg'
+};
+
+function getProfileImage(username) {
+  const lowerUsername = username.toLowerCase();
+  return profileImages[lowerUsername] || null;
+}
+
 let username = null;
 let isAdmin = localStorage.getItem("isAdmin") === "true";
 let blockedUsers = [];
@@ -20,6 +51,7 @@ let lastSent = 0;
 let cooldownInterval = null;
 let selectedFriends = [];
 let currentProfileUser = null;
+let countingCooldownEnd = 0;
 
 // SIDEBAR TOGGLE
 function toggleSidebar() {
@@ -188,7 +220,18 @@ window.addEventListener('load', async () => {
 
 function initializeApp() {
   document.getElementById("myUsername").textContent = username;
-  document.getElementById("myAvatar").textContent = username[0].toUpperCase();
+  
+  // Set profile avatar
+  const profileImg = getProfileImage(username);
+  const avatarEl = document.getElementById("myAvatar");
+  if (profileImg) {
+    avatarEl.style.backgroundImage = `url(${profileImg})`;
+    avatarEl.style.backgroundSize = 'cover';
+    avatarEl.style.backgroundPosition = 'center';
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.textContent = username[0].toUpperCase();
+  }
 
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'block';
@@ -198,6 +241,15 @@ function initializeApp() {
   loadPrivateChats();
   loadGroups();
   loadRoom(currentRoom);
+  
+  // Check for counting cooldown
+  const savedCooldown = localStorage.getItem('countingCooldown_' + username);
+  if (savedCooldown) {
+    countingCooldownEnd = parseInt(savedCooldown);
+    if (countingCooldownEnd > Date.now()) {
+      startCountingCooldownTimer();
+    }
+  }
 }
 
 // SETTINGS
@@ -332,6 +384,44 @@ function loadBannedServer() {
   });
 }
 
+// BLOCKED USERS PANEL
+function openBlockedPanel() {
+  document.getElementById('blockedPanel').style.display = 'block';
+  document.getElementById('blockedPanelOverlay').style.display = 'block';
+  loadBlockedPanel();
+}
+
+function closeBlockedPanel() {
+  document.getElementById('blockedPanel').style.display = 'none';
+  document.getElementById('blockedPanelOverlay').style.display = 'none';
+}
+
+function loadBlockedPanel() {
+  const list = document.getElementById('blockedPanelList');
+  list.innerHTML = '';
+  
+  if (blockedUsers.length === 0) {
+    list.innerHTML = 'No blocked users';
+    return;
+  }
+  
+  blockedUsers.forEach(user => {
+    const div = document.createElement('div');
+    div.className = 'user-item';
+    div.innerHTML = `<span>${user}</span>`;
+    
+    const btn = document.createElement('button');
+    btn.textContent = 'Unblock';
+    btn.onclick = () => {
+      unblockUser(user);
+      loadBlockedPanel();
+    };
+    div.appendChild(btn);
+    
+    list.appendChild(div);
+  });
+}
+
 // COOLDOWN
 function startCooldown() {
   const timerEl = document.getElementById('cooldownTimer');
@@ -349,6 +439,28 @@ function startCooldown() {
     } else {
       timerEl.style.display = 'none';
       clearInterval(cooldownInterval);
+    }
+  }, 1000);
+}
+
+function startCountingCooldownTimer() {
+  const timerEl = document.getElementById('cooldownTimer');
+  timerEl.style.display = 'block';
+  
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  
+  cooldownInterval = setInterval(() => {
+    const remaining = countingCooldownEnd - Date.now();
+    if (remaining <= 0) {
+      timerEl.style.display = 'none';
+      clearInterval(cooldownInterval);
+      localStorage.removeItem('countingCooldown_' + username);
+      countingCooldownEnd = 0;
+    } else {
+      const hours = Math.floor(remaining / 3600000);
+      const mins = Math.floor((remaining % 3600000) / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      timerEl.textContent = `Counting cooldown: ${hours}h ${mins}m ${secs}s`;
     }
   }, 1000);
 }
@@ -464,8 +576,16 @@ async function sendMessage() {
     return;
   }
 
-  // Counting channel logic
+  // Counting channel logic with 1-hour cooldown
   if (currentRoomType === 'counting') {
+    // Check if user is still on cooldown
+    if (countingCooldownEnd > now) {
+      const remaining = countingCooldownEnd - now;
+      const mins = Math.ceil(remaining / 60000);
+      showNotification(`You can count again in ${mins} minutes`);
+      return;
+    }
+    
     const num = parseInt(text);
     if (isNaN(num)) {
       showNotification('Counting: numbers only!');
@@ -481,10 +601,17 @@ async function sendMessage() {
     }
     
     await db.collection('countingState').doc('current').set({number: num, user: username, timestamp: Date.now()});
+    
+    // Set 1-hour cooldown
+    countingCooldownEnd = now + 3600000; // 1 hour
+    localStorage.setItem('countingCooldown_' + username, countingCooldownEnd.toString());
+    startCountingCooldownTimer();
   }
   
   lastSent = now;
-  startCooldown();
+  if (currentRoomType !== 'counting') {
+    startCooldown();
+  }
 
   const collection = currentRoomType === 'group' 
     ? db.collection("groupChats").doc(currentRoom).collection("messages")
@@ -560,10 +687,20 @@ function loadRoom(room, type = 'public') {
       div.className = "message";
       if (m.isAnnouncement) div.classList.add('announcement');
       
-      // Avatar
+      // Avatar with profile image
       const avatar = document.createElement("div");
       avatar.className = "message-avatar";
-      avatar.textContent = m.user === 'SYSTEM' ? '📢' : m.user[0].toUpperCase();
+      const profileImg = m.user !== 'SYSTEM' ? getProfileImage(m.user) : null;
+      
+      if (profileImg) {
+        avatar.style.backgroundImage = `url(${profileImg})`;
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
+        avatar.textContent = '';
+      } else {
+        avatar.textContent = m.user === 'SYSTEM' ? '📢' : m.user[0].toUpperCase();
+      }
+      
       avatar.onclick = () => m.user !== 'SYSTEM' && openUserProfile(m.user);
       div.appendChild(avatar);
       
@@ -841,7 +978,19 @@ async function openUserProfile(user) {
   
   document.getElementById("profileTitle").textContent = user === username ? "My Profile" : `${user}'s Profile`;
   document.getElementById("profileUsername").textContent = user;
-  document.getElementById("profileAvatar").textContent = user[0].toUpperCase();
+  
+  // Set profile avatar with image
+  const avatarEl = document.getElementById("profileAvatar");
+  const profileImg = getProfileImage(user);
+  if (profileImg) {
+    avatarEl.style.backgroundImage = `url(${profileImg})`;
+    avatarEl.style.backgroundSize = 'cover';
+    avatarEl.style.backgroundPosition = 'center';
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.textContent = user[0].toUpperCase();
+    avatarEl.style.backgroundImage = 'none';
+  }
   
   const profileDoc = await db.collection("profiles").doc(user).get();
   if (profileDoc.exists) {
