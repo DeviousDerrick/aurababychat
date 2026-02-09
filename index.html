@@ -5,7 +5,7 @@
   <title>AuraBaby Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="chat_styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -34,19 +34,33 @@
   ✨ AURABABY CHAT ✨
 </div>
 
+<button class="top-btn friends-btn" onclick="openFriendsPanel()">👥</button>
 <button class="top-btn settings-btn" onclick="openSettings()">⚙️</button>
+<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑</button>
+<button class="top-btn banned-btn" onclick="openBannedServer()">🚫</button>
 
 <div class="container" id="mainApp" style="display:none;">
   <div class="sidebar" id="sidebar">
     <div class="sidebar-section">
-      <div class="section-title">ROOMS</div>
-      <div class="room active" data-room="General 1">🌌 General 1</div>
-      <div class="room" data-room="General 2">💫 General 2</div>
-      <div class="room" data-room="General 3">⭐ General 3</div>
+      <div class="section-title"><span class="admin-trigger" onclick="adminUnlock()">P</span>UBLIC</div>
+      <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
+      <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
+      <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
+      <div class="room" data-room="Counting" data-type="counting">🔢 Counting</div>
+    </div>
+
+    <div class="sidebar-section" id="groupChatsSection" style="display:none;">
+      <div class="section-title">GROUPS</div>
+      <div id="groupChatsList"></div>
+    </div>
+
+    <div class="sidebar-section" id="privateChatsSection" style="display:none;">
+      <div class="section-title">PRIVATE</div>
+      <div id="privateChatsList"></div>
     </div>
 
     <div class="profile-section">
-      <div class="profile-card">
+      <div class="profile-card" onclick="openMyProfile()">
         <div class="profile-avatar" id="myAvatar">?</div>
         <div class="profile-name" id="myUsername">Username</div>
       </div>
@@ -59,11 +73,17 @@
     <div class="input">
       <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
       <div class="input-row">
+        <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
         <input id="msgInput" placeholder="Type your message..." maxlength="200" />
         <button onclick="sendMessage()">SEND</button>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Emoji Picker -->
+<div class="emoji-picker" id="emojiPicker" style="display:none;">
+  <div class="emoji-grid" id="emojiGrid"></div>
 </div>
 
 <!-- Settings Modal -->
@@ -76,11 +96,140 @@
     <h3>Display</h3>
     <label><input type="checkbox" id="showTimestamps"> Show timestamps</label>
     <label><input type="checkbox" id="soundEnabled"> Sound notifications</label>
+    <label><input type="checkbox" id="enterToSend"> Enter to send</label>
   </div>
   
   <div class="modal-section">
-    <h3>Account</h3>
-    <button onclick="logout()">Logout</button>
+    <h3>Blocked Users</h3>
+    <div id="blockedUsersList" class="user-list">No blocked users</div>
+  </div>
+</div>
+
+<!-- Friends Panel -->
+<div class="modal-overlay" id="friendsOverlay" onclick="closeFriendsPanel()"></div>
+<div class="modal" id="friendsPanel">
+  <button class="close-modal" onclick="closeFriendsPanel()">✕</button>
+  <h2>Friends & Groups</h2>
+  
+  <div class="tab-buttons">
+    <button class="tab-btn active" onclick="switchTab('friends')">Friends</button>
+    <button class="tab-btn" onclick="switchTab('groups')">Groups</button>
+    <button class="tab-btn" onclick="switchTab('add')">Add Friend</button>
+  </div>
+  
+  <div id="friendsTab">
+    <div class="modal-section">
+      <h3>Your Friends</h3>
+      <div id="friendsList" class="user-list">No friends yet</div>
+    </div>
+    <div class="modal-section">
+      <h3>Friend Requests</h3>
+      <div id="friendRequests" class="user-list">No pending requests</div>
+    </div>
+  </div>
+  
+  <div id="groupsTab" style="display:none;">
+    <div class="modal-section">
+      <h3>Your Groups</h3>
+      <div id="groupsList" class="user-list">No groups yet</div>
+    </div>
+    <div class="modal-section">
+      <h3>Create Group</h3>
+      <input type="text" id="groupName" placeholder="Group name">
+      <div id="friendsSelectList" class="user-list"></div>
+      <button onclick="createGroupChat()">Create Group</button>
+    </div>
+  </div>
+  
+  <div id="addTab" style="display:none;">
+    <div class="modal-section">
+      <h3>Send Friend Request</h3>
+      <input type="text" id="addFriendUsername" placeholder="Username">
+      <button onclick="sendFriendRequest()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileOverlay" onclick="closeProfile()"></div>
+<div class="modal" id="profileModal">
+  <button class="close-modal" onclick="closeProfile()">✕</button>
+  <h2 id="profileTitle">Profile</h2>
+  
+  <div style="text-align:center; margin-bottom:20px;">
+    <div class="profile-avatar profile-avatar-large" id="profileAvatar">?</div>
+    <h3 id="profileUsername">Username</h3>
+    <p id="profileBio" style="opacity:0.8; font-size:13px;">AuraBaby user</p>
+  </div>
+  
+  <div id="profileActions">
+    <button id="profileBlockBtn" onclick="blockUserFromProfile()">BLOCK</button>
+    <button id="profileAddFriend" onclick="addFriendFromProfile()">ADD FRIEND</button>
+    <button onclick="openPrivateChat()">MESSAGE</button>
+  </div>
+  
+  <div class="modal-section">
+    <h3>Friends</h3>
+    <div id="profileFriends" class="user-list">Loading...</div>
+  </div>
+  
+  <div class="modal-section">
+    <h3>Groups</h3>
+    <div id="profileGroups" class="user-list">Loading...</div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="modal-overlay" id="adminOverlay" onclick="closeAdminPanel()"></div>
+<div class="modal" id="adminPanel">
+  <button class="close-modal" onclick="closeAdminPanel()">✕</button>
+  <h2>Admin Panel</h2>
+  
+  <div class="modal-section">
+    <h3>Ban User</h3>
+    <input type="text" id="banUsername" placeholder="Username">
+    <select id="banDuration">
+      <option value="300000">5 minutes</option>
+      <option value="900000">15 minutes</option>
+      <option value="3600000">1 hour</option>
+      <option value="86400000">1 day</option>
+    </select>
+    <button onclick="banUser()">Ban</button>
+    <div id="bannedList" class="user-list">No banned users</div>
+  </div>
+  
+  <div class="modal-section">
+    <h3>Mute User</h3>
+    <input type="text" id="muteUsername" placeholder="Username">
+    <select id="muteDuration">
+      <option value="300000">5 minutes</option>
+      <option value="900000">15 minutes</option>
+      <option value="3600000">1 hour</option>
+    </select>
+    <button onclick="muteUser()">Mute</button>
+    <div id="mutedList" class="user-list">No muted users</div>
+  </div>
+  
+  <div class="modal-section">
+    <h3>Send Announcement</h3>
+    <textarea id="announcementText" placeholder="Announcement text" rows="3"></textarea>
+    <select id="announcementRoom">
+      <option value="all">All Rooms</option>
+      <option value="General 1">General 1</option>
+      <option value="General 2">General 2</option>
+      <option value="General 3">General 3</option>
+    </select>
+    <button onclick="sendAnnouncement()">Send</button>
+  </div>
+</div>
+
+<!-- Banned Server Panel -->
+<div class="modal-overlay" id="bannedServerOverlay" onclick="closeBannedServer()"></div>
+<div class="modal" id="bannedServerPanel">
+  <button class="close-modal" onclick="closeBannedServer()">✕</button>
+  <h2>🚫 Banned Users</h2>
+  <div class="modal-section">
+    <div id="bannedServerList" class="user-list">Loading...</div>
   </div>
 </div>
 
@@ -88,6 +237,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<script src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
