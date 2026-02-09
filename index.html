@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AuraBaby Chat (Reworked)</title>
+  <title>AuraBaby Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="chat_styles.css">
 </head>
 <body>
@@ -34,72 +34,60 @@
   ✨ AURABABY CHAT ✨
 </div>
 
-<!-- Buttons -->
-<button class="top-btn friends-btn" onclick="openFriendsPanel()">👥</button>
 <button class="top-btn settings-btn" onclick="openSettings()">⚙️</button>
-<button class="top-btn leaderboard-btn" onclick="openLeaderboard()">🏆</button>
-<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()">👑</button>
-<button class="top-btn banned-btn" onclick="openBannedServer()">🚫</button>
-
-<!-- [All modals and panels unchanged from original — omitted here for brevity in this preview but included in full file above] -->
 
 <div class="container" id="mainApp" style="display:none;">
   <div class="sidebar" id="sidebar">
     <div class="sidebar-section">
-      <div class="section-title"><span class="admin-trigger" onclick="adminUnlock()">P</span>UBLIC</div>
-      <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
-      <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
-      <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
-      <div class="room" data-room="Counting" data-type="counting">🔢 Counting</div>
-    </div>
-
-    <div class="sidebar-section" id="groupChatsSection" style="display:none;">
-      <div class="section-title">GROUPS</div>
-      <div id="groupChatsList"></div>
-    </div>
-
-    <div class="sidebar-section" id="privateChatsSection" style="display:none;">
-      <div class="section-title">PRIVATE</div>
-      <div id="privateChatsList"></div>
+      <div class="section-title">ROOMS</div>
+      <div class="room active" data-room="General 1">🌌 General 1</div>
+      <div class="room" data-room="General 2">💫 General 2</div>
+      <div class="room" data-room="General 3">⭐ General 3</div>
     </div>
 
     <div class="profile-section">
-      <div class="profile-card" onclick="openMyProfile()">
-        <img id="myAvatarImg" class="profile-avatar" src="" alt="" style="display:none;">
+      <div class="profile-card">
         <div class="profile-avatar" id="myAvatar">?</div>
         <div class="profile-name" id="myUsername">Username</div>
-        <div class="profile-time" id="myTime">⏱️ 0d 0h</div>
       </div>
     </div>
   </div>
 
   <div class="chat">
-    <div class="chat-header" id="roomName">
-      🌌 General 1 
-      <span class="online-btn" onclick="openOnlineUsers()">Online: <span id="onlineCount">0</span></span>
-    </div>
-    <div class="typing-indicator" id="typingIndicator"></div>
+    <div class="chat-header" id="roomName">🌌 General 1</div>
     <div class="messages" id="messages"></div>
     <div class="input">
       <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
-      <div class="word-counter" id="wordCounter">0/30 words</div>
       <div class="input-row">
-        <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
-        <input type="file" id="imageUpload" accept="image/*" style="display:none;">
-        <button class="image-btn" onclick="document.getElementById('imageUpload').click()">🖼️</button>
-        <input id="msgInput" placeholder="Type your message..." />
+        <input id="msgInput" placeholder="Type your message..." maxlength="200" />
         <button onclick="sendMessage()">SEND</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+<div class="modal" id="settingsPanel">
+  <button class="close-modal" onclick="closeSettings()">✕</button>
+  <h2>Settings</h2>
+  
+  <div class="modal-section">
+    <h3>Display</h3>
+    <label><input type="checkbox" id="showTimestamps"> Show timestamps</label>
+    <label><input type="checkbox" id="soundEnabled"> Sound notifications</label>
+  </div>
+  
+  <div class="modal-section">
+    <h3>Account</h3>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
-<!-- Reworked app script -->
 <script src="app.js"></script>
 </body>
 </html>
