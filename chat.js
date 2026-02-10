@@ -882,11 +882,21 @@ function switchTab(tab) {
   
   document.getElementById('friendsTab').style.display = tab === 'friends' ? 'block' : 'none';
   document.getElementById('groupsTab').style.display = tab === 'groups' ? 'block' : 'none';
-  document.getElementById('profilesTab').style.display = tab === 'profiles' ? 'block' : 'none';
   document.getElementById('addTab').style.display = tab === 'add' ? 'block' : 'none';
   
   if (tab === 'groups') loadFriendsForGroup();
-  if (tab === 'profiles') loadProfileGallery();
+}
+
+// PICTURE PANEL
+function openPicturePanel() {
+  document.getElementById('picturePanel').style.display = 'block';
+  document.getElementById('picturePanelOverlay').style.display = 'block';
+  loadProfileGallery();
+}
+
+function closePicturePanel() {
+  document.getElementById('picturePanel').style.display = 'none';
+  document.getElementById('picturePanelOverlay').style.display = 'none';
 }
 
 function loadProfileGallery() {
