@@ -51,7 +51,6 @@ let currentProfileUser = null;
 let countingCooldownEnd = 0;
 let typingTimeout = null;
 let currentlyTyping = new Set();
-let userProfilePicture = null;
 
 // SIDEBAR TOGGLE
 function toggleSidebar() {
@@ -266,6 +265,12 @@ function openSettings() {
   document.getElementById('soundEnabled').checked = localStorage.getItem('soundEnabled') === 'true';
   document.getElementById('enterToSend').checked = localStorage.getItem('enterToSend') !== 'false';
   
+  // Load saved colors
+  const primaryColor = localStorage.getItem('primaryColor') || '#667eea';
+  const secondaryColor = localStorage.getItem('secondaryColor') || '#764ba2';
+  document.getElementById('primaryColorPicker').value = primaryColor;
+  document.getElementById('secondaryColorPicker').value = secondaryColor;
+  
   loadBlockedUsers();
 }
 
@@ -277,6 +282,46 @@ function closeSettings() {
   localStorage.setItem('soundEnabled', document.getElementById('soundEnabled').checked);
   localStorage.setItem('enterToSend', document.getElementById('enterToSend').checked);
 }
+
+function applyColors() {
+  const primaryColor = localStorage.getItem('primaryColor') || '#667eea';
+  const secondaryColor = localStorage.getItem('secondaryColor') || '#764ba2';
+  
+  document.documentElement.style.setProperty('--primary-color', primaryColor);
+  document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+}
+
+function resetColors() {
+  localStorage.removeItem('primaryColor');
+  localStorage.removeItem('secondaryColor');
+  document.getElementById('primaryColorPicker').value = '#667eea';
+  document.getElementById('secondaryColorPicker').value = '#764ba2';
+  applyColors();
+  showNotification('Colors reset to default!', 'success');
+}
+
+// Color picker event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const primaryPicker = document.getElementById('primaryColorPicker');
+  const secondaryPicker = document.getElementById('secondaryColorPicker');
+  
+  if (primaryPicker) {
+    primaryPicker.addEventListener('input', (e) => {
+      localStorage.setItem('primaryColor', e.target.value);
+      applyColors();
+    });
+  }
+  
+  if (secondaryPicker) {
+    secondaryPicker.addEventListener('input', (e) => {
+      localStorage.setItem('secondaryColor', e.target.value);
+      applyColors();
+    });
+  }
+  
+  // Apply saved colors on load
+  applyColors();
+});
 
 // BLOCKING SYSTEM
 function blockUser(user) {
