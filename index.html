@@ -70,6 +70,7 @@
 
   <div class="chat">
     <div class="chat-header" id="roomName">🌌 General 1</div>
+    <div class="typing-indicator" id="typingIndicator"></div>
     <div class="messages" id="messages"></div>
     <div class="input">
       <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
@@ -115,6 +116,7 @@
   <div class="tab-buttons">
     <button class="tab-btn active" onclick="switchTab('friends')">Friends</button>
     <button class="tab-btn" onclick="switchTab('groups')">Groups</button>
+    <button class="tab-btn" onclick="switchTab('profiles')">Profiles</button>
     <button class="tab-btn" onclick="switchTab('add')">Add Friend</button>
   </div>
   
@@ -139,6 +141,14 @@
       <input type="text" id="groupName" placeholder="Group name">
       <div id="friendsSelectList" class="user-list"></div>
       <button onclick="createGroupChat()">Create Group</button>
+    </div>
+  </div>
+  
+  <div id="profilesTab" style="display:none;">
+    <div class="modal-section">
+      <h3>Choose Your Profile Picture</h3>
+      <p style="font-size:11px; opacity:0.8; margin-bottom:10px;">Select a baby avatar:</p>
+      <div id="profileGallery" class="profile-gallery"></div>
     </div>
   </div>
   
