@@ -36,6 +36,7 @@
 
 <button class="top-btn friends-btn" onclick="openFriendsPanel()"><span class="btn-icon">👥</span><span class="btn-text">FRIENDS</span></button>
 <button class="top-btn settings-btn" onclick="openSettings()"><span class="btn-icon">⚙️</span><span class="btn-text">SETTINGS</span></button>
+<button class="top-btn picture-btn" onclick="openPicturePanel()"><span class="btn-icon">📷</span><span class="btn-text">PICTURE</span></button>
 <button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()"><span class="btn-icon">👑</span><span class="btn-text">ADMIN</span></button>
 <button class="top-btn banned-btn" onclick="openBannedServer()"><span class="btn-icon">🚫</span><span class="btn-text">BANNED</span></button>
 <button class="top-btn blocked-btn" onclick="openBlockedPanel()"><span class="btn-icon">🔇</span><span class="btn-text">BLOCKED</span></button>
@@ -116,7 +117,6 @@
   <div class="tab-buttons">
     <button class="tab-btn active" onclick="switchTab('friends')">Friends</button>
     <button class="tab-btn" onclick="switchTab('groups')">Groups</button>
-    <button class="tab-btn" onclick="switchTab('profiles')">Profiles</button>
     <button class="tab-btn" onclick="switchTab('add')">Add Friend</button>
   </div>
   
@@ -141,14 +141,6 @@
       <input type="text" id="groupName" placeholder="Group name">
       <div id="friendsSelectList" class="user-list"></div>
       <button onclick="createGroupChat()">Create Group</button>
-    </div>
-  </div>
-  
-  <div id="profilesTab" style="display:none;">
-    <div class="modal-section">
-      <h3>Choose Your Profile Picture</h3>
-      <p style="font-size:11px; opacity:0.8; margin-bottom:10px;">Select a baby avatar:</p>
-      <div id="profileGallery" class="profile-gallery"></div>
     </div>
   </div>
   
@@ -251,6 +243,17 @@
   <h2>🔇 Blocked Users</h2>
   <div class="modal-section">
     <div id="blockedPanelList" class="user-list">Loading...</div>
+  </div>
+</div>
+
+<!-- Picture Panel -->
+<div class="modal-overlay" id="picturePanelOverlay" onclick="closePicturePanel()"></div>
+<div class="modal" id="picturePanel">
+  <button class="close-modal" onclick="closePicturePanel()">✕</button>
+  <h2>📷 Choose Your Profile Picture</h2>
+  <div class="modal-section">
+    <p style="font-size:11px; opacity:0.8; margin-bottom:10px;">Select a baby avatar:</p>
+    <div id="profileGallery" class="profile-gallery"></div>
   </div>
 </div>
 
