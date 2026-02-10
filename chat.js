@@ -10,36 +10,33 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Profile Images Mapping
-const profileImages = {
-  'aurababy': 'https://i.ibb.co/Y4L448c1/aurababy.jpg',
-  'kingdarren': 'https://i.ibb.co/1YGkQ5M4/kingdarren.jpg',
-  'daniel': 'https://i.ibb.co/RTwqxcck/daniel.jpg',
-  'manuel': 'https://i.ibb.co/JRr6BWjb/theonewhocknocks.jpg',
-  'grant': 'https://i.ibb.co/TqHnrtSp/grant.jpg',
-  'joony': 'https://i.ibb.co/fd9Kg05w/output.jpg',
-  'zoely': 'https://i.ibb.co/fVLDq186/zoely.png',
-  'lemmet': 'https://i.ibb.co/TBmZmYYh/newlemmet.jpg',
-  'kelly': 'https://i.ibb.co/Xk2DybZg/kelly.jpg',
-  'bryce': 'https://i.ibb.co/pvgyknnq/bryce.jpg',
-  'fattiebaby': 'https://i.ibb.co/FkyMMCRv/fattiebaby.jpg',
-  'goonerbaby': 'https://i.ibb.co/b5DH8g26/goonerbaby.jpg',
-  'teros': 'https://i.ibb.co/Nd6v0WjN/teros.jpg',
-  'gangstababy': 'https://i.ibb.co/TM91vD3z/Officalgangstababy.png',
-  'darkabby': 'https://i.ibb.co/vCTDWs40/output-1.jpg',
-  'poorbaby': 'https://i.ibb.co/Nn9v6ZBw/poorbaby.jpg',
-  'richbaby': 'https://i.ibb.co/DDSNbypf/richbaby.jpg',
-  'thebabythatholdsaura': 'https://i.ibb.co/Kx8ZSGCB/The-Baby-That-Holds-Aura.jpg',
-  'jollybaby': 'https://i.ibb.co/bgp5mdQZ/jollybaby.png',
-  'cupidbaby': 'https://i.ibb.co/1GbNb2PX/Untitled-4.png',
-  'judgemntbaby': 'https://i.ibb.co/TqtxsJ52/judgment.jpg',
-  'justicen': 'https://i.ibb.co/dwkHnD65/Justicebaby.jpg'
-};
+// Available Profile Pictures Gallery
+const availableProfiles = [
+  { name: 'AuraBaby', url: 'https://i.ibb.co/Y4L448c1/aurababy.jpg' },
+  { name: 'King Darren', url: 'https://i.ibb.co/1YGkQ5M4/kingdarren.jpg' },
+  { name: 'Daniel', url: 'https://i.ibb.co/RTwqxcck/daniel.jpg' },
+  { name: 'Manuel', url: 'https://i.ibb.co/JRr6BWjb/theonewhocknocks.jpg' },
+  { name: 'Grant', url: 'https://i.ibb.co/TqHnrtSp/grant.jpg' },
+  { name: 'Joony', url: 'https://i.ibb.co/fd9Kg05w/output.jpg' },
+  { name: 'Zoely', url: 'https://i.ibb.co/fVLDq186/zoely.png' },
+  { name: 'Lemmet', url: 'https://i.ibb.co/TBmZmYYh/newlemmet.jpg' },
+  { name: 'Kelly', url: 'https://i.ibb.co/Xk2DybZg/kelly.jpg' },
+  { name: 'Bryce', url: 'https://i.ibb.co/pvgyknnq/bryce.jpg' },
+  { name: 'FattieBaby', url: 'https://i.ibb.co/FkyMMCRv/fattiebaby.jpg' },
+  { name: 'GoonerBaby', url: 'https://i.ibb.co/b5DH8g26/goonerbaby.jpg' },
+  { name: 'Teros', url: 'https://i.ibb.co/Nd6v0WjN/teros.jpg' },
+  { name: 'GangstaBaby', url: 'https://i.ibb.co/TM91vD3z/Officalgangstababy.png' },
+  { name: 'DarkAbby', url: 'https://i.ibb.co/vCTDWs40/output-1.jpg' },
+  { name: 'PoorBaby', url: 'https://i.ibb.co/Nn9v6ZBw/poorbaby.jpg' },
+  { name: 'RichBaby', url: 'https://i.ibb.co/DDSNbypf/richbaby.jpg' },
+  { name: 'The Baby That Holds Aura', url: 'https://i.ibb.co/Kx8ZSGCB/The-Baby-That-Holds-Aura.jpg' },
+  { name: 'JollyBaby', url: 'https://i.ibb.co/bgp5mdQZ/jollybaby.png' },
+  { name: 'CupidBaby', url: 'https://i.ibb.co/1GbNb2PX/Untitled-4.png' },
+  { name: 'JudgmentBaby', url: 'https://i.ibb.co/TqtxsJ52/judgment.jpg' },
+  { name: 'JusticeN', url: 'https://i.ibb.co/dwkHnD65/Justicebaby.jpg' }
+];
 
-function getProfileImage(username) {
-  const lowerUsername = username.toLowerCase();
-  return profileImages[lowerUsername] || null;
-}
+let userProfilePicture = null;
 
 let username = null;
 let isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -52,6 +49,9 @@ let cooldownInterval = null;
 let selectedFriends = [];
 let currentProfileUser = null;
 let countingCooldownEnd = 0;
+let typingTimeout = null;
+let currentlyTyping = new Set();
+let userProfilePicture = null;
 
 // SIDEBAR TOGGLE
 function toggleSidebar() {
@@ -218,14 +218,19 @@ window.addEventListener('load', async () => {
   }
 });
 
-function initializeApp() {
+async function initializeApp() {
   document.getElementById("myUsername").textContent = username;
   
+  // Load user's profile picture
+  const profileDoc = await db.collection("profiles").doc(username).get();
+  if (profileDoc.exists && profileDoc.data().profilePicture) {
+    userProfilePicture = profileDoc.data().profilePicture;
+  }
+  
   // Set profile avatar
-  const profileImg = getProfileImage(username);
   const avatarEl = document.getElementById("myAvatar");
-  if (profileImg) {
-    avatarEl.style.backgroundImage = `url(${profileImg})`;
+  if (userProfilePicture) {
+    avatarEl.style.backgroundImage = `url(${userProfilePicture})`;
     avatarEl.style.backgroundSize = 'cover';
     avatarEl.style.backgroundPosition = 'center';
     avatarEl.textContent = '';
@@ -465,6 +470,61 @@ function startCountingCooldownTimer() {
   }, 1000);
 }
 
+// TYPING INDICATORS
+function sendTypingIndicator() {
+  if (!currentRoom || currentRoomType === 'counting') return;
+  
+  const path = currentRoomType === 'group' 
+    ? `groupChats/${currentRoom}/typing`
+    : currentRoomType === 'private'
+    ? `privateChats/${currentRoom}/typing`
+    : `rooms/${currentRoom}/typing`;
+  
+  db.collection(path).doc(username).set({
+    typing: true,
+    timestamp: Date.now()
+  });
+  
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.collection(path).doc(username).delete().catch(() => {});
+  }, 3000);
+}
+
+function watchTyping(room, type) {
+  const path = type === 'group'
+    ? `groupChats/${room}/typing`
+    : type === 'private'
+    ? `privateChats/${room}/typing`
+    : `rooms/${room}/typing`;
+  
+  db.collection(path).onSnapshot(snapshot => {
+    currentlyTyping.clear();
+    const now = Date.now();
+    
+    snapshot.forEach(doc => {
+      if (doc.id !== username && now - doc.data().timestamp < 4000 && !blockedUsers.includes(doc.id)) {
+        currentlyTyping.add(doc.id);
+      }
+    });
+    
+    const indicator = document.getElementById('typingIndicator');
+    if (currentlyTyping.size > 0) {
+      const users = Array.from(currentlyTyping);
+      if (users.length === 1) {
+        indicator.textContent = `${users[0]} is typing...`;
+      } else if (users.length === 2) {
+        indicator.textContent = `${users[0]} and ${users[1]} are typing...`;
+      } else {
+        indicator.textContent = `${users[0]}, ${users[1]}, and ${users.length - 2} others are typing...`;
+      }
+      indicator.style.display = 'block';
+    } else {
+      indicator.style.display = 'none';
+    }
+  });
+}
+
 // PRIVATE CHATS
 async function openPrivateChat() {
   if (!currentProfileUser || currentProfileUser === username) return;
@@ -631,7 +691,7 @@ async function sendMessage() {
 }
 
 // ROOM LOADING - FIXED MESSAGE RENDERING
-function loadRoom(room, type = 'public') {
+async function loadRoom(room, type = 'public') {
   if (unsub) unsub();
   currentRoom = room;
   currentRoomType = type;
@@ -672,16 +732,19 @@ function loadRoom(room, type = 'public') {
     document.getElementById("roomName").innerHTML = `🌌 ${room}`;
   }
   
+  // Watch typing indicators
+  watchTyping(room, type);
+  
   const showTimestamps = localStorage.getItem('showTimestamps') === 'true';
   
-  unsub = collection.orderBy("time").limitToLast(50).onSnapshot(snapshot => {
+  unsub = collection.orderBy("time").limitToLast(50).onSnapshot(async snapshot => {
     document.getElementById("messages").innerHTML = "";
     
-    snapshot.forEach(doc => {
+    for (const doc of snapshot.docs) {
       const m = doc.data();
       
       // Filter blocked users
-      if (blockedUsers.includes(m.user)) return;
+      if (blockedUsers.includes(m.user)) continue;
       
       const div = document.createElement("div");
       div.className = "message";
@@ -690,7 +753,7 @@ function loadRoom(room, type = 'public') {
       // Avatar with profile image
       const avatar = document.createElement("div");
       avatar.className = "message-avatar";
-      const profileImg = m.user !== 'SYSTEM' ? getProfileImage(m.user) : null;
+      const profileImg = m.user !== 'SYSTEM' ? await getUserProfilePicture(m.user) : null;
       
       if (profileImg) {
         avatar.style.backgroundImage = `url(${profileImg})`;
@@ -740,11 +803,16 @@ function loadRoom(room, type = 'public') {
       }
       
       document.getElementById("messages").appendChild(div);
-    });
+    }
     
     // Auto scroll
     const messages = document.getElementById("messages");
     messages.scrollTop = messages.scrollHeight;
+    
+    // Show notification for new messages if not in focus
+    if (document.hidden && localStorage.getItem('soundEnabled') === 'true') {
+      playNotificationSound();
+    }
   });
 }
 
@@ -764,12 +832,35 @@ function startPresence() {
   }, 5000);
 }
 
+// Notification sound
+function playNotificationSound() {
+  // Create a simple beep sound
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.value = 800;
+  oscillator.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.5);
+}
+
 // Enter to send
 document.getElementById("msgInput").addEventListener("keypress", e => {
   if (e.key === "Enter" && localStorage.getItem('enterToSend') !== 'false') {
     sendMessage();
   }
 });
+
+// Typing indicator on input
+document.getElementById("msgInput").addEventListener("input", sendTypingIndicator);
 
 // FRIENDS FUNCTIONS
 function openFriendsPanel() {
@@ -791,9 +882,70 @@ function switchTab(tab) {
   
   document.getElementById('friendsTab').style.display = tab === 'friends' ? 'block' : 'none';
   document.getElementById('groupsTab').style.display = tab === 'groups' ? 'block' : 'none';
+  document.getElementById('profilesTab').style.display = tab === 'profiles' ? 'block' : 'none';
   document.getElementById('addTab').style.display = tab === 'add' ? 'block' : 'none';
   
   if (tab === 'groups') loadFriendsForGroup();
+  if (tab === 'profiles') loadProfileGallery();
+}
+
+function loadProfileGallery() {
+  const gallery = document.getElementById('profileGallery');
+  gallery.innerHTML = '';
+  
+  availableProfiles.forEach(profile => {
+    const div = document.createElement('div');
+    div.className = 'profile-option';
+    if (userProfilePicture === profile.url) {
+      div.classList.add('selected');
+    }
+    
+    div.style.backgroundImage = `url(${profile.url})`;
+    div.style.backgroundSize = 'cover';
+    div.style.backgroundPosition = 'center';
+    
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'profile-name-label';
+    nameLabel.textContent = profile.name;
+    div.appendChild(nameLabel);
+    
+    div.onclick = () => selectProfilePicture(profile.url);
+    
+    gallery.appendChild(div);
+  });
+}
+
+async function selectProfilePicture(url) {
+  userProfilePicture = url;
+  
+  // Save to Firestore
+  await db.collection('profiles').doc(username).set({
+    profilePicture: url
+  }, { merge: true });
+  
+  // Update sidebar avatar
+  const avatarEl = document.getElementById("myAvatar");
+  avatarEl.style.backgroundImage = `url(${url})`;
+  avatarEl.style.backgroundSize = 'cover';
+  avatarEl.style.backgroundPosition = 'center';
+  avatarEl.textContent = '';
+  
+  // Reload gallery to show selection
+  loadProfileGallery();
+  
+  showNotification('Profile picture updated!', 'success');
+}
+
+async function getUserProfilePicture(user) {
+  try {
+    const profileDoc = await db.collection('profiles').doc(user).get();
+    if (profileDoc.exists && profileDoc.data().profilePicture) {
+      return profileDoc.data().profilePicture;
+    }
+  } catch (e) {
+    console.error('Error loading profile picture:', e);
+  }
+  return null;
 }
 
 function loadFriends() {
@@ -981,7 +1133,7 @@ async function openUserProfile(user) {
   
   // Set profile avatar with image
   const avatarEl = document.getElementById("profileAvatar");
-  const profileImg = getProfileImage(user);
+  const profileImg = await getUserProfilePicture(user);
   if (profileImg) {
     avatarEl.style.backgroundImage = `url(${profileImg})`;
     avatarEl.style.backgroundSize = 'cover';
