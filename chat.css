@@ -395,17 +395,21 @@ body {
   right: 105px;
   background: linear-gradient(135deg, #10b981, #059669);
 }
+.picture-btn {
+  right: 195px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
 .admin-btn {
-  right: 205px;
+  right: 285px;
   background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 .banned-btn {
-  right: 295px;
+  right: 375px;
   background: linear-gradient(135deg, #6b7280, #4b5563);
 }
 .blocked-btn {
-  right: 385px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  right: 465px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
 }
 
 .top-btn:hover {
@@ -743,9 +747,10 @@ body {
   
   .friends-btn { right: 10px; }
   .settings-btn { right: 85px; }
-  .admin-btn { right: 165px; }
-  .banned-btn { right: 240px; }
-  .blocked-btn { right: 310px; }
+  .picture-btn { right: 160px; }
+  .admin-btn { right: 235px; }
+  .banned-btn { right: 310px; }
+  .blocked-btn { right: 385px; }
 }
 
 /* PROFILE GALLERY */
