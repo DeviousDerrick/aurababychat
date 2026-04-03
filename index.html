@@ -4,276 +4,357 @@
   <meta charset="UTF-8">
   <title>AuraBaby Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="chat.css">
 </head>
 <body>
 
-<!-- Login Screen -->
-<div id="loginScreen" class="login-screen">
+<!-- ─── LOGIN SCREEN ─────────────────────────────── -->
+<div id="loginScreen">
   <div class="login-box">
-    <h1>✨ AURABABY CHAT ✨</h1>
+    <div class="login-logo">
+      <span class="logo-icon">✨</span>
+      <h1>AURABABY CHAT</h1>
+      <p>Your crew, your vibe</p>
+    </div>
+
     <div id="loginForm">
-      <input type="text" id="loginUsername" placeholder="Username" maxlength="20">
-      <input type="password" id="loginCode" placeholder="6-Digit Code" maxlength="6">
-      <button onclick="login()">LOGIN</button>
-      <div class="login-toggle" onclick="toggleSignup()">Don't have an account? Sign up</div>
+      <div class="login-form-group">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter your username" maxlength="20"
+               onkeypress="if(event.key==='Enter') login()">
+      </div>
+      <div class="login-form-group">
+        <label>6-Digit Code</label>
+        <input type="password" id="loginCode" placeholder="••••••" maxlength="6"
+               onkeypress="if(event.key==='Enter') login()">
+      </div>
+      <button class="login-btn" onclick="login()">LOGIN →</button>
+      <div class="login-toggle" onclick="toggleSignup()">No account? <span>Sign up here</span></div>
     </div>
-    <div id="signupForm" style="display:none;">
-      <input type="text" id="signupUsername" placeholder="Choose Username" maxlength="20">
-      <input type="password" id="signupCode" placeholder="Create 6-Digit Code" maxlength="6">
-      <input type="password" id="signupCodeConfirm" placeholder="Confirm Code" maxlength="6">
-      <button onclick="signup()">SIGN UP</button>
-      <div class="login-toggle" onclick="toggleSignup()">Already have an account? Login</div>
+
+    <div id="signupForm" style="display:none">
+      <div class="login-form-group">
+        <label>Choose Username</label>
+        <input type="text" id="signupUsername" placeholder="Pick a cool name" maxlength="20">
+      </div>
+      <div class="login-form-group">
+        <label>Create 6-Digit Code</label>
+        <input type="password" id="signupCode" placeholder="••••••" maxlength="6">
+      </div>
+      <div class="login-form-group">
+        <label>Confirm Code</label>
+        <input type="password" id="signupCodeConfirm" placeholder="••••••" maxlength="6">
+      </div>
+      <button class="login-btn" onclick="signup()">CREATE ACCOUNT →</button>
+      <div class="login-toggle" onclick="toggleSignup()">Already have one? <span>Login here</span></div>
     </div>
   </div>
 </div>
 
-<div class="topbar">
-  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-  ✨ AURABABY CHAT ✨
-</div>
+<!-- ─── MAIN APP ──────────────────────────────────── -->
+<div id="mainApp">
 
-<button class="top-btn friends-btn" onclick="openFriendsPanel()"><span class="btn-icon">👥</span><span class="btn-text">FRIENDS</span></button>
-<button class="top-btn settings-btn" onclick="openSettings()"><span class="btn-icon">⚙️</span><span class="btn-text">SETTINGS</span></button>
-<button class="top-btn picture-btn" onclick="openPicturePanel()"><span class="btn-icon">📷</span><span class="btn-text">PICTURE</span></button>
-<button class="top-btn admin-btn" id="adminBtn" style="display:none;" onclick="openAdminPanel()"><span class="btn-icon">👑</span><span class="btn-text">ADMIN</span></button>
-<button class="top-btn banned-btn" onclick="openBannedServer()"><span class="btn-icon">🚫</span><span class="btn-text">BANNED</span></button>
-<button class="top-btn blocked-btn" onclick="openBlockedPanel()"><span class="btn-icon">🔇</span><span class="btn-text">BLOCKED</span></button>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-logo">✨ AURA<span>BABY</span></div>
 
-<div class="container" id="mainApp" style="display:none;">
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="section-title"><span class="admin-trigger" onclick="adminUnlock()">P</span>UBLIC</div>
-      <div class="room active" data-room="General 1" data-type="public">🌌 General 1</div>
-      <div class="room" data-room="General 2" data-type="public">💫 General 2</div>
-      <div class="room" data-room="General 3" data-type="public">⭐ General 3</div>
-      <div class="room" data-room="Counting" data-type="counting">🔢 Counting</div>
+    <div class="topbar-actions">
+      <button class="tb-btn tb-btn-purple" onclick="openFriendsPanel()">
+        <span class="tb-icon">👥</span><span class="tb-label">Friends</span>
+      </button>
+      <button class="tb-btn tb-btn-green" onclick="openSettings()">
+        <span class="tb-icon">⚙️</span><span class="tb-label">Settings</span>
+      </button>
+      <button class="tb-btn tb-btn-amber" onclick="openPicturePanel()">
+        <span class="tb-icon">📷</span><span class="tb-label">Picture</span>
+      </button>
+      <button class="tb-btn tb-btn-red" id="adminBtn" style="display:none" onclick="openAdminPanel()">
+        <span class="tb-icon">👑</span><span class="tb-label">Admin</span>
+      </button>
+      <button class="tb-btn tb-btn-gray" onclick="openBannedServer()">
+        <span class="tb-icon">🚫</span><span class="tb-label">Banned</span>
+      </button>
+      <button class="tb-btn tb-btn-violet" onclick="openBlockedPanel()">
+        <span class="tb-icon">🔇</span><span class="tb-label">Blocked</span>
+      </button>
     </div>
+  </div>
 
-    <div class="sidebar-section" id="groupChatsSection" style="display:none;">
-      <div class="section-title">GROUPS</div>
-      <div id="groupChatsList"></div>
-    </div>
+  <div class="app-body">
 
-    <div class="sidebar-section" id="privateChatsSection" style="display:none;">
-      <div class="section-title">PRIVATE</div>
-      <div id="privateChatsList"></div>
-    </div>
+    <!-- ─── LEFT SIDEBAR ─────────────────────────── -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
 
-    <div class="profile-section">
-      <div class="profile-card" onclick="openMyProfile()">
-        <div class="profile-avatar" id="myAvatar">?</div>
-        <div class="profile-name" id="myUsername">Username</div>
+        <div class="sidebar-section">
+          <div class="section-label">
+            <span class="admin-trigger" onclick="adminUnlock()" title="Admin unlock">P</span>UBLIC CHANNELS
+          </div>
+          <div class="channel-item active" data-room="General 1" data-type="public">
+            <span class="ch-icon">🌌</span> General 1
+          </div>
+          <div class="channel-item" data-room="General 2" data-type="public">
+            <span class="ch-icon">💫</span> General 2
+          </div>
+          <div class="channel-item" data-room="General 3" data-type="public">
+            <span class="ch-icon">⭐</span> General 3
+          </div>
+          <div class="channel-item" data-room="Counting" data-type="counting">
+            <span class="ch-icon">🔢</span> Counting
+          </div>
+        </div>
+
+        <div class="sidebar-section" id="groupChatsSection" style="display:none">
+          <div class="section-label">GROUPS</div>
+          <div id="groupChatsList"></div>
+        </div>
+
+        <div class="sidebar-section" id="privateChatsSection" style="display:none">
+          <div class="section-label">DIRECT MESSAGES</div>
+          <div id="privateChatsList"></div>
+        </div>
+
+        <div class="sidebar-profile">
+          <div class="profile-card" onclick="openMyProfile()">
+            <div class="profile-card-avatar" id="myAvatar">?</div>
+            <div class="profile-card-info">
+              <div class="profile-card-name" id="myUsername">Username</div>
+              <div class="profile-card-status">● Online</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
 
-  <div class="chat">
-    <div class="chat-header" id="roomName">🌌 General 1</div>
-    <div class="typing-indicator" id="typingIndicator"></div>
-    <div class="messages" id="messages"></div>
-    <div class="input">
-      <div class="cooldown-timer" id="cooldownTimer" style="display:none;"></div>
-      <div class="input-row">
-        <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
-        <input id="msgInput" placeholder="Type your message..." maxlength="200" />
-        <button onclick="sendMessage()">SEND</button>
+    <!-- ─── CHAT AREA ─────────────────────────────── -->
+    <div class="chat-area">
+
+      <div class="chat-header">
+        <span class="chat-header-icon" id="roomIcon">🌌</span>
+        <span class="chat-header-name" id="roomName">General 1</span>
+        <span class="chat-header-desc" id="roomDesc"></span>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- Emoji Picker -->
-<div class="emoji-picker" id="emojiPicker" style="display:none;">
+      <div class="messages-wrapper">
+        <div class="messages" id="messages"></div>
+
+        <div class="typing-bar" id="typingIndicator" style="display:none">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+          <span id="typingText"></span>
+        </div>
+
+        <div class="input-area">
+          <div class="cooldown-bar" id="cooldownTimer"></div>
+          <div class="input-box">
+            <button class="emoji-btn" onclick="toggleEmojiPicker()">😊</button>
+            <input id="msgInput" placeholder="Send a message..." maxlength="200">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ─── RIGHT PANEL: ONLINE MEMBERS ──────────── -->
+    <div class="members-panel">
+      <div class="members-header">
+        <div class="online-dot"></div>
+        ONLINE — <span id="onlineCount">0</span>
+      </div>
+      <div class="members-list" id="membersList"></div>
+    </div>
+
+  </div><!-- /app-body -->
+</div><!-- /mainApp -->
+
+<!-- ─── EMOJI PICKER ───────────────────────────────── -->
+<div class="emoji-picker" id="emojiPicker">
   <div class="emoji-grid" id="emojiGrid"></div>
 </div>
 
-<!-- Settings Modal -->
+<!-- ─── SETTINGS MODAL ─────────────────────────────── -->
 <div class="modal-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
 <div class="modal" id="settingsPanel">
   <button class="close-modal" onclick="closeSettings()">✕</button>
-  <h2>Settings</h2>
-  
+  <div class="modal-title">⚙️ Settings</div>
+
   <div class="modal-section">
     <h3>Display</h3>
-    <label><input type="checkbox" id="showTimestamps"> Show timestamps</label>
+    <label><input type="checkbox" id="showTimestamps"> Show message timestamps</label>
     <label><input type="checkbox" id="soundEnabled"> Sound notifications</label>
-    <label><input type="checkbox" id="enterToSend"> Enter to send</label>
+    <label><input type="checkbox" id="enterToSend"> Enter key to send</label>
+    <label><input type="checkbox" id="showMembers" onchange="toggleMembersPanel()"> Show members panel</label>
   </div>
-  
+
   <div class="modal-section">
-    <h3>Customize Colors</h3>
-    <div style="margin-bottom:10px;">
-      <label style="display:block; margin-bottom:5px; font-size:12px;">Primary Color</label>
-      <input type="color" id="primaryColorPicker" value="#667eea" style="width:100%; height:40px; cursor:pointer;">
-    </div>
-    <div style="margin-bottom:10px;">
-      <label style="display:block; margin-bottom:5px; font-size:12px;">Secondary Color</label>
-      <input type="color" id="secondaryColorPicker" value="#764ba2" style="width:100%; height:40px; cursor:pointer;">
-    </div>
-    <button onclick="resetColors()" style="background: linear-gradient(135deg, #ef4444, #dc2626); margin-top:5px;">Reset to Default</button>
+    <h3>Theme Colors</h3>
+    <label style="font-size:12px; color:var(--text-secondary)">Primary Color</label>
+    <input type="color" id="primaryColorPicker" value="#6c7fff">
+    <label style="font-size:12px; color:var(--text-secondary)">Accent Color</label>
+    <input type="color" id="secondaryColorPicker" value="#ff6cbe">
+    <button class="modal-btn danger" onclick="resetColors()">Reset Colors</button>
   </div>
-  
+
   <div class="modal-section">
     <h3>Blocked Users</h3>
-    <div id="blockedUsersList" class="user-list">No blocked users</div>
+    <div id="blockedUsersList" class="user-list"><div class="empty-state">No blocked users</div></div>
   </div>
 </div>
 
-<!-- Friends Panel -->
+<!-- ─── FRIENDS PANEL ──────────────────────────────── -->
 <div class="modal-overlay" id="friendsOverlay" onclick="closeFriendsPanel()"></div>
 <div class="modal" id="friendsPanel">
   <button class="close-modal" onclick="closeFriendsPanel()">✕</button>
-  <h2>Friends & Groups</h2>
-  
+  <div class="modal-title">👥 Friends & Groups</div>
+
   <div class="tab-buttons">
-    <button class="tab-btn active" onclick="switchTab('friends')">Friends</button>
-    <button class="tab-btn" onclick="switchTab('groups')">Groups</button>
-    <button class="tab-btn" onclick="switchTab('add')">Add Friend</button>
+    <button class="tab-btn active" onclick="switchTab('friends', this)">Friends</button>
+    <button class="tab-btn" onclick="switchTab('groups', this)">Groups</button>
+    <button class="tab-btn" onclick="switchTab('add', this)">+ Add</button>
   </div>
-  
+
   <div id="friendsTab">
     <div class="modal-section">
       <h3>Your Friends</h3>
-      <div id="friendsList" class="user-list">No friends yet</div>
+      <div id="friendsList" class="user-list"><div class="empty-state">No friends yet</div></div>
     </div>
     <div class="modal-section">
-      <h3>Friend Requests</h3>
-      <div id="friendRequests" class="user-list">No pending requests</div>
+      <h3>Pending Requests</h3>
+      <div id="friendRequests" class="user-list"><div class="empty-state">No pending requests</div></div>
     </div>
   </div>
-  
-  <div id="groupsTab" style="display:none;">
+
+  <div id="groupsTab" style="display:none">
     <div class="modal-section">
       <h3>Your Groups</h3>
-      <div id="groupsList" class="user-list">No groups yet</div>
+      <div id="groupsList" class="user-list"><div class="empty-state">No groups yet</div></div>
     </div>
     <div class="modal-section">
       <h3>Create Group</h3>
-      <input type="text" id="groupName" placeholder="Group name">
+      <input type="text" id="groupName" placeholder="Group name...">
       <div id="friendsSelectList" class="user-list"></div>
-      <button onclick="createGroupChat()">Create Group</button>
+      <button class="modal-btn" onclick="createGroupChat()" style="margin-top:8px">Create Group</button>
     </div>
   </div>
-  
-  <div id="addTab" style="display:none;">
+
+  <div id="addTab" style="display:none">
     <div class="modal-section">
       <h3>Send Friend Request</h3>
-      <input type="text" id="addFriendUsername" placeholder="Username">
-      <button onclick="sendFriendRequest()">Send Request</button>
+      <input type="text" id="addFriendUsername" placeholder="Enter username...">
+      <button class="modal-btn" onclick="sendFriendRequest()">Send Request</button>
     </div>
   </div>
 </div>
 
-<!-- Profile Modal -->
+<!-- ─── PROFILE MODAL ──────────────────────────────── -->
 <div class="modal-overlay" id="profileOverlay" onclick="closeProfile()"></div>
 <div class="modal" id="profileModal">
   <button class="close-modal" onclick="closeProfile()">✕</button>
-  <h2 id="profileTitle">Profile</h2>
-  
-  <div style="text-align:center; margin-bottom:20px;">
-    <div class="profile-avatar profile-avatar-large" id="profileAvatar">?</div>
-    <h3 id="profileUsername">Username</h3>
-    <p id="profileBio" style="opacity:0.8; font-size:13px;">AuraBaby user</p>
+  <div class="modal-title" id="profileTitle">Profile</div>
+
+  <div class="profile-hero">
+    <div class="profile-big-avatar" id="profileAvatar">?</div>
+    <div class="profile-hero-name" id="profileUsername">Username</div>
+    <div class="profile-hero-bio" id="profileBio">AuraBaby user</div>
   </div>
-  
-  <div id="profileActions">
-    <button id="profileBlockBtn" onclick="blockUserFromProfile()">BLOCK</button>
-    <button id="profileAddFriend" onclick="addFriendFromProfile()">ADD FRIEND</button>
-    <button onclick="openPrivateChat()">MESSAGE</button>
+
+  <div id="profileActions" class="profile-actions">
+    <button class="modal-btn" id="profileAddFriend" onclick="addFriendFromProfile()">Add Friend</button>
+    <button class="modal-btn" onclick="openPrivateChat()">Message</button>
+    <button class="modal-btn danger" id="profileBlockBtn" onclick="blockUserFromProfile()">Block</button>
   </div>
-  
+
   <div class="modal-section">
     <h3>Friends</h3>
-    <div id="profileFriends" class="user-list">Loading...</div>
+    <div id="profileFriends" class="user-list"><div class="empty-state">Loading...</div></div>
   </div>
-  
   <div class="modal-section">
     <h3>Groups</h3>
-    <div id="profileGroups" class="user-list">Loading...</div>
+    <div id="profileGroups" class="user-list"><div class="empty-state">Loading...</div></div>
   </div>
 </div>
 
-<!-- Admin Panel -->
+<!-- ─── ADMIN PANEL ────────────────────────────────── -->
 <div class="modal-overlay" id="adminOverlay" onclick="closeAdminPanel()"></div>
 <div class="modal" id="adminPanel">
   <button class="close-modal" onclick="closeAdminPanel()">✕</button>
-  <h2>Admin Panel</h2>
-  
+  <div class="modal-title">👑 Admin Panel</div>
+
   <div class="modal-section">
     <h3>Ban User</h3>
-    <input type="text" id="banUsername" placeholder="Username">
+    <input type="text" id="banUsername" placeholder="Username...">
     <select id="banDuration">
       <option value="300000">5 minutes</option>
       <option value="900000">15 minutes</option>
       <option value="3600000">1 hour</option>
       <option value="86400000">1 day</option>
     </select>
-    <button onclick="banUser()">Ban</button>
-    <div id="bannedList" class="user-list">No banned users</div>
+    <button class="modal-btn danger" onclick="banUser()">Ban User</button>
+    <div id="bannedList" class="user-list" style="margin-top:8px"><div class="empty-state">No banned users</div></div>
   </div>
-  
+
   <div class="modal-section">
     <h3>Mute User</h3>
-    <input type="text" id="muteUsername" placeholder="Username">
+    <input type="text" id="muteUsername" placeholder="Username...">
     <select id="muteDuration">
       <option value="300000">5 minutes</option>
       <option value="900000">15 minutes</option>
       <option value="3600000">1 hour</option>
     </select>
-    <button onclick="muteUser()">Mute</button>
-    <div id="mutedList" class="user-list">No muted users</div>
+    <button class="modal-btn" style="background:#f59e0b" onclick="muteUser()">Mute User</button>
+    <div id="mutedList" class="user-list" style="margin-top:8px"><div class="empty-state">No muted users</div></div>
   </div>
-  
+
   <div class="modal-section">
-    <h3>Send Announcement</h3>
-    <textarea id="announcementText" placeholder="Announcement text" rows="3"></textarea>
+    <h3>Announcement</h3>
+    <textarea id="announcementText" placeholder="Announcement text..." rows="3"></textarea>
     <select id="announcementRoom">
       <option value="all">All Rooms</option>
       <option value="General 1">General 1</option>
       <option value="General 2">General 2</option>
       <option value="General 3">General 3</option>
     </select>
-    <button onclick="sendAnnouncement()">Send</button>
+    <button class="modal-btn" onclick="sendAnnouncement()">Send Announcement</button>
   </div>
 </div>
 
-<!-- Banned Server Panel -->
+<!-- ─── BANNED SERVER PANEL ───────────────────────── -->
 <div class="modal-overlay" id="bannedServerOverlay" onclick="closeBannedServer()"></div>
 <div class="modal" id="bannedServerPanel">
   <button class="close-modal" onclick="closeBannedServer()">✕</button>
-  <h2>🚫 Banned Users</h2>
+  <div class="modal-title">🚫 Currently Banned</div>
   <div class="modal-section">
-    <div id="bannedServerList" class="user-list">Loading...</div>
+    <div id="bannedServerList" class="user-list"><div class="empty-state">No users currently banned</div></div>
   </div>
 </div>
 
-<!-- Blocked Users Panel -->
+<!-- ─── BLOCKED USERS PANEL ──────────────────────── -->
 <div class="modal-overlay" id="blockedPanelOverlay" onclick="closeBlockedPanel()"></div>
 <div class="modal" id="blockedPanel">
   <button class="close-modal" onclick="closeBlockedPanel()">✕</button>
-  <h2>🔇 Blocked Users</h2>
+  <div class="modal-title">🔇 Blocked Users</div>
   <div class="modal-section">
-    <div id="blockedPanelList" class="user-list">Loading...</div>
+    <div id="blockedPanelList" class="user-list"><div class="empty-state">No blocked users</div></div>
   </div>
 </div>
 
-<!-- Picture Panel -->
+<!-- ─── PICTURE PANEL ─────────────────────────────── -->
 <div class="modal-overlay" id="picturePanelOverlay" onclick="closePicturePanel()"></div>
 <div class="modal" id="picturePanel">
   <button class="close-modal" onclick="closePicturePanel()">✕</button>
-  <h2>📷 Choose Your Profile Picture</h2>
+  <div class="modal-title">📷 Choose Profile Picture</div>
   <div class="modal-section">
-    <p style="font-size:11px; opacity:0.8; margin-bottom:10px;">Select a baby avatar:</p>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Click any avatar to set it as yours</p>
     <div id="profileGallery" class="profile-gallery"></div>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- ─── FIREBASE ───────────────────────────────────── -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
 <script src="chat.js"></script>
 </body>
 </html>
